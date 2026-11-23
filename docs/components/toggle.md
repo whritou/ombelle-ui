@@ -1,6 +1,6 @@
 # Toggle
 
-Toggle is a two-state button that reports its state with `aria-pressed`, such as "Show grid" or a theme switch. For a set of related choices use [Toggle Group](toggle-group.md). It is available in all five families in light and dark mode, with Radix and Base UI editions; the template is a client component.
+Toggle is a two-state button that reports its state with `aria-pressed`, such as "Show grid" or a theme switch. For a set of related choices use [Toggle Group](toggle-group.md). It is available in all eight families (the seven stable families and liquid glass) in light and dark mode, with Radix and Base UI editions; the template is a client component.
 
 This component requires CLI **0.7.5** or later: `npx @ombelle-ui/cli@0.7.5 add toggle`. For a built local checkout:
 

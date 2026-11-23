@@ -27,6 +27,21 @@ export function isCommandShortcut(event: Pick<KeyboardEvent, 'key' | 'ctrlKey' |
   return event.key.toLowerCase() === 'k' && (event.ctrlKey || event.metaKey) && !event.altKey && !event.shiftKey
 }
 
+// Fields with their own text undo; sliders, checkboxes and colour inputs have none, so the editor's applies there.
+const textEntry = ['', 'text', 'search', 'url', 'tel', 'email', 'password', 'number'].map(type => type ? `input[type="${type}"]` : 'input:not([type])')
+  .concat('textarea', '[contenteditable]:not([contenteditable="false"])').join(', ')
+
+/**
+ * Ctrl+Z or Command+Z undoes the editor's last edit, with Shift it redoes, as the Edit menu shows. Text
+ * fields keep the browser's own undo, and an open dialog or menu keeps the keys for itself.
+ */
+export function historyShortcut(event: Pick<KeyboardEvent, 'key' | 'ctrlKey' | 'metaKey' | 'altKey' | 'shiftKey' | 'defaultPrevented' | 'target'>): 'undo' | 'redo' | null {
+  if (event.defaultPrevented || event.key.toLowerCase() !== 'z' || !(event.ctrlKey || event.metaKey) || event.altKey) return null
+  const target = event.target as Element | null
+  if (target?.closest?.(`${textEntry}, [role="dialog"], [role="alertdialog"], [role="menu"]`)) return null
+  return event.shiftKey ? 'redo' : 'undo'
+}
+
 /** A Families group that switches the editor to each style family except the current one. */
 export function familyCommands<Family extends string>(families: readonly Family[], current: Family, names: Record<Family, string>, choose: (family: Family) => void): PaletteGroup {
   return {

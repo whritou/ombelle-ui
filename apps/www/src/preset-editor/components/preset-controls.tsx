@@ -75,9 +75,7 @@ export function revealPresetField(path: string) {
   const field =
     document.getElementById(fieldId(path) + '-number') ??
     document.getElementById(fieldId(path))
-  // Identity fields live in a closed dialog; open it so they can take focus.
-  const dialog = field?.closest('dialog')
-  if (dialog && !dialog.open) dialog.showModal()
+  // Id and revision live in the editor's ID & revision dialog, which opens them itself.
   field?.focus()
 }
 type ControlProps = {

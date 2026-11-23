@@ -179,3 +179,10 @@ it('offers the body font picker with the style font chosen and every body font l
   expect(select).toContain('value="system-serif"')
   expect(select).not.toContain('value="geist-mono"')
 })
+
+it('points an invalid Button text field at its error message', () => {
+  const html = renderToStaticMarkup(<PropertiesPanel recipe={recipe} family="flat" onFamily={noop}
+    diagnostic={{ code: 'INVALID', message: 'Text is required.', path: '/content' } as never} onChange={noop} onDiagnostic={noop} />)
+  expect(html).toMatch(/<input id="button-text"[^>]*aria-invalid="true"[^>]*aria-describedby="error-content"/)
+  expect(html).toMatch(/id="error-content"[^>]*>Text is required\./)
+})

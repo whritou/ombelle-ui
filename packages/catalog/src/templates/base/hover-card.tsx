@@ -27,7 +27,7 @@ export type HoverCardProps = React.ComponentProps<typeof PreviewCardPrimitive.Ro
 export function HoverCard({ openDelay = 500, closeDelay = 200, ...props }: HoverCardProps) {
   return (
     <DelayContext.Provider value={{ openDelay, closeDelay }}>
-      <PreviewCardPrimitive.Root data-slot="hover-card" {...props} />
+      <PreviewCardPrimitive.Root {...props} data-slot="hover-card" />
     </DelayContext.Provider>
   )
 }
@@ -37,12 +37,12 @@ export function HoverCardTrigger({ className, ...props }: Part<typeof PreviewCar
   const { openDelay, closeDelay } = React.useContext(DelayContext)
   return (
     <PreviewCardPrimitive.Trigger
-      data-slot="hover-card-trigger"
       delay={openDelay}
       closeDelay={closeDelay}
       className={cn(className)}
       render={(triggerProps, state) => <a {...triggerProps} data-state={openState(state.open)} />}
       {...props}
+      data-slot="hover-card-trigger"
     />
   )
 }
@@ -65,7 +65,6 @@ export function HoverCardContent({
     <PreviewCardPrimitive.Portal>
       <PreviewCardPrimitive.Positioner side={side} align={align} sideOffset={sideOffset} alignOffset={alignOffset} collisionPadding={collisionPadding}>
         <PreviewCardPrimitive.Popup
-          data-slot="hover-card-content"
           className={cn(className)}
           // The shared stylesheet reads Radix's available-size variables.
           style={{
@@ -77,6 +76,7 @@ export function HoverCardContent({
             <div {...popupProps} data-state={openState(state.open)} data-side={state.side} data-align={state.align} />
           )}
           {...props}
+          data-slot="hover-card-content"
         />
       </PreviewCardPrimitive.Positioner>
     </PreviewCardPrimitive.Portal>
@@ -87,7 +87,6 @@ export function HoverCardContent({
 export function HoverCardArrow({ className, ...props }: Part<typeof PreviewCardPrimitive.Arrow>) {
   return (
     <PreviewCardPrimitive.Arrow
-      data-slot="hover-card-arrow"
       className={cn(className)}
       render={(arrowProps, state) => (
         <div {...arrowProps} data-side={state.side}>
@@ -97,6 +96,7 @@ export function HoverCardArrow({ className, ...props }: Part<typeof PreviewCardP
         </div>
       )}
       {...props}
+      data-slot="hover-card-arrow"
     />
   )
 }

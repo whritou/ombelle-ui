@@ -59,7 +59,7 @@ export type ToastViewportProps = Part<typeof ToastPrimitive.Viewport> & {
 export function ToastViewport({ className, stack, children, ...props }: ToastViewportProps) {
   // The manager lists the newest toast first; a stack puts the newest last, in front, as the Radix edition does.
   const ordered = stack ? React.Children.toArray(children).reverse() : children
-  return <ToastPrimitive.Viewport data-slot="toast-viewport" data-stack={stack ? '' : undefined} aria-label="Notifications" className={cn(className)} {...props}>
+  return <ToastPrimitive.Viewport data-stack={stack ? '' : undefined} aria-label="Notifications" className={cn(className)} {...props} data-slot="toast-viewport">
     {ordered}
   </ToastPrimitive.Viewport>
 }
@@ -67,10 +67,11 @@ export type ToastProps = Part<typeof ToastPrimitive.Root> & { variant?: ToastVar
 export function Toast({ className, children, variant, toast, swipeDirection, ...props }: ToastProps) {
   const defaultSwipe = React.useContext(SwipeContext)
   const type = toast.type === 'loading' ? 'default' : toast.type === 'error' ? 'destructive' : toast.type
-  return <ToastPrimitive.Root data-slot="toast" data-variant={variant ?? type ?? 'default'}
+  return <ToastPrimitive.Root data-variant={variant ?? type ?? 'default'}
     className={cn(className)} toast={toast} swipeDirection={swipeDirection ?? defaultSwipe}
     render={(rootProps, state) => <div {...rootProps} data-state={state.transitionStatus === 'ending' ? 'closed' : 'open'} />}
-    {...props}>
+    {...props}
+    data-slot="toast">
     <ToastPrimitive.Content data-slot="toast-content">
       {toast.type === 'loading' ? <span data-slot="toast-spinner" aria-hidden="true" /> : null}
       {children}
@@ -78,18 +79,18 @@ export function Toast({ className, children, variant, toast, swipeDirection, ...
   </ToastPrimitive.Root>
 }
 export function ToastTitle({ className, ...props }: Part<typeof ToastPrimitive.Title>) {
-  return <ToastPrimitive.Title data-slot="toast-title" className={cn(className)} {...props} />
+  return <ToastPrimitive.Title className={cn(className)} {...props} data-slot="toast-title" />
 }
 export function ToastDescription({ className, ...props }: Part<typeof ToastPrimitive.Description>) {
-  return <ToastPrimitive.Description data-slot="toast-description" className={cn(className)} {...props} />
+  return <ToastPrimitive.Description className={cn(className)} {...props} data-slot="toast-description" />
 }
 export type ToastActionProps = Part<typeof ToastPrimitive.Action> & { altText: string }
 /** altText supplies a meaningful accessible label; actions retain native Base UI behavior. */
 export function ToastAction({ className, altText, ...props }: ToastActionProps) {
-  return <ToastPrimitive.Action data-slot="toast-action" aria-label={altText} className={cn(className)} {...props} />
+  return <ToastPrimitive.Action aria-label={altText} className={cn(className)} {...props} data-slot="toast-action" />
 }
 export function ToastClose({ className, children, ...props }: Part<typeof ToastPrimitive.Close>) {
-  return <ToastPrimitive.Close data-slot="toast-close" aria-label="Dismiss notification" className={cn(className)} {...props}>
+  return <ToastPrimitive.Close aria-label="Dismiss notification" className={cn(className)} {...props} data-slot="toast-close">
     {children ?? <span aria-hidden="true">×</span>}
   </ToastPrimitive.Close>
 }

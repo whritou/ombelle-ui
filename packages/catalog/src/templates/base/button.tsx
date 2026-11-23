@@ -37,7 +37,7 @@ export function Button({
   className,
   variant = 'default',
   size = 'default',
-  loading = false,
+  loading,
   type = 'button',
   disabled,
   children,
@@ -46,13 +46,16 @@ export function Button({
 }: ButtonProps) {
   // A render prop replaces the element; it keeps its own type and loading UI.
   const rendered = props.render !== undefined
-  const busy = loading && !rendered
+  const busy = loading === true && !rendered
+  // Only a Button that takes a loading prop (true or false) measures itself.
+  const watchesLoading = loading !== undefined && !rendered
   const ownRef = React.useRef<HTMLButtonElement | null>(null)
   const restingWidth = React.useRef<number | undefined>(undefined)
   // Loading keeps the width measured at rest, so the spinner never makes the button grow.
-  // Every render at rest measures again, so a label or size changed since is kept too.
+  // Every render at rest measures again, so a label or size changed since is kept too; a Button
+  // without a loading prop never forces that layout read.
   React.useLayoutEffect(() => {
-    if (!busy && ownRef.current) restingWidth.current = ownRef.current.getBoundingClientRect().width
+    if (watchesLoading && !busy && ownRef.current) restingWidth.current = ownRef.current.getBoundingClientRect().width
   })
   React.useLayoutEffect(() => {
     const element = ownRef.current

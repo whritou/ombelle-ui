@@ -1,6 +1,6 @@
 # Command
 
-Command is a keyboard-first command menu: a search box over a filtered list of grouped commands, shown inline or in a dialog. It is available in all five families in light and dark mode, with Radix and Base UI editions; the template is a client component.
+Command is a keyboard-first command menu: a search box over a filtered list of grouped commands, shown inline or in a dialog. It is available in all eight families (the seven stable families and liquid glass) in light and dark mode, with Radix and Base UI editions; the template is a client component.
 
 This component requires CLI **0.7.3** or later: `npx @ombelle-ui/cli@0.7.3 add command`. For a built local checkout:
 
@@ -49,13 +49,34 @@ export function CommandMenu() {
 
 ## API and accessibility
 
-- `Command` takes `label` (the search box's name, default "Commands"), `filter` (set `false` when the items are already filtered) and `defaultSearch`.
+- `Command` takes `label` (the search box's name, default "Commands"), `filter` (set `false` when the items are already filtered), `defaultSearch`, and `search` with `onSearchChange` to keep the search text yourself. `onSearchChange` also works without `search`, to read what is typed.
 - `CommandItem` takes `value` (the text the search matches, default its text), `keywords`, `disabled` and `onSelect`, which runs on Enter or click.
 - `CommandGroup` takes a `heading` and hides itself when none of its commands match. `CommandSeparator` is hidden while searching; it is drawn only, since a list box holds options and groups.
 - `CommandShortcut` shows "Ctrl+T" as one `<kbd>` per key.
 - `CommandDialog` takes `open`, `onOpenChange` and `title` (default "Command menu", read by assistive technology, not shown). The search box has focus when it opens, and closing returns focus to what had it before. `CommandDialogTrigger`, placed inside it, is a button that opens it.
-- The search box is a `combobox` that controls the list box; Up and Down move the highlight.
+- `CommandList` takes `label`, the list box's name (default "Suggestions").
+- The search box is a `combobox` that controls the list box; Up and Down move the highlight. The first command starts highlighted (marked `aria-selected`), and while nothing matches the search box points at no option.
 - `CommandEmpty` is a polite live region that is always present. Place it after `CommandList`.
+
+### Items filtered elsewhere
+
+With `filter={false}` the menu shows the items you render. Read the search text with `onSearchChange` and render the matching items yourself, for example from a server:
+
+```tsx
+export function ProjectSearch() {
+  const [search, setSearch] = React.useState('')
+  const projects = useProjects(search) // your own data hook
+  return (
+    <Command label="Projects" filter={false} search={search} onSearchChange={setSearch}>
+      <CommandInput placeholder="Search projects" />
+      <CommandList>
+        {projects.map(project => <CommandItem key={project.id} value={project.name}>{project.name}</CommandItem>)}
+      </CommandList>
+      <CommandEmpty>No projects found.</CommandEmpty>
+    </Command>
+  )
+}
+```
 
 ## Recipe
 

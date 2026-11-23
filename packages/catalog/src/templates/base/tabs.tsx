@@ -16,7 +16,7 @@ export type TabsProps = Part<typeof TabsPrimitive.Root>
 
 export function Tabs({ className, ...props }: TabsProps) {
   return (
-    <TabsPrimitive.Root data-slot="tabs" className={cn(className)} {...props} />
+    <TabsPrimitive.Root className={cn(className)} {...props} data-slot="tabs" />
   )
 }
 
@@ -29,11 +29,11 @@ export function TabsList({
 }: Part<typeof TabsPrimitive.List> & { appearance?: 'contained' | 'underline' | 'pills' }) {
   return (
     <TabsPrimitive.List
-      data-slot="tabs-list"
       data-appearance={appearance}
       className={cn(className)}
       activateOnFocus={activateOnFocus}
       {...props}
+      data-slot="tabs-list"
     />
   )
 }
@@ -44,7 +44,6 @@ export function TabsTrigger({
 }: Part<typeof TabsPrimitive.Tab>) {
   return (
     <TabsPrimitive.Tab
-      data-slot="tabs-trigger"
       className={cn(className)}
       render={(tabProps, state) => (
         <button
@@ -54,6 +53,7 @@ export function TabsTrigger({
         />
       )}
       {...props}
+      data-slot="tabs-trigger"
     />
   )
 }
@@ -66,7 +66,6 @@ export function TabsContent({
 }: Part<typeof TabsPrimitive.Panel>) {
   return (
     <TabsPrimitive.Panel
-      data-slot="tabs-content"
       className={cn(className)}
       keepMounted={keepMounted}
       render={(panelProps, state) => (
@@ -77,6 +76,7 @@ export function TabsContent({
         />
       )}
       {...props}
+      data-slot="tabs-content"
     />
   )
 }

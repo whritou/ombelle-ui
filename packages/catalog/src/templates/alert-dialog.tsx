@@ -9,7 +9,7 @@ export function AlertDialog(props: AlertDialogProps) {
   return <AlertDialogPrimitive.Root {...props} />
 }
 export function AlertDialogTrigger({ className, ...props }: React.ComponentProps<typeof AlertDialogPrimitive.Trigger>) {
-  return <AlertDialogPrimitive.Trigger data-slot="alert-dialog-trigger" className={cn(className)} {...props} />
+  return <AlertDialogPrimitive.Trigger className={cn(className)} {...props} data-slot="alert-dialog-trigger" />
 }
 export type AlertDialogContentProps = React.ComponentProps<typeof AlertDialogPrimitive.Content>
 export function AlertDialogContent({ className, children, onOpenAutoFocus, ...props }: AlertDialogContentProps) {
@@ -18,7 +18,7 @@ export function AlertDialogContent({ className, children, onOpenAutoFocus, ...pr
   return (
     <AlertDialogPrimitive.Portal>
       <AlertDialogPrimitive.Overlay data-slot="alert-dialog-overlay" />
-      <AlertDialogPrimitive.Content data-slot="alert-dialog-content" className={cn(className)}
+      <AlertDialogPrimitive.Content className={cn(className)}
         onOpenAutoFocus={event => {
           onOpenAutoFocus?.(event)
           // With a typed confirmation, focus starts in its input instead of Cancel.
@@ -27,31 +27,32 @@ export function AlertDialogContent({ className, children, onOpenAutoFocus, ...pr
             confirm.input.current.focus()
           }
         }}
-        {...props}>
+        {...props}
+        data-slot="alert-dialog-content">
         <ConfirmContext.Provider value={confirm}>{children}</ConfirmContext.Provider>
       </AlertDialogPrimitive.Content>
     </AlertDialogPrimitive.Portal>
   )
 }
 export function AlertDialogHeader({ className, ...props }: React.ComponentProps<'div'>) {
-  return <div data-slot="alert-dialog-header" className={cn(className)} {...props} />
+  return <div className={cn(className)} {...props} data-slot="alert-dialog-header" />
 }
 export function AlertDialogFooter({ className, ...props }: React.ComponentProps<'div'>) {
-  return <div data-slot="alert-dialog-footer" className={cn(className)} {...props} />
+  return <div className={cn(className)} {...props} data-slot="alert-dialog-footer" />
 }
 export function AlertDialogTitle({ className, ...props }: React.ComponentProps<typeof AlertDialogPrimitive.Title>) {
-  return <AlertDialogPrimitive.Title data-slot="alert-dialog-title" className={cn(className)} {...props} />
+  return <AlertDialogPrimitive.Title className={cn(className)} {...props} data-slot="alert-dialog-title" />
 }
 export function AlertDialogDescription({ className, ...props }: React.ComponentProps<typeof AlertDialogPrimitive.Description>) {
-  return <AlertDialogPrimitive.Description data-slot="alert-dialog-description" className={cn(className)} {...props} />
+  return <AlertDialogPrimitive.Description className={cn(className)} {...props} data-slot="alert-dialog-description" />
 }
 /** Radix focuses this safe choice when the alert dialog opens. */
 export function AlertDialogCancel({ className, ...props }: React.ComponentProps<typeof AlertDialogPrimitive.Cancel>) {
-  return <AlertDialogPrimitive.Cancel data-slot="alert-dialog-cancel" className={cn(className)} {...props} />
+  return <AlertDialogPrimitive.Cancel className={cn(className)} {...props} data-slot="alert-dialog-cancel" />
 }
 export function AlertDialogAction({ className, disabled, 'aria-describedby': describedBy, ref, ...props }: React.ComponentProps<typeof AlertDialogPrimitive.Action>) {
   const { actionRef, ...state } = useConfirmAction(disabled, describedBy)
-  return <AlertDialogPrimitive.Action data-slot="alert-dialog-action" className={cn(className)} {...props} {...state} ref={mergeRefs(ref, actionRef)} />
+  return <AlertDialogPrimitive.Action className={cn(className)} {...props} {...state} data-slot="alert-dialog-action" ref={mergeRefs(ref, actionRef)} />
 }
 
 type Confirm = {

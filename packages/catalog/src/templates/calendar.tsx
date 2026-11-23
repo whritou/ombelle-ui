@@ -31,6 +31,11 @@ export function formatDate(value: Date | Range | undefined, options: Intl.DateTi
   return value.from ? format.format(value.from) : ''
 }
 
+// The locale the trigger uses before hydration: fixed, so server and browser text match.
+const SERVER_LOCALE = 'en-US'
+const noSubscription = () => () => {}
+const documentLocale = () => document.documentElement.lang || navigator.language || SERVER_LOCALE
+
 type DateInput = Date | string
 const asDate = (value: DateInput | undefined) => (typeof value === 'string' ? fromIsoDate(value) : value)
 type DistributiveOmit<T, K extends PropertyKey> = T extends unknown ? Omit<T, K> : never
@@ -118,7 +123,10 @@ type PickerCommon = {
   placeholder?: string
   /** How the trigger shows the date; default { dateStyle: 'medium' }. */
   format?: Intl.DateTimeFormatOptions
-  /** A BCP 47 tag for the trigger text; default the document's language. */
+  /**
+   * A BCP 47 tag for the trigger text. Without it the server and the first render use en-US,
+   * then the document's language (or the browser's) once hydrated, so the two never disagree.
+   */
   locale?: string
   disabled?: boolean
   /** Submits YYYY-MM-DD as a hidden input; a range submits name-from and name-to. */
@@ -136,6 +144,10 @@ export type DatePickerProps = PickerCommon & (
   | { mode: 'range'; value?: DateRange | null; defaultValue?: { from?: DateInput; to?: DateInput }; onValueChange?(value: DateRange | undefined): void }
 )
 
+/** A date or range as text, to compare two values. */
+const isoOf = (value: Date | DateRange | undefined) =>
+  value instanceof Date ? toIsoDate(value) : value ? `${value.from ? toIsoDate(value.from) : ''}/${value.to ? toIsoDate(value.to) : ''}` : ''
+
 /** A button that shows the chosen date and opens a Calendar to change it. */
 export function DatePicker(props: DatePickerProps) {
   const { placeholder = 'Choose a date', format = { dateStyle: 'medium' }, locale, disabled, name, id, className, calendar } = props
@@ -144,6 +156,9 @@ export function DatePicker(props: DatePickerProps) {
     : range ? { from: asDate((props.defaultValue as Range).from), to: asDate((props.defaultValue as Range).to) } as DateRange
     : asDate(props.defaultValue as DateInput)
   const [own, setOwn] = React.useState<Date | DateRange | undefined>(initial)
+  // The date a form reset returns to: the default on the first render, as for a native field.
+  const [start] = React.useState(initial)
+  const root = React.useRef<HTMLDivElement>(null)
   // A value prop makes the picker controlled, even when it is undefined, so a reset clears it.
   // The trigger always reads the current value, so a change from outside shows at once.
   const controlled = 'value' in props
@@ -153,10 +168,23 @@ export function DatePicker(props: DatePickerProps) {
     if (!controlled) setOwn(next)
     ;(props.onValueChange as ((value: Date | DateRange | undefined) => void) | undefined)?.(next)
   }
-  const text = formatDate(value, format, locale)
+  const reset = React.useRef(() => {})
+  reset.current = () => {
+    setOpen(false)
+    if (isoOf(start) !== isoOf(value)) commit(start)
+  }
+  React.useEffect(() => {
+    const form = root.current?.closest('form')
+    if (!form) return
+    const onReset = () => reset.current()
+    form.addEventListener('reset', onReset)
+    return () => form.removeEventListener('reset', onReset)
+  }, [])
+  const pageLocale = React.useSyncExternalStore(noSubscription, documentLocale, () => SERVER_LOCALE)
+  const text = formatDate(value, format, locale ?? pageLocale)
   const focusDay = value instanceof Date ? value : (value as DateRange | undefined)?.from
   return (
-    <div data-slot="date-picker" className={cn(className)}>
+    <div ref={root} data-slot="date-picker" className={cn(className)}>
       <PopoverPrimitive.Root open={open} onOpenChange={setOpen}>
         <PopoverPrimitive.Trigger asChild>
           <button

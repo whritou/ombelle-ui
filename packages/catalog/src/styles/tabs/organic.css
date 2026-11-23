@@ -253,9 +253,10 @@
 /* end 0.7.3 variants */
 /* organic layer */
 [data-slot='tabs-list']{gap:3px;padding:4px;border:0;border-radius:var(--o-r3);background:var(--secondary);box-shadow:none}
-[data-slot='tabs-trigger']{border:0;border-radius:var(--o-r2);font-weight:700;transition:border-radius 0.3s,background-color var(--motion-duration)}
+[data-slot='tabs-trigger']{border:0;border-radius:var(--o-r2);font-weight:700;transition:border-radius calc(var(--motion-duration) * 2),background-color var(--motion-duration)}
 [data-slot='tabs-trigger'][data-state='inactive']:not(:disabled):hover{background:var(--card);border-radius:var(--o-r3h)}
-[data-slot='tabs-trigger'][data-state='active']{background:var(--card);color:var(--card-foreground);box-shadow:var(--o-e1)}
+/* The selected segment carries a 2px foreground ring, not only a 1.2:1 fill (A11Y-12). */
+[data-slot='tabs-trigger'][data-state='active']{background:var(--card);color:var(--card-foreground);font-weight:800;box-shadow:inset 0 0 0 2px var(--foreground),var(--o-e1)}
 [data-slot='tabs-trigger']:focus-visible{outline:3px solid var(--ring);outline-offset:2px}
 [data-slot='tabs-trigger'][data-disabled]{border-style:none;opacity:0.5}
 [data-slot='tabs-content']{border-radius:var(--o-r3)}

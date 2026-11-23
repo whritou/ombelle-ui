@@ -388,12 +388,13 @@ describe('editor inputs board comparison, measured on the edition pages against 
   it.each([['minimalist', 'var(--radius)'], ['neo-brutalism', '0'], ['ombelle', '999px'], ['flat', '999px'], ['liquid-glass', '999px']])('%s rounds the hue track like the board (%s)', (family, radius) => {
     expect(declarations(read(`color-picker/${family}.css`), "[data-slot='color-picker-hue']")['border-radius']).toBe(radius)
   })
-  it('flat draws 1px edges on the picker parts, and boxes the trigger row and Number Input with a 10px radius, as its board', () => {
+  it('flat draws 1px edges on the picker parts and boxes the trigger row with a 10px radius, as its board; Number Input takes the field rule', () => {
     const css = read('color-picker/flat.css')
     for (const slot of ['color-picker-preview', 'color-picker-area', 'color-picker-hue', 'color-picker-swatch'])
       expect(declarations(css, `[data-slot='${slot}']`)['border-width'] ?? declarations(css, `[data-slot='${slot}']`).border, slot).toMatch(/^1px/)
     expect(declarations(css, "[data-slot='color-picker-trigger']")).toMatchObject({ border: '1px solid var(--border)', 'border-radius': '10px' })
-    expect(declarations(read('number-input/flat.css'), "[data-slot='number-input']")).toMatchObject({ border: '1px solid var(--border)', 'border-radius': '10px' })
+    // A11Y-05: the board's 1px Number Input edge measured 1.15:1; the field takes flat's 2px rule instead.
+    expect(declarations(read('number-input/flat.css'), "[data-slot='number-input']")).toMatchObject({ 'border-block-end': '2px solid var(--input)' })
   })
 })
 

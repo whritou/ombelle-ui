@@ -5,6 +5,19 @@ import { CheckIcon, MinusIcon } from 'lucide-react'
 import { cn } from './utils.js'
 import './checkbox.css'
 
+/**
+ * The component an element renders. Parts written in a Server Component, such as a Next.js
+ * App Router page, reach this client file as lazy client references rather than as the
+ * components, so `element.type` is resolved before it is compared.
+ */
+function partType(element: React.ReactElement): unknown {
+  const type = element.type as unknown as { $$typeof?: symbol; _init?: (payload: unknown) => unknown; _payload?: unknown } | null
+  if (typeof type === 'object' && type !== null && type.$$typeof === Symbol.for('react.lazy') && typeof type._init === 'function') {
+    try { return type._init(type._payload) } catch { return undefined }
+  }
+  return element.type
+}
+
 type CheckedState = boolean | 'indeterminate'
 export type CheckboxProps = React.ComponentProps<typeof CheckboxPrimitive.Root>
 
@@ -25,10 +38,10 @@ export function Checkbox({ className, ...props }: CheckboxProps) {
     : {}
   return (
     <CheckboxPrimitive.Root
-      data-slot="checkbox"
       className={cn(className)}
       {...props}
       {...grouped}
+      data-slot="checkbox"
     >
       <CheckboxPrimitive.Indicator data-slot="checkbox-indicator">
         <CheckIcon data-checkbox-mark="checked" aria-hidden="true" />
@@ -91,7 +104,7 @@ function useCheckboxGroup(part: string): GroupState {
 function collectOptions(children: React.ReactNode, out: GroupOption[] = []): GroupOption[] {
   React.Children.forEach(children, child => {
     if (!React.isValidElement<{ value?: unknown; disabled?: boolean; id?: string; children?: React.ReactNode }>(child)) return
-    if ((child.type === Checkbox || child.type === CheckboxOption) && typeof child.props.value === 'string')
+    if ((partType(child) === Checkbox || partType(child) === CheckboxOption) && typeof child.props.value === 'string')
       out.push({ value: child.props.value, disabled: child.props.disabled === true, id: child.props.id })
     else collectOptions(child.props.children, out)
   })
@@ -163,8 +176,8 @@ export function CheckboxGroup({
 
 export type CheckboxGroupParentProps = Omit<CheckboxProps, 'checked' | 'defaultChecked' | 'onCheckedChange' | 'value' | 'title'> & {
   title: React.ReactNode
-  /** Shows "2 of 4" after the title, inside the label. */
-  count?: boolean
+  /** Shows "2 of 4" after the title, inside the label; a function sets the text. */
+  count?: boolean | ((checked: number, total: number) => React.ReactNode)
 }
 
 /** Reads checked, unchecked or mixed from the group, and checks or clears every enabled child. */
@@ -181,14 +194,16 @@ export function CheckboxGroupParent({ title, count = true, className, disabled, 
         disabled={disabled || group.disabled}
       />
       <span data-slot="checkbox-group-parent-title">{title}</span>
-      {count && <CheckboxGroupCount />}
+      {count && <CheckboxGroupCount format={typeof count === 'function' ? count : undefined} />}
     </label>
   )
 }
 
-/** "2 of 4": how many of the group's checkboxes are checked. */
-export function CheckboxGroupCount({ className, ...props }: React.ComponentProps<'span'>) {
+/** "2 of 4": how many of the group's checkboxes are checked. format sets the text. */
+export function CheckboxGroupCount({ className, format = (checked, total) => `${checked} of ${total}`, ...props }: React.ComponentProps<'span'> & {
+  format?: (checked: number, total: number) => React.ReactNode
+}) {
   const group = useCheckboxGroup('CheckboxGroupCount')
   const checked = group.options.filter(option => group.value.includes(option.value)).length
-  return <span {...props} data-slot="checkbox-group-count" className={cn(className)}>{`${checked} of ${group.options.length}`}</span>
+  return <span {...props} data-slot="checkbox-group-count" className={cn(className)}>{format(checked, group.options.length)}</span>
 }

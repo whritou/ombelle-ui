@@ -1,3 +1,4 @@
+import { cache } from 'react'
 import { parseRecipeSnapshotReference } from '@ombelle/contracts'
 import { PublishedRecipe } from '../../../../recipe-snapshots/components/published-recipe'
 import { recipeSnapshotInstallCommand } from '../../../../recipe-snapshots/install-command'
@@ -14,6 +15,33 @@ export const runtime = 'nodejs'
 // Anyone can publish these pages, so search engines must not index user-chosen text (RL-11).
 export const metadata = { robots: { index: false, follow: false } }
 
+// One read per request, shared by the title and the page.
+const readSnapshot = cache(async (id: string, revision: string) => {
+  const snapshot = await createRequestRecipeSnapshotService().read(parseRecipeSnapshotReference(`${id}@${revision}`))
+  if (snapshot.snapshotVersion === '2.0' && !catalogRecipesAvailable)
+    throw new SnapshotServiceError({ status: 503, code: 'SNAPSHOT_SERVICE_UNAVAILABLE' })
+  return snapshot
+})
+
+function unavailableTitle(error: unknown) {
+  const code = error instanceof SnapshotServiceError ? error.code : undefined
+  return code === 'SNAPSHOT_WITHDRAWN'
+    ? 'Snapshot withdrawn'
+    : code === 'SNAPSHOT_NOT_FOUND'
+      ? 'Snapshot not found'
+      : 'Snapshot unavailable'
+}
+
+export async function generateMetadata({ params }: { params: Promise<{ id: string; revision: string }> }) {
+  const { id, revision } = await params
+  try {
+    const snapshot = await readSnapshot(id, revision)
+    return { title: `Published ${componentDoc(snapshot.recipe.component)?.name ?? 'Button'} recipe · Ombelle UI` }
+  } catch (error) {
+    return { title: `${unavailableTitle(error)} · Ombelle UI` }
+  }
+}
+
 export default async function Page({
   params,
 }: {
@@ -21,10 +49,7 @@ export default async function Page({
 }) {
   const { id, revision } = await params
   try {
-    const ref = parseRecipeSnapshotReference(`${id}@${revision}`)
-    const snapshot = await createRequestRecipeSnapshotService().read(ref)
-    if (snapshot.snapshotVersion === '2.0' && !catalogRecipesAvailable)
-      throw new SnapshotServiceError({ status: 503, code: 'SNAPSHOT_SERVICE_UNAVAILABLE' })
+    const snapshot = await readSnapshot(id, revision)
     const { publicOrigin } = readSnapshotConfig(process.env)
     // Fail within the request boundary if an operator configured an authority
     // which cannot be shown safely in the private shell invocation.
@@ -41,16 +66,7 @@ export default async function Page({
     const withdrawn = code === 'SNAPSHOT_WITHDRAWN'
     const missing = code === 'SNAPSHOT_NOT_FOUND'
     return (
-      <DocPage
-        eyebrow="Published code"
-        title={
-          withdrawn
-            ? 'Snapshot withdrawn'
-            : missing
-              ? 'Snapshot not found'
-              : 'Snapshot unavailable'
-        }
-      >
+      <DocPage eyebrow="Published code" title={unavailableTitle(error)}>
         <p>
           {withdrawn
             ? 'This snapshot is no longer publicly available. Cached copies and installed source cannot be recalled.'

@@ -142,7 +142,7 @@ export function DemoPage() {
   const next = demoPages[(index + 1) % demoPages.length]!
   const view: EditorView = { mode: state.mode, viewport: state.width, panel: 'customize', forcedState: 'none' }
   const unavailable = page.kind === 'component' && styleSupport(page.id, state.family) === 'unavailable'
-  return <main className={styles.root} aria-labelledby="demo-title">
+  return <main id="main" tabIndex={-1} className={styles.root} aria-labelledby="demo-title">
     <header className={styles.bar}>
       <h1 id="demo-title" className={styles.title}>Demo</h1>
       <Choice label="Style" value={state.family} onChange={(family) => update({ family })}

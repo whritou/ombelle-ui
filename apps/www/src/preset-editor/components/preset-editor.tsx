@@ -143,6 +143,8 @@ export default function PresetEditor() {
   const identityOpener = useRef<HTMLElement | null>(null),
     returnFocus = useRef<HTMLElement | null>(null)
   const [identityOpen, setIdentityOpen] = useState(false)
+  // The identity field the dialog should focus when it opens to show an error.
+  const identityFocus = useRef<string | null>(null)
   const [replaceOpen, setReplaceOpen] = useState(false)
   const undoButton = useRef<HTMLButtonElement>(null),
     redoButton = useRef<HTMLButtonElement>(null),
@@ -240,6 +242,13 @@ export default function PresetEditor() {
     else commit(change.draft, 'family')
   }
   const diagnostic = compiled.diagnostic
+  // Id and revision live in a Radix dialog that is unmounted while closed: open it through its state.
+  const reveal = (path: string, opener: HTMLElement) => {
+    if (path !== '/id' && path !== '/revision') return revealPresetField(path)
+    identityOpener.current = opener
+    identityFocus.current = fieldId(path)
+    setIdentityOpen(true)
+  }
   const glass = draft.family === 'liquid-glass'
   const startingPreset = useMemo(() => (glass ? matchingStartingPreset(draft) : null), [glass, draft])
   // A custom draft keeps the backdrop of the preset it was started from.
@@ -315,7 +324,7 @@ export default function PresetEditor() {
   const warnings = presetWarningCount(contrast, glassReport)
   const warningText = warnings ? `, ${warnings} ${warnings === 1 ? 'warning' : 'warnings'}` : ''
   return (
-    <main className={styles.editor} aria-label="Preset editor" data-editor-root="">
+    <main id="main" tabIndex={-1} className={styles.editor} aria-label="Preset editor" data-editor-root="">
       <EditorTopBar
         commands={[familyCommands(offeredStyleFamilies(draft.family), draft.family, familyNames, family)]}
         crumbs={['Presets']}
@@ -325,6 +334,7 @@ export default function PresetEditor() {
           value: draft.identity.name,
           maxLength: 80,
           invalid: diagnostic?.path === '/name',
+          describedBy: 'preset-error',
           onChange: (value) =>
             commit(setPresetIdentity(draft, 'name', value), 'name'),
         }}
@@ -474,7 +484,7 @@ export default function PresetEditor() {
               href={'#' + fieldId(diagnostic.path)}
               onClick={(event) => {
                 event.preventDefault()
-                revealPresetField(diagnostic.path!)
+                reveal(diagnostic.path!, event.currentTarget)
               }}
             >
               Review {diagnostic.path}
@@ -714,6 +724,13 @@ export default function PresetEditor() {
       </AlertDialog>
       <Dialog open={identityOpen} onOpenChange={setIdentityOpen}>
         <DialogContent
+          onOpenAutoFocus={(event) => {
+            const target = identityFocus.current && document.getElementById(identityFocus.current)
+            identityFocus.current = null
+            if (!target) return
+            event.preventDefault()
+            target.focus()
+          }}
           onCloseAutoFocus={(event) => {
             // Done and Escape alike return to the More actions button the menu came from.
             event.preventDefault()
@@ -729,21 +746,28 @@ export default function PresetEditor() {
             </DialogDescription>
           </DialogHeader>
           <DialogBody>
-            {(['id', 'revision'] as const).map((key) => (
-              <div className={styles.field} key={key}>
-                <label htmlFor={fieldId('/' + key)}>Preset {key}</label>
-                <input
-                  id={fieldId('/' + key)}
-                  value={draft.identity[key]}
-                  maxLength={key === 'revision' ? 16 : 80}
-                  inputMode={key === 'revision' ? 'numeric' : undefined}
-                  aria-invalid={diagnostic?.path === '/' + key || undefined}
-                  onChange={(e) =>
-                    commit(setPresetIdentity(draft, key, e.target.value), key)
-                  }
-                />
-              </div>
-            ))}
+            {(['id', 'revision'] as const).map((key) => {
+              // The page's error banner sits behind this modal, so the field's error is shown here too.
+              const error = diagnostic?.path === '/' + key ? diagnostic.message : undefined
+              const errorId = fieldId('/' + key) + '-error'
+              return (
+                <div className={styles.field} key={key}>
+                  <label htmlFor={fieldId('/' + key)}>Preset {key}</label>
+                  <input
+                    id={fieldId('/' + key)}
+                    value={draft.identity[key]}
+                    maxLength={key === 'revision' ? 16 : 80}
+                    inputMode={key === 'revision' ? 'numeric' : undefined}
+                    aria-invalid={error ? true : undefined}
+                    aria-describedby={error ? errorId : undefined}
+                    onChange={(e) =>
+                      commit(setPresetIdentity(draft, key, e.target.value), key)
+                    }
+                  />
+                  {error && <p id={errorId} className={styles.fieldError}>{error}</p>}
+                </div>
+              )
+            })}
           </DialogBody>
           <DialogFooter>
             <DialogClose className={styles.confirmPrimary}>Done</DialogClose>

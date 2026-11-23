@@ -12,6 +12,8 @@ All runs were local runs by an agent on Windows 11 Home 10.0.26300, with Node 24
 | `dedc550` | `neo-brutalism/radix/light` | Passed |
 | `dedc550` | The four liquid-glass configurations | Dark passed. Light: 7 recorded findings per edition (see Liquid glass) |
 
+Papier, organic and retro futurism were added after these runs. Their specimen audit runs are recorded in [decision 0006](../decisions/0006-papier-family.md), [decision 0007](../decisions/0007-organic-family.md) and [decision 0008](../decisions/0008-retro-futurism-family.md), not in the table above.
+
 A whole-branch review after `7280c33` found gaps in the harness:
 
 - Glass pages lacked their backdrop.

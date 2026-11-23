@@ -5,6 +5,19 @@ import { CheckIcon, ChevronDownIcon, ChevronUpIcon } from 'lucide-react'
 import { cn } from './utils.js'
 import './select.css'
 
+/**
+ * The component an element renders. Parts written in a Server Component, such as a Next.js
+ * App Router page, reach this client file as lazy client references rather than as the
+ * components, so `element.type` is resolved before it is compared.
+ */
+function partType(element: React.ReactElement): unknown {
+  const type = element.type as unknown as { $$typeof?: symbol; _init?: (payload: unknown) => unknown; _payload?: unknown } | null
+  if (typeof type === 'object' && type !== null && type.$$typeof === Symbol.for('react.lazy') && typeof type._init === 'function') {
+    try { return type._init(type._payload) } catch { return undefined }
+  }
+  return element.type
+}
+
 /** Base UI parts accept a className function; these components take a string. */
 type Part<T extends React.ElementType> = Omit<React.ComponentProps<T>, 'className'> & {
   className?: string
@@ -28,7 +41,7 @@ export type SelectProps<
 function collectItems(node: React.ReactNode, items: Record<string, React.ReactNode>) {
   React.Children.forEach(node, (child) => {
     if (!React.isValidElement<{ value?: unknown; children?: React.ReactNode }>(child)) return
-    if (child.type === SelectItem && typeof child.props.value === 'string')
+    if (partType(child) === SelectItem && typeof child.props.value === 'string')
       items[child.props.value] = child.props.children
     collectItems(child.props.children, items)
   })
@@ -47,14 +60,33 @@ const SelectItemsContext = React.createContext<{ items: Record<string, React.Rea
 export function Select<
   Value = string,
   Multiple extends boolean | undefined = false,
->({ items, children, ...props }: SelectProps<Value, Multiple>) {
+>({ items, children, inputRef, ...props }: SelectProps<Value, Multiple>) {
   const labels = items ?? collectItems(children, {})
+  // Base UI keeps its value through a form reset; an uncontrolled Select starts again from defaultValue,
+  // as the native fields beside it do. A controlled one follows its value prop.
+  const hidden = React.useRef<HTMLInputElement | null>(null)
+  const [generation, setGeneration] = React.useState(0)
+  const controlled = props.value !== undefined
+  React.useEffect(() => {
+    const form = hidden.current?.form
+    if (!form || controlled) return
+    const reset = () => setGeneration(count => count + 1)
+    form.addEventListener('reset', reset)
+    return () => form.removeEventListener('reset', reset)
+  }, [controlled, generation])
+  const setInput = React.useCallback((element: HTMLInputElement | null) => {
+    hidden.current = element
+    if (typeof inputRef === 'function') inputRef(element)
+    else if (inputRef) inputRef.current = element
+  }, [inputRef])
   return (
     <SelectItemsContext.Provider value={{ items: labelsByValue(labels), multiple: !!props.multiple }}>
       <SelectPrimitive.Root
-        data-slot="select"
+        key={generation}
         items={labels}
+        inputRef={setInput}
         {...props}
+        data-slot="select"
       >
         {children}
       </SelectPrimitive.Root>
@@ -68,9 +100,9 @@ export function SelectGroup({
 }: Part<typeof SelectPrimitive.Group>) {
   return (
     <SelectPrimitive.Group
-      data-slot="select-group"
       className={cn(className)}
       {...props}
+      data-slot="select-group"
     />
   )
 }
@@ -84,7 +116,7 @@ export function SelectValue({
     // A multiple Select shows a chip per chosen label, or the placeholder.
     const { placeholder, children: _children, ...rest } = props as typeof props & { placeholder?: React.ReactNode }
     return (
-      <SelectPrimitive.Value data-slot="select-value" className={cn(className)} {...rest}>
+      <SelectPrimitive.Value className={cn(className)} {...rest} data-slot="select-value">
         {(value: unknown) => Array.isArray(value) && value.length
           ? value.map(item => <span key={String(item)} data-slot="select-chip" data-select-chip="">{items[String(item)] ?? String(item)}</span>)
           : placeholder}
@@ -93,9 +125,9 @@ export function SelectValue({
   }
   return (
     <SelectPrimitive.Value
-      data-slot="select-value"
       className={cn(className)}
       {...props}
+      data-slot="select-value"
     />
   )
 }
@@ -110,7 +142,6 @@ export function SelectTrigger({
 }) {
   return (
     <SelectPrimitive.Trigger
-      data-slot="select-trigger"
       data-size={size}
       className={cn(className)}
       render={(triggerProps, state) => (
@@ -121,6 +152,7 @@ export function SelectTrigger({
         />
       )}
       {...props}
+      data-slot="select-trigger"
     >
       {children}
       <SelectPrimitive.Icon
@@ -168,7 +200,6 @@ export function SelectContent({
         sticky={sticky}
       >
         <SelectPrimitive.Popup
-          data-slot="select-content"
           className={cn(className)}
           // The shared stylesheet reads Radix's trigger-width and
           // available-height variables; the column layout is the one Radix
@@ -189,6 +220,7 @@ export function SelectContent({
             />
           )}
           {...props}
+          data-slot="select-content"
         >
           <SelectScrollUpButton />
           <SelectPrimitive.List data-slot="select-viewport">
@@ -208,9 +240,9 @@ export function SelectLabel({
 }: React.ComponentProps<'div'>) {
   return (
     <div
-      data-slot="select-label"
       className={cn(className)}
       {...props}
+      data-slot="select-label"
     />
   )
 }
@@ -230,13 +262,13 @@ export function SelectItem({
   const hintId = React.useId()
   return (
     <SelectPrimitive.Item
-      data-slot="select-item"
       className={cn(className)}
       aria-describedby={hint ? hintId : undefined}
       render={(itemProps, state) => (
         <div {...itemProps} data-state={checkedState(state.selected)} />
       )}
       {...props}
+      data-slot="select-item"
     >
       {icon ? <span data-slot="select-item-icon" aria-hidden="true">{icon}</span> : null}
       <SelectPrimitive.ItemText>{children}</SelectPrimitive.ItemText>
@@ -258,9 +290,9 @@ export function SelectSeparator({
 }: Part<typeof SelectPrimitive.Separator>) {
   return (
     <SelectPrimitive.Separator
-      data-slot="select-separator"
       className={cn(className)}
       {...props}
+      data-slot="select-separator"
     />
   )
 }
@@ -271,9 +303,9 @@ export function SelectScrollUpButton({
 }: Part<typeof SelectPrimitive.ScrollUpArrow>) {
   return (
     <SelectPrimitive.ScrollUpArrow
-      data-slot="select-scroll-up-button"
       className={cn(className)}
       {...props}
+      data-slot="select-scroll-up-button"
     >
       <ChevronUpIcon aria-hidden="true" />
     </SelectPrimitive.ScrollUpArrow>
@@ -286,9 +318,9 @@ export function SelectScrollDownButton({
 }: Part<typeof SelectPrimitive.ScrollDownArrow>) {
   return (
     <SelectPrimitive.ScrollDownArrow
-      data-slot="select-scroll-down-button"
       className={cn(className)}
       {...props}
+      data-slot="select-scroll-down-button"
     >
       <ChevronDownIcon aria-hidden="true" />
     </SelectPrimitive.ScrollDownArrow>

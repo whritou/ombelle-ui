@@ -7,12 +7,12 @@
   gap: 8px;
   margin: 0;
   border: 1.5px solid var(--input);
-  border-radius: 12px;
+  border-radius: var(--radius);
   background: var(--card);
   color: var(--foreground);
   font: 600 14px/1 var(--font-family);
   cursor: pointer;
-  transition: background-color 0.15s, color 0.15s;
+  transition: background-color var(--motion-duration), color var(--motion-duration);
 }
 [data-slot='toggle'] > svg {
   flex: none;

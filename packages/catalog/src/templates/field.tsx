@@ -4,6 +4,19 @@ import { CircleAlertIcon } from 'lucide-react'
 import { cn } from './utils.js'
 import './field.css'
 
+/**
+ * The component an element renders. Parts written in a Server Component, such as a Next.js
+ * App Router page, reach this client file as lazy client references rather than as the
+ * components, so `element.type` is resolved before it is compared.
+ */
+function partType(element: React.ReactElement): unknown {
+  const type = element.type as unknown as { $$typeof?: symbol; _init?: (payload: unknown) => unknown; _payload?: unknown } | null
+  if (typeof type === 'object' && type !== null && type.$$typeof === Symbol.for('react.lazy') && typeof type._init === 'function') {
+    try { return type._init(type._payload) } catch { return undefined }
+  }
+  return element.type
+}
+
 type FieldState = {
   controlId: string
   descriptionId?: string
@@ -27,7 +40,7 @@ function useField(part: string): FieldState {
 /** Whether the tree contains an element of the given component, found while rendering so server HTML is correct. */
 function contains(children: React.ReactNode, type: React.ElementType): boolean {
   return React.Children.toArray(children).some(child => React.isValidElement<{ children?: React.ReactNode }>(child) &&
-    (child.type === type || contains(child.props.children, type)))
+    (partType(child) === type || contains(child.props.children, type)))
 }
 
 export type FieldProps = React.ComponentProps<'div'> & {
@@ -186,7 +199,7 @@ function labelOf(children: React.ReactNode): string | undefined {
   let label: string | undefined
   React.Children.forEach(children, child => {
     if (label !== undefined || !React.isValidElement<{ children?: React.ReactNode }>(child)) return
-    label = child.type === FieldLabel ? textOf(child.props.children).trim() : labelOf(child.props.children)
+    label = partType(child) === FieldLabel ? textOf(child.props.children).trim() : labelOf(child.props.children)
   })
   return label
 }
@@ -195,7 +208,7 @@ function labelOf(children: React.ReactNode): string | undefined {
 function collectFields(children: React.ReactNode, out: { name: string; label: string }[] = []) {
   React.Children.forEach(children, child => {
     if (!React.isValidElement<{ name?: unknown; children?: React.ReactNode }>(child)) return
-    if (child.type === Field && typeof child.props.name === 'string') out.push({ name: child.props.name, label: labelOf(child.props.children) || child.props.name })
+    if (partType(child) === Field && typeof child.props.name === 'string') out.push({ name: child.props.name, label: labelOf(child.props.children) || child.props.name })
     else collectFields(child.props.children, out)
   })
   return out
@@ -339,11 +352,16 @@ export function Form({ errors, validate, summaryAction = 'submitting', onSubmit,
   )
 }
 
+const defaultSummaryTitle = (count: number, action: 'saving' | 'submitting') => `Fix ${count} ${count === 1 ? 'field' : 'fields'} before ${action}`
+
 const summaryText = (line: SummaryLine) =>
   `${line.label}: ${line.message.charAt(0).toLowerCase()}${line.message.slice(1).replace(/\.$/, '')}`
 
 /** Lists every invalid field after a failed submit; it takes focus, and each line moves focus to its field. */
-export function FormErrorSummary({ className, ...props }: React.ComponentProps<'div'>) {
+export function FormErrorSummary({ className, title = defaultSummaryTitle, ...props }: Omit<React.ComponentProps<'div'>, 'title'> & {
+  /** The heading; default "Fix <count> field(s) before saving" or "… before submitting", from Form's summaryAction. */
+  title?: (count: number, action: 'saving' | 'submitting') => React.ReactNode
+}) {
   const form = React.useContext(FormContext)
   if (!form) throw new Error('FormErrorSummary must be used inside <Form>')
   const titleId = React.useId()
@@ -352,7 +370,7 @@ export function FormErrorSummary({ className, ...props }: React.ComponentProps<'
   return (
     <div {...props} ref={form.summaryRef} role="region" tabIndex={-1} aria-labelledby={titleId} data-slot="form-error-summary" className={cn(className)}>
       <CircleAlertIcon aria-hidden="true" />
-      <p id={titleId} data-slot="form-error-summary-title">{`Fix ${count} ${count === 1 ? 'field' : 'fields'} before ${form.summaryAction}`}</p>
+      <p id={titleId} data-slot="form-error-summary-title">{title(count, form.summaryAction)}</p>
       <ul data-slot="form-error-summary-list">
         {form.lines.map(line => (
           <li key={line.name}>

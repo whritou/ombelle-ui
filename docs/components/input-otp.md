@@ -1,6 +1,6 @@
 # Input OTP
 
-Input OTP takes a one-time code in separate slots. Typing moves along the slots, and pasting a code fills them all. It is available in all five families in light and dark mode, with Radix and Base UI editions; the template is a client component.
+Input OTP takes a one-time code in separate slots. Typing moves along the slots, and pasting a code fills them all. It is available in all eight families (the seven stable families and liquid glass) in light and dark mode, with Radix and Base UI editions; the template is a client component.
 
 This component requires CLI **0.7.3** or later: `npx @ombelle-ui/cli@0.7.3 add input-otp`. For a built local checkout:
 

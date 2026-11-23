@@ -1467,7 +1467,10 @@
   animation-duration: 84s;
 }
 
-.ol-mqs:hover ul {
+/* Paused under the pointer, while a control inside has focus, and by the pause button. */
+.ol-mqs:hover ul,
+.ol-mqs:focus-within ul,
+.ol-mqs[data-paused="true"] ul {
   animation-play-state: paused;
 }
 
@@ -2326,6 +2329,10 @@
   }
   ::view-transition-new(root) {
     animation: none;
+  }
+  /* Nothing scrolls under reduced motion, so there is nothing to pause. */
+  .ol-mq-pause {
+    display: none!important;
   }
 }
 

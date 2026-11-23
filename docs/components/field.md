@@ -1,6 +1,6 @@
 # Field
 
-Field connects a label, a hint and an error to one control. The label names the control, the hint and error describe it, and the required, invalid and disabled states reach it. Field is a composition around the control you already use (Input, Textarea, Native Select). It is available in all five families in light and dark mode, with Radix and Base UI editions; the template is a client component.
+Field connects a label, a hint and an error to one control. The label names the control, the hint and error describe it, and the required, invalid and disabled states reach it. Field is a composition around the control you already use (Input, Textarea, Native Select). It is available in all eight families (the seven stable families and liquid glass) in light and dark mode, with Radix and Base UI editions; the template is a client component.
 
 This component requires CLI **0.7.3** or later: `npx @ombelle-ui/cli@0.7.3 add field`. For a built local checkout:
 
@@ -70,7 +70,7 @@ export function SavePreset({ errors }: { errors?: Record<string, string> }) {
 - **`errors`** holds the server's errors, keyed by field name, and they show at once. A new `errors` object shows them again. They do not stop the next submit: the server judges again.
 - **A named `Field`** (`name`) receives its error and becomes invalid; `FieldError` with no children shows the message, and the control submits under that name. In the Base UI edition, `name` also sets the name the control submits with outside a Form, which is ordinary form behaviour.
 - **A field's error clears** when its value changes. Nothing is reported before the first submit, except server errors.
-- **`FormErrorSummary`** renders nothing until there are errors. Then it is a `role="region"` named by its title, "Fix 2 fields before submitting" (or "… before saving" with `summaryAction="saving"`), and takes focus after a failed submit. Each line reads "Radius: enter a number from 0 to 48" and is a link that moves focus to its field; an error for a name with no field is plain text.
+- **`FormErrorSummary`** renders nothing until there are errors. Then it is a `role="region"` named by its title, "Fix 2 fields before submitting" (or "… before saving" with `summaryAction="saving"`), and takes focus after a failed submit. `title(count, action)` sets the title in another language. Each line reads "Radius: enter a number from 0 to 48" and is a link that moves focus to its field; an error for a name with no field is plain text.
 - **`FieldSet`** names a group with `FieldLegend`; disabled, it disables every control inside. The Base UI edition uses `Fieldset` from `@base-ui/react/fieldset`.
 - Both editions build Form on a native `form`. Base UI's `Form` always sets `noValidate` and stops the submit while any Base field is invalid, which would bypass the summary and the browser's validation before hydration.
 - **Recipe:** `form` (`none` or `summary`), `fieldset` (`none`, `default` or `disabled`), and the content fields `legend` and up to four `fields`. A form or fieldset needs a legend.

@@ -30,7 +30,46 @@ export function addTags(
   return { value, rejected }
 }
 
+/** The words the tag input shows or announces; each has an English default. */
+export type TagInputLabels = {
+  /** Names the list of tags; default "Selected tags". */
+  list?: string
+  /** Names a tag's remove button; default "Remove <tag>". */
+  remove?(tag: string): string
+  /** Announced when the tag is already there; default "<tag> is already added". */
+  duplicate?(tag: string): string
+  /** Announced when no more tags fit; default "You can add up to <max> tags". */
+  max?(max: number): string
+  /** Announced after tags are added; default "Added <tags, joined by commas>". */
+  added?(tags: string[]): string
+  /** Announced after a tag is removed; default "Removed <tag>". */
+  removed?(tag: string): string
+}
+const defaultLabels: Required<TagInputLabels> = {
+  list: 'Selected tags',
+  remove: tag => `Remove ${tag}`,
+  duplicate: tag => `${tag} is already added`,
+  max: max => `You can add up to ${max} tags`,
+  added: tags => `Added ${tags.join(', ')}`,
+  removed: tag => `Removed ${tag}`,
+}
+
+/** Calls onReset when the form that holds the element is reset. */
+function useFormReset(ref: React.RefObject<HTMLElement | null>, onReset: () => void) {
+  const latest = React.useRef(onReset)
+  React.useEffect(() => { latest.current = onReset })
+  React.useEffect(() => {
+    const element = ref.current
+    const form = (element instanceof HTMLInputElement ? element.form : null) ?? element?.closest('form')
+    if (!form) return
+    const reset = () => latest.current()
+    form.addEventListener('reset', reset)
+    return () => form.removeEventListener('reset', reset)
+  }, [ref])
+}
+
 type TagInputState = {
+  labels: Required<TagInputLabels>
   value: readonly string[]
   disabled: boolean
   separators: readonly string[]
@@ -57,6 +96,7 @@ export type TagInputProps = Omit<React.ComponentProps<'div'>, 'defaultValue' | '
   disabled?: boolean
   /** Submits each tag as a hidden input with this name. */
   name?: string
+  labels?: TagInputLabels
 }
 
 /**
@@ -73,11 +113,22 @@ export function TagInput({
   allowDuplicates = false,
   disabled = false,
   name,
+  labels: words,
   children,
   onClick,
+  ref,
   ...props
 }: TagInputProps) {
-  const [own, setOwn] = React.useState<string[]>(defaultValue ?? [])
+  const labels = { ...defaultLabels, ...words }
+  // The tags a form reset returns to: the default on the first render, as for a native field.
+  const [initial] = React.useState<string[]>(() => defaultValue ?? [])
+  const [own, setOwn] = React.useState<string[]>(initial)
+  const root = React.useRef<HTMLDivElement | null>(null)
+  const setRoot = React.useCallback((element: HTMLDivElement | null) => {
+    root.current = element
+    if (typeof ref === 'function') ref(element)
+    else if (ref) ref.current = element
+  }, [ref])
   const [message, setMessage] = React.useState('')
   const inputRef = React.useRef<HTMLInputElement>(null)
   const current = value ?? own
@@ -85,7 +136,12 @@ export function TagInput({
     if (value === undefined) setOwn(next)
     onValueChange?.(next)
   }
+  useFormReset(root, () => {
+    setMessage('')
+    if (initial.join('\n') !== current.join('\n')) commit(initial)
+  })
   const state: TagInputState = {
+    labels,
     value: current,
     disabled,
     separators,
@@ -95,15 +151,15 @@ export function TagInput({
       if (added.length) commit(result.value)
       const first = result.rejected[0]
       setMessage(first
-        ? first.reason === 'duplicate' ? `${first.tag} is already added` : `You can add up to ${max} tags`
-        : added.length ? `Added ${added.join(', ')}` : '')
+        ? first.reason === 'duplicate' ? labels.duplicate(first.tag) : labels.max(max!)
+        : added.length ? labels.added(added) : '')
       return result.rejected
     },
     remove(index) {
       const tag = current[index]
       if (tag === undefined) return
       commit(current.filter((_, position) => position !== index))
-      setMessage(`Removed ${tag}`)
+      setMessage(labels.removed(tag))
       inputRef.current?.focus()
     },
     inputRef,
@@ -112,6 +168,7 @@ export function TagInput({
     <TagInputContext.Provider value={state}>
       <div
         {...props}
+        ref={setRoot}
         data-slot="tag-input"
         data-disabled={disabled || undefined}
         className={cn(className)}
@@ -131,14 +188,14 @@ export function TagInput({
 
 /** The current tags, each with a remove button. */
 export function TagInputList({ className, ...props }: React.ComponentProps<'ul'>) {
-  const { value, disabled, remove } = useTagInput('TagInputList')
+  const { value, disabled, remove, labels } = useTagInput('TagInputList')
   if (!value.length) return null
   return (
-    <ul aria-label="Selected tags" {...props} data-slot="tag-input-list" className={cn(className)}>
+    <ul aria-label={labels.list} {...props} data-slot="tag-input-list" className={cn(className)}>
       {value.map((tag, index) => (
         <li key={tag + index} data-slot="tag-input-tag">
           <span>{tag}</span>
-          <button type="button" aria-label={`Remove ${tag}`} disabled={disabled} data-slot="tag-input-remove" onClick={() => remove(index)}>
+          <button type="button" aria-label={labels.remove(tag)} disabled={disabled} data-slot="tag-input-remove" onClick={() => remove(index)}>
             <XIcon aria-hidden="true" />
           </button>
         </li>
@@ -157,6 +214,8 @@ export function TagInputInput({ className, onKeyDown, onPaste, onChange, disable
     if (typeof ref === 'function') ref(element)
     else if (ref) ref.current = element
   }, [ref, state.inputRef])
+  // A form reset clears the text being typed, as it does for a native field.
+  useFormReset(state.inputRef, () => setText(''))
   const submit = (raw: string) => {
     const rejected = state.add(raw)
     setText(rejected.map(item => item.tag).join(', '))

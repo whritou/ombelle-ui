@@ -2,6 +2,8 @@
 
 7 November 2026. Supersedes the Radix-only primitive edition in [0002](0002-registry-adapter.md) for component editions; its registry-adapter decision is unchanged.
 
+The component counts below ("All 24 components", "Fourteen components have two sources") are those of 7 November 2026. The rule has not changed since; the catalog has. As of 22 November 2026 it has 63 components (`supportedComponentIds` in `packages/contracts/src/component-ids.ts`), all of which install in both editions; 39 have a Base UI template in `packages/catalog/src/templates/base/` and the other 24 have no primitive imports and share one template.
+
 ## Context
 
 shadcn's pinned 4.22.1 offers Base UI component styles (`base-nova`, `base-vega`, `base-maia`, `base-lyra`, `base-mira`, `base-luma`, `base-sera`, `base-rhea`) next to the Radix ones. Projects created with them could apply only an Ombelle palette, and `add` rejected every component with "Component primitive edition is not supported". Every project created by `shadcn init`, Radix or Base UI, also stopped on shadcn's own `lib/utils.ts` and `components/ui/button.tsx`, which Ombelle treated as app-owned conflicts.

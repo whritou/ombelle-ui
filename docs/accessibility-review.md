@@ -1,20 +1,30 @@
 # Accessibility review protocol
 
-This is the manual review that acceptance criterion PR5 in the [product requirements](01-product-requirements.md#acceptance-criteria) requires alongside automated checks. It covers the twelve stable components in flat, minimalist and neo-brutalism: 36 entries. The [components doc](03-components-styles-accessibility.md#accessibility-target) lists the behaviors it must establish.
+This is the manual review that acceptance criterion PR5 in the [product requirements](01-product-requirements.md#acceptance-criteria) requires alongside automated checks. It covers the stable catalog: 63 components in 7 stable style families, 441 component and family entries. The components are `supportedComponentIds` in `packages/contracts/src/component-ids.ts`; the families are `supportedStyleFamilies` in `packages/contracts/src/style-families.ts` (flat, minimalist, neo-brutalism, ombelle, papier, organic and retro futurism). When either list changes, change the count here and the rows of the results tables. Liquid glass is not one of the stable families and is outside this protocol. The [components doc](03-components-styles-accessibility.md#accessibility-target) lists the behaviors the review must establish.
 
 **No manual review has been performed.** The results tables below are empty. Until a human reviewer fills them in for a recorded environment, PR5 is not met, whatever the automated suites report. The automated half (axe with no rule exclusions, plus scripted keyboard, focus, target-size, contrast, forced-colors and reduced-motion checks) is summarized in the [web alpha readiness audit](web-alpha-readiness.md) and its linked evidence; this protocol does not repeat those checks, and passing them does not count as a manual result.
+
+## How the entries are covered
+
+Behavior comes from a component's template, and every family installs the same template: keyboard operation, names, roles, states and announcements do not change with the family. So the behavior passes (K, N and V below) are done once per component and edition, in any one stable family:
+
+- 39 components have a separate Base UI template in `packages/catalog/src/templates/base/`. They need K, N and V in the Radix edition and again in the Base UI edition.
+- The other 24 have no primitive imports, and one template serves both editions. One set of K, N and V covers both.
+
+What the family changes is how things look: focus indicators, boundaries, forced colors, zoom and motion. A visual pass per family covers that, across all 63 components. Both editions share one stylesheet per family, so the visual pass is done on the Radix audit page.
+
+An entry, one component in one family, is reviewed when the component's behavior passes and the family's visual pass are all **Pass** and the visual pass lists no failure for that component.
 
 ## Who and what
 
 The reviewer is a person operating a real keyboard and screen reader, not an agent or a script. Record one row per pass: reviewer, date, commit, operating system and version, browser and version, screen reader and version, and any non-default settings (speech rate, verbosity, browse/focus mode defaults, keyboard layout). A pass that changes any of these is a separate row.
-
-Three passes are required for each entry:
 
 | Pass | Environment | Mode |
 | --- | --- | --- |
 | K | Any supported desktop browser, no assistive technology | Keyboard only. Unplug or ignore the pointer |
 | N | Windows, current NVDA, current Chrome | NVDA browse mode and focus mode, keyboard only |
 | V | macOS, current VoiceOver, current Safari | VoiceOver keyboard commands (VO keys), keyboard only. Enable "Press Tab to highlight each item on a webpage" in Safari settings |
+| Visual | Any supported desktop browser; Windows for forced colors | Focus indicators in light and dark mode, Windows forced colors (High Contrast), 200 percent browser text zoom, and the operating system's reduced-motion setting |
 
 ## Setup
 
@@ -25,28 +35,26 @@ Run the preview from the repository checkout under review:
 3. `pnpm generate:preview`
 4. `pnpm dev:preview`
 
-Open `http://127.0.0.1:4173/<family>/?mode=<mode>` with `<family>` one of `flat`, `minimalist`, `neo-brutalism`, `ombelle` and `<mode>` one of `light`, `dark`. Add the fixture query from the table below. Review each component in all four stable families. Do the full K, N and V passes in light mode for each family, then repeat the visual focus checks (steps marked *visual*) in dark mode.
+Each family and edition has a specimen audit page that renders every catalog component:
 
-| Component | Preview query | Notes |
-| --- | --- | --- |
-| Button | `&states=1` | Variants, sizes, disabled and loading |
-| Badge | `&badges=1` | |
-| Card | `&cards=1` | Default and dense |
-| Input | `&states=1` and `&forms=1` | Empty, filled, invalid, disabled |
-| Textarea | `&forms=1` | |
-| Label | `&forms=1` | Required indication |
-| Checkbox | `&checkboxes=1` | Includes form submit/reset and a right-to-left toggle |
-| Switch | `&switches=1` | |
-| Native Select | `&forms=1` | Includes optgroup, multiple, disabled and fieldset-disabled |
-| Dialog | default scenario, or `&states=1` for the long Dialog | |
-| Tabs | `&tabs=1` | |
-| Tooltip | `&tooltips=1` | |
+```text
+http://127.0.0.1:4173/audit/<family>/<edition>/?mode=<mode>&only=<component>
+```
 
-Also run each component once with the operating system's reduced-motion setting on, once in Windows forced colors (High Contrast) mode with NVDA, and once at 200 percent browser text zoom. Record these as notes on the K row of the affected component.
+- `<family>`: `flat`, `minimalist`, `neo-brutalism`, `ombelle`, `papier`, `organic` or `retro-futurism`.
+- `<edition>`: `radix` or `base`. The Base UI page renders every component from its Base UI edition; the 24 one-template components are the same on both pages.
+- `<mode>`: `light` or `dark`. Leaving `mode` out gives light.
+- `<component>`: a component ID from the tables below, such as `context-menu`. Several IDs can be joined with commas. Leaving `only` out shows all 63 components.
+
+For example, `http://127.0.0.1:4173/audit/papier/base/?mode=dark&only=combobox`.
+
+For the behavior passes, open each component in light mode in one family of your choice, on the `radix` page and, for the 39 components with a Base UI template, on the `base` page. Record the family used in the Notes column. For the visual pass of a family, go through all 63 components on its `radix` page in light mode, then in dark mode, then with forced colors on, at 200 percent text zoom, and with reduced motion on.
+
+Some checks below name a preview scene or the website because a component is easier to judge in context there (the `projects`, `settings` and `dashboard` scenes, the edition pages at `/editions/<family>/<edition>/`, and the website editors). Results are still recorded in the component's row.
 
 ## Automated checks
 
-The [specimen audit](evidence/specimen-audit.md) automates part of what this protocol looks for, in Chromium only. For every catalog component in all five families, both editions, and light and dark mode, it measures:
+The [specimen audit](evidence/specimen-audit.md) automates part of what this protocol looks for, in Chromium only. For every catalog component in all eight families (the seven stable families and liquid glass), both editions, and light and dark mode, it measures:
 
 - **Focus visible**: each control, list item and menu item reached by keyboard changes by at least 3:1 over 90 percent of a 1px outline.
 - **Clipping**: shadows and focus rings are not cut by a clipping ancestor.
@@ -56,11 +64,11 @@ The [specimen audit](evidence/specimen-audit.md) automates part of what this pro
 - **Forced colors**: focus shows as an outline, borders survive and no backdrop filter remains.
 - **Axe**: the WCAG 2.2 A and AA rules.
 
-Run it with `pnpm test:specimen-audit` after `pnpm build:packages` and `pnpm generate:preview`. It does not replace any K, N or V pass: it checks what can be measured from rendered pixels and styles, not what a screen reader announces or how a person experiences reading order.
+Run it with `pnpm test:specimen-audit` after `pnpm build:packages` and `pnpm generate:preview`. It does not replace any K, N, V or visual pass: it checks what can be measured from rendered pixels and styles, not what a screen reader announces or how a person experiences reading order, zoom or forced colors.
 
 ## Checks for every component
 
-Apply these in every pass, then the component-specific checks.
+Apply these in every behavior pass, then the component-specific checks. Steps marked *visual* are repeated in each family's visual pass.
 
 1. **Tab order** follows the visual reading order and skips nothing interactive. Non-interactive elements (Badge, Card, Label, Tooltip content) take no tab stop.
 2. **Focus visible** (*visual*): every focused control shows an indicator that is not clipped by overflow, is distinguishable from the unfocused state, and remains visible in dark mode and forced colors.
@@ -71,6 +79,8 @@ Apply these in every pass, then the component-specific checks.
 7. **Right-to-left** (where the fixture offers it): arrow-key direction and visual order mirror correctly.
 
 ## Component-specific checks
+
+Each component's row in the results covers every check listed for it here, including its variant batches. A component with no section of its own (such as Dropdown Menu, Radio Group, Separator or Skeleton) is reviewed with the checks for every component.
 
 **Button**
 - Enter and Space both activate. Activation fires once per press.
@@ -133,7 +143,7 @@ Apply these in every pass, then the component-specific checks.
 
 **Display components (0.7.3)**
 
-Spinner, Kbd, Empty, Field, Meter and Stepper are not part of the 36 PR5 entries. Review them with the same passes on the preview `projects`, `settings` and `dashboard` scenes, and record them in their own rows below.
+Spinner, Kbd, Empty, Field, Meter and Stepper. They also appear in context on the preview `projects`, `settings` and `dashboard` scenes.
 
 - **Spinner**: a standalone spinner is announced once as a status named "Loading" (or its label); one marked `aria-hidden` inside a labelled button is not announced at all. It takes no tab stop.
 - **Kbd**: keys are read as written text and take no tab stop.
@@ -144,7 +154,7 @@ Spinner, Kbd, Empty, Field, Meter and Stepper are not part of the 36 PR5 entries
 
 **Form controls (0.7.3)**
 
-Slider, Toggle Group, Chip, Tag Input and Input OTP are not part of the 36 PR5 entries either. Review them on the preview `settings` and `projects` scenes and in the website editor, and record them in their own rows below.
+Slider, Toggle Group, Chip, Tag Input and Input OTP. They also appear in context on the preview `settings` and `projects` scenes and in the website editor.
 
 - **Slider**: each thumb is announced as a slider with its name and value text ("Border radius, 12 pixels"); the arrow keys, Page Up, Page Down, Home and End change it; range thumbs have distinct names and do not pass each other.
 - **Toggle Group**: a single choice is announced as a radio group with one Tab stop, the arrow keys move between options, and Space selects; a multiple choice is a toolbar of toggle buttons announced as pressed or not.
@@ -154,7 +164,7 @@ Slider, Toggle Group, Chip, Tag Input and Input OTP are not part of the 36 PR5 e
 
 **Overlays and search (0.7.3)**
 
-Combobox, Command, Hover Card, Context Menu and Calendar are not part of the 36 PR5 entries either. Review them on the preview `projects` and `settings` scenes and in the website editor (the Ctrl+K palette and the icon and glass preset pickers), and record them in their own rows below.
+Combobox, Command, Hover Card, Context Menu and Calendar. They also appear in context on the preview `projects` and `settings` scenes and in the website editor (the Ctrl+K palette and the icon and glass preset pickers).
 
 - **Combobox**: the field is announced as a combobox with its label, collapsed or expanded; the highlighted option is announced as the arrow keys move while focus stays in the field; "No presets found." is announced; each chip's remove button is named "Remove" plus its label.
 - **Command**: Ctrl+K opens a dialog named "Command menu" with focus in the search box; group headings name their groups; the highlighted command is announced; Escape returns focus to where it was.
@@ -164,7 +174,7 @@ Combobox, Command, Hover Card, Context Menu and Calendar are not part of the 36 
 
 **Variants, batch 6a (0.7.3)**
 
-New variants of Button, Badge, Alert, Card, Avatar and Accordion. Review them on the preview `projects` scene, the `settings` scene's Billing tab and the edition pages' "Variants" section, and record them in their own rows below.
+New variants of Button, Badge, Alert, Card, Avatar and Accordion, recorded in each component's row. They also appear on the preview `projects` scene, the `settings` scene's Billing tab and the edition pages' "Variants" section.
 
 - **Button**: a loading button keeps its name and is announced busy; an icon-only button is named by its `aria-label`, and its Tooltip shows the same words.
 - **Badge**: soft and outline badges keep their status in the visible text; the colour is not the only cue.
@@ -175,7 +185,7 @@ New variants of Button, Badge, Alert, Card, Avatar and Accordion. Review them on
 
 **Variants, batches 6b and 6c (0.7.3)**
 
-New variants of Tabs, Table, Input, Textarea, Input Group, Pagination, Select, Toast and Sheet. Review them on the preview `projects` and `settings` scenes and the edition pages' "More variants" section.
+New variants of Tabs, Table, Input, Textarea, Input Group, Pagination, Select, Toast and Sheet, recorded in each component's row. They also appear on the preview `projects` and `settings` scenes and the edition pages' "More variants" section.
 
 - **Tabs**: a pill with a count is named with its count, such as "Review 3"; vertical tabs move with Arrow Up and Arrow Down.
 - **Table**: a sortable header is a button and announces its order through `aria-sort`; the actions header is named "Actions"; a loading table is busy, and its bars are not announced.
@@ -187,7 +197,7 @@ New variants of Tabs, Table, Input, Textarea, Input Group, Pagination, Select, T
 
 **Primitives (0.7.5)**
 
-Toggle, Collapsible, Scroll Area, Button Group and Item are not part of the 36 PR5 entries either. Review them on the preview "Primitives" section of the edition pages and in the website editor, and record them in their own rows below. Review the family scrollbars on the Command, Combobox, Select and Sheet lists with the same pass as Scroll Area.
+Toggle, Collapsible, Scroll Area, Button Group and Item. They also appear in the preview "Primitives" section of the edition pages and in the website editor. Review the family scrollbars on the Command, Combobox, Select and Sheet lists with the same pass as Scroll Area, and record them in the Scroll Area row.
 
 - **Toggle**: the button is announced with its name and as pressed or not; Space and Enter toggle it; an icon-only Toggle is named by its `aria-label`.
 - **Collapsible**: the trigger is announced as expanded or collapsed; Tab skips links and buttons in closed content and reaches them once it is open.
@@ -198,7 +208,7 @@ Toggle, Collapsible, Scroll Area, Button Group and Item are not part of the 36 P
 
 **Editor inputs (0.7.5)**
 
-Number Input and Color Picker are not part of the 36 PR5 entries either. Review them on the preview "Editor inputs" section of the edition pages, the settings scene and the website's preset and component editors, and record them in their own rows below.
+Number Input and Color Picker. They also appear in the preview "Editor inputs" section of the edition pages, the settings scene and the website's preset and component editors.
 
 - **Number Input steppers**: the field is announced as a spin button with its name, value and unit ("12 pixels"); the arrow, Page, Home and End keys change it; the two steppers are named "Decrease …" and "Increase …", are not Tab stops, and are announced as unavailable at the bounds; a half-typed value is kept and announced as invalid after the field loses focus.
 - **Color Picker 2D area**: the swatch button is announced with "Open … color picker" and as expanded or collapsed; the popover is a dialog named "… color"; the area is one Tab stop announced as a 2D slider with "Saturation …%, brightness …%", and the arrow keys move it; the hue slider reads "Hue, … degrees".
@@ -208,7 +218,7 @@ Number Input and Color Picker are not part of the 36 PR5 entries either. Review 
 
 **Code Block (0.7.5)**
 
-Code Block is not part of the 36 PR5 entries either. Review it on the preview "Code Block" section of the edition pages, the Projects scene's project page and the website's docs, component pages, editors' artifact views and Get code dialog, and record it in its own rows below.
+Code Block also appears in the preview "Code Block" section of the edition pages, the Projects scene's project page and the website's docs, component pages, editors' artifact views and Get code dialog.
 
 - **Package-manager tabs**: the tab list is announced with its name ("Package manager"), each manager as a tab and the selected one as selected; the arrow keys move between tabs and select them, Home and End jump to the ends, and the command below changes; Copy is named "Copy command" (or the page's own label) and copies the selected manager's command.
 - **Scrollable `pre`**: the code is one Tab stop announced as a region named "<title> source", or "Code" without a title; the arrow keys scroll it, and a long line scrolls inside it, not the page; line numbers are not read and are not part of a copied selection; several untitled blocks on one page share the name "Code".
@@ -217,7 +227,7 @@ Code Block is not part of the 36 PR5 entries either. Review it on the preview "C
 
 **Variants, batch 4a (0.7.5)**
 
-Review these on the preview "0.7.5 variants" section of the edition pages, the Settings and Projects scenes and the website's component editor, and record them in their own rows below.
+Record these in the row of the component they belong to. They also appear in the preview "0.7.5 variants" section of the edition pages, the Settings and Projects scenes and the website's component editor.
 
 - **Checkbox Option**: the checkbox is announced with the option's title as its name and its description as its description; a click on the title, the description or anywhere on the card toggles it once; Tab reaches the checkbox and Space toggles it; a disabled option does not toggle.
 - **Small Switch target**: the `sm` Switch can be activated anywhere in a 24 × 24 px area around its track; in a horizontal Field row it is named by the row's label.
@@ -226,7 +236,7 @@ Review these on the preview "0.7.5 variants" section of the edition pages, the S
 
 **Variants, batch 4b (0.7.5)**
 
-Review these on the preview "0.7.5 variants" section of the edition pages, the Projects scene and the website's editors, and record them in their own rows below.
+Record these in the row of the component they belong to. They also appear in the preview "0.7.5 variants" section of the edition pages, the Projects scene and the website's editors.
 
 - **Scrolling Dialog body**: the body is announced as a region named by the dialog title; while it overflows, Tab reaches it and the arrow keys and Page Down scroll it; the footer actions stay on screen; a body that fits is not a Tab stop.
 - **Typed confirmation**: focus starts in the text field, announced with the instruction as its name; the action is announced as unavailable with the instruction as its description until the text matches exactly; Enter does nothing until then; Escape and Cancel close.
@@ -234,7 +244,7 @@ Review these on the preview "0.7.5 variants" section of the edition pages, the P
 
 **Components (0.7.6)**
 
-Review these on the preview "0.7.6 components" section of the edition pages, the Settings and Projects scenes and the website's editor top bar, and record them in their own rows below.
+Record these in the row of the component they belong to (the form error summary and FieldSet in the Field row). They also appear in the preview "0.7.6 components" section of the edition pages, the Settings and Projects scenes and the website's editor top bar.
 
 - **Form error summary**: before the first submit nothing is announced as invalid; after a failed submit focus moves to the summary, announced as a region named "Fix N fields before …"; each line is a link that moves focus to its field, which is announced as invalid with its message as its description; an error clears when its field changes.
 - **FieldSet and Checkbox Group**: the group is announced with its legend; the parent checkbox is announced as mixed, checked or not checked, with the count in its name; pressing it checks or clears every enabled child; a disabled fieldset disables every control inside.
@@ -252,7 +262,7 @@ Review these on the preview "0.7.6 components" section of the edition pages, the
 
 ## Results
 
-Record each pass as **Pass**, **Fail** (with a linked issue) or **Blocked** (with a reason). A component is reviewed for a family only when K, N and V all pass for that family. Leave a cell empty until it is actually tested.
+Record each pass as **Pass**, **Fail** (with a linked issue) or **Blocked** (with a reason). Leave a cell empty until it is actually tested.
 
 ### Environments
 
@@ -261,156 +271,96 @@ Record each pass as **Pass**, **Fail** (with a linked issue) or **Blocked** (wit
 | K | | | | | | n/a | |
 | N | | | | | | | |
 | V | | | | | | | |
+| Visual | | | | | | n/a | |
 
-### Results by entry
+### Behavior by component
 
-| Component | Flat K | Flat N | Flat V | Minimalist K | Minimalist N | Minimalist V | Neo-brutalism K | Neo-brutalism N | Neo-brutalism V | Notes |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| Button | | | | | | | | | | |
-| Badge | | | | | | | | | | |
-| Card | | | | | | | | | | |
-| Input | | | | | | | | | | |
-| Textarea | | | | | | | | | | |
-| Label | | | | | | | | | | |
-| Checkbox | | | | | | | | | | |
-| Switch | | | | | | | | | | |
-| Native Select | | | | | | | | | | |
-| Dialog | | | | | | | | | | |
-| Tabs | | | | | | | | | | |
-| Tooltip | | | | | | | | | | |
+One row per component, 63 in all. Record the family the passes used in Notes.
 
-#### Display components (0.7.3)
+#### Components with a Base UI template (39)
 
-| Component | Flat K | Flat N | Flat V | Minimalist K | Minimalist N | Minimalist V | Neo-brutalism K | Neo-brutalism N | Neo-brutalism V | Notes |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| Spinner | | | | | | | | | | |
-| Kbd | | | | | | | | | | |
-| Empty | | | | | | | | | | |
-| Field | | | | | | | | | | |
-| Meter | | | | | | | | | | |
-| Stepper | | | | | | | | | | |
+| Component | ID | Radix K | Radix N | Radix V | Base UI K | Base UI N | Base UI V | Notes |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Accordion | `accordion` | | | | | | | |
+| Button | `button` | | | | | | | |
+| Avatar | `avatar` | | | | | | | |
+| Checkbox | `checkbox` | | | | | | | |
+| Dialog | `dialog` | | | | | | | |
+| Dropdown Menu | `dropdown-menu` | | | | | | | |
+| Popover | `popover` | | | | | | | |
+| Progress | `progress` | | | | | | | |
+| Radio Group | `radio-group` | | | | | | | |
+| Select | `select` | | | | | | | |
+| Switch | `switch` | | | | | | | |
+| Separator | `separator` | | | | | | | |
+| Tabs | `tabs` | | | | | | | |
+| Tooltip | `tooltip` | | | | | | | |
+| Sheet | `sheet` | | | | | | | |
+| Alert Dialog | `alert-dialog` | | | | | | | |
+| Breadcrumb | `breadcrumb` | | | | | | | |
+| Toast | `toast` | | | | | | | |
+| Empty | `empty` | | | | | | | |
+| Field | `field` | | | | | | | |
+| Meter | `meter` | | | | | | | |
+| Slider | `slider` | | | | | | | |
+| Toggle Group | `toggle-group` | | | | | | | |
+| Input OTP | `input-otp` | | | | | | | |
+| Combobox | `combobox` | | | | | | | |
+| Command | `command` | | | | | | | |
+| Hover Card | `hover-card` | | | | | | | |
+| Context Menu | `context-menu` | | | | | | | |
+| Calendar | `calendar` | | | | | | | |
+| Toggle | `toggle` | | | | | | | |
+| Collapsible | `collapsible` | | | | | | | |
+| Scroll Area | `scroll-area` | | | | | | | |
+| Color Picker | `color-picker` | | | | | | | |
+| Code Block | `code-block` | | | | | | | |
+| Toolbar | `toolbar` | | | | | | | |
+| Navigation Menu | `navigation-menu` | | | | | | | |
+| Sidebar | `sidebar` | | | | | | | |
+| Menubar | `menubar` | | | | | | | |
+| Data Table | `data-table` | | | | | | | |
 
-#### Form controls (0.7.3)
+#### Components with one template for both editions (24)
 
-| Component | Flat K | Flat N | Flat V | Minimalist K | Minimalist N | Minimalist V | Neo-brutalism K | Neo-brutalism N | Neo-brutalism V | Notes |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| Slider | | | | | | | | | | |
-| Toggle Group | | | | | | | | | | |
-| Chip | | | | | | | | | | |
-| Tag Input | | | | | | | | | | |
-| Input OTP | | | | | | | | | | |
+| Component | ID | K | N | V | Notes |
+| --- | --- | --- | --- | --- | --- |
+| Alert | `alert` | | | | |
+| Badge | `badge` | | | | |
+| Card | `card` | | | | |
+| Input | `input` | | | | |
+| Label | `label` | | | | |
+| Native Select | `native-select` | | | | |
+| Skeleton | `skeleton` | | | | |
+| Table | `table` | | | | |
+| Textarea | `textarea` | | | | |
+| Input Group | `input-group` | | | | |
+| Pagination | `pagination` | | | | |
+| Spinner | `spinner` | | | | |
+| Kbd | `kbd` | | | | |
+| Stepper | `stepper` | | | | |
+| Chip | `chip` | | | | |
+| Tag Input | `tag-input` | | | | |
+| Button Group | `button-group` | | | | |
+| Item | `item` | | | | |
+| Number Input | `number-input` | | | | |
+| Password Field | `password-field` | | | | |
+| Carousel | `carousel` | | | | |
+| Aspect Ratio | `aspect-ratio` | | | | |
+| Prose | `prose` | | | | |
+| Resizable | `resizable` | | | | |
 
-#### Overlays and search (0.7.3)
+### Visual pass by family
 
-| Component | Flat K | Flat N | Flat V | Minimalist K | Minimalist N | Minimalist V | Neo-brutalism K | Neo-brutalism N | Neo-brutalism V | Notes |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| Combobox | | | | | | | | | | |
-| Command | | | | | | | | | | |
-| Hover Card | | | | | | | | | | |
-| Context Menu | | | | | | | | | | |
-| Calendar | | | | | | | | | | |
-
-#### Primitives (0.7.5)
-
-| Component | Flat K | Flat N | Flat V | Minimalist K | Minimalist N | Minimalist V | Neo-brutalism K | Neo-brutalism N | Neo-brutalism V | Notes |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| Toggle | | | | | | | | | | |
-| Collapsible | | | | | | | | | | |
-| Scroll Area | | | | | | | | | | |
-| Button Group | | | | | | | | | | |
-| Item | | | | | | | | | | |
-| List scrollbars (Command, Combobox, Select, Sheet) | | | | | | | | | | |
-
-#### Editor inputs (0.7.5)
-
-| Component | Flat K | Flat N | Flat V | Minimalist K | Minimalist N | Minimalist V | Neo-brutalism K | Neo-brutalism N | Neo-brutalism V | Notes |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| Number Input and steppers | | | | | | | | | | |
-| Color Picker 2D area and hue | | | | | | | | | | |
-| Color Picker contrast readout | | | | | | | | | | |
-| Color Picker eyedropper | | | | | | | | | | |
-| Color Picker Pair | | | | | | | | | | |
-
-#### Code Block (0.7.5)
-
-| Component | Flat K | Flat N | Flat V | Minimalist K | Minimalist N | Minimalist V | Neo-brutalism K | Neo-brutalism N | Neo-brutalism V | Notes |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| Code Block package-manager tabs | | | | | | | | | | |
-| Code Block scrollable `pre` | | | | | | | | | | |
-| Code Block copy announcement | | | | | | | | | | |
-| Code Block token contrast | | | | | | | | | | |
-
-#### Variants, batch 4a (0.7.5)
-
-| Component | Flat K | Flat N | Flat V | Minimalist K | Minimalist N | Minimalist V | Neo-brutalism K | Neo-brutalism N | Neo-brutalism V | Notes |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| Checkbox Option | | | | | | | | | | |
-| Switch `sm` target size | | | | | | | | | | |
-| Progress label and value | | | | | | | | | | |
-| Popover arrow | | | | | | | | | | |
-
-#### Variants, batch 4b (0.7.5)
-
-| Component | Flat K | Flat N | Flat V | Minimalist K | Minimalist N | Minimalist V | Neo-brutalism K | Neo-brutalism N | Neo-brutalism V | Notes |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| Dialog scrolling body and footer | | | | | | | | | | |
-| Alert Dialog typed confirmation | | | | | | | | | | |
-| Breadcrumb collapsed menu | | | | | | | | | | |
-
-#### Variants (0.7.6)
-
-| Component | Flat K | Flat N | Flat V | Minimalist K | Minimalist N | Minimalist V | Neo-brutalism K | Neo-brutalism N | Neo-brutalism V | Notes |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| Sheet snap handle value text (`Half height`, `Full height`, `33%`) | | | | | | | | | | |
-| Card action button name | | | | | | | | | | |
-| Slider editable value field (Enter, blur, Escape, bad input) | | | | | | | | | | |
-| Progress and Meter ring: hidden number, value text read once | | | | | | | | | | |
-| Code Block diff markers and `Added:` / `Removed:` screen-reader text | | | | | | | | | | |
-| Tooltip shortcut announced once, through `aria-keyshortcuts` | | | | | | | | | | |
-| Carousel image: required alt, lazy images from the third slide | | | | | | | | | | |
-| Carousel thumbnails named by alt text, current one with `aria-current` | | | | | | | | | | |
-
-#### Variants, batch 6a (0.7.3)
-
-| Component | Flat K | Flat N | Flat V | Minimalist K | Minimalist N | Minimalist V | Neo-brutalism K | Neo-brutalism N | Neo-brutalism V | Notes |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| Button variants | | | | | | | | | | |
-| Badge variants | | | | | | | | | | |
-| Alert variants | | | | | | | | | | |
-| Card variants | | | | | | | | | | |
-| Avatar variants | | | | | | | | | | |
-| Accordion variants | | | | | | | | | | |
-
-#### Variants, batches 6b and 6c (0.7.3)
-
-| Component | Flat K | Flat N | Flat V | Minimalist K | Minimalist N | Minimalist V | Neo-brutalism K | Neo-brutalism N | Neo-brutalism V | Notes |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| Tabs variants | | | | | | | | | | |
-| Table variants | | | | | | | | | | |
-| Input and Textarea sizes | | | | | | | | | | |
-| Input Group Clear and counter | | | | | | | | | | |
-| Pagination variants | | | | | | | | | | |
-| Select multiple | | | | | | | | | | |
-| Toast variants and timing | | | | | | | | | | |
-| Sheet handles | | | | | | | | | | |
-
-#### Components (0.7.6)
-
-| Component | Flat K | Flat N | Flat V | Minimalist K | Minimalist N | Minimalist V | Neo-brutalism K | Neo-brutalism N | Neo-brutalism V | Notes |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| Form and error summary | | | | | | | | | | |
-| FieldSet and Checkbox Group | | | | | | | | | | |
-| Password Field | | | | | | | | | | |
-| Carousel | | | | | | | | | | |
-| Aspect Ratio | | | | | | | | | | |
-| Toolbar and More menu | | | | | | | | | | |
-| Editor top bar toolbar | | | | | | | | | | |
-| Prose | | | | | | | | | | |
-| Navigation Menu | | | | | | | | | | |
-| Sidebar and phone sheet | | | | | | | | | | |
-| Resizable | | | | | | | | | | |
-| Menubar | | | | | | | | | | |
-| Data Table | | | | | | | | | | |
+| Family | Light focus | Dark focus | Forced colors | 200% zoom | Reduced motion | Components that fail (with issue) |
+| --- | --- | --- | --- | --- | --- | --- |
+| Flat (`flat`) | | | | | | |
+| Minimalist (`minimalist`) | | | | | | |
+| Neo-brutalism (`neo-brutalism`) | | | | | | |
+| Ombelle (`ombelle`) | | | | | | |
+| Papier (`papier`) | | | | | | |
+| Organic (`organic`) | | | | | | |
+| Retro futurism (`retro-futurism`) | | | | | | |
 
 ### Findings
 
@@ -418,4 +368,4 @@ Record each pass as **Pass**, **Fail** (with a linked issue) or **Blocked** (wit
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | | | | | | | | |
 
-When the tables are complete, update the PR5 row in the [web alpha readiness audit](web-alpha-readiness.md) with the environments and outcome. Any entry with a failing or missing pass stays out of the stable claim.
+Record visual failures here too, with their family. When the tables are complete, update the PR5 row in the [web alpha readiness audit](web-alpha-readiness.md) with the environments and outcome. Any entry with a failing or missing pass stays out of the stable claim.

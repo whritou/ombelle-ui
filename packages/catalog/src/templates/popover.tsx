@@ -4,22 +4,35 @@ import * as PopoverPrimitive from '@radix-ui/react-popover'
 import { cn } from './utils.js'
 import './popover.css'
 
+/**
+ * The component an element renders. Parts written in a Server Component, such as a Next.js
+ * App Router page, reach this client file as lazy client references rather than as the
+ * components, so `element.type` is resolved before it is compared.
+ */
+function partType(element: React.ReactElement): unknown {
+  const type = element.type as unknown as { $$typeof?: symbol; _init?: (payload: unknown) => unknown; _payload?: unknown } | null
+  if (typeof type === 'object' && type !== null && type.$$typeof === Symbol.for('react.lazy') && typeof type._init === 'function') {
+    try { return type._init(type._payload) } catch { return undefined }
+  }
+  return element.type
+}
+
 export type PopoverProps = React.ComponentProps<typeof PopoverPrimitive.Root>
 
 export function Popover({ ...props }: PopoverProps) {
-  return <PopoverPrimitive.Root data-slot="popover" {...props} />
+  return <PopoverPrimitive.Root {...props} data-slot="popover" />
 }
 
 export function PopoverTrigger({
   ...props
 }: React.ComponentProps<typeof PopoverPrimitive.Trigger>) {
-  return <PopoverPrimitive.Trigger data-slot="popover-trigger" {...props} />
+  return <PopoverPrimitive.Trigger {...props} data-slot="popover-trigger" />
 }
 
 export function PopoverAnchor({
   ...props
 }: React.ComponentProps<typeof PopoverPrimitive.Anchor>) {
-  return <PopoverPrimitive.Anchor data-slot="popover-anchor" {...props} />
+  return <PopoverPrimitive.Anchor {...props} data-slot="popover-anchor" />
 }
 
 export function PopoverContent({
@@ -32,12 +45,12 @@ export function PopoverContent({
   return (
     <PopoverPrimitive.Portal>
       <PopoverPrimitive.Content
-        data-slot="popover-content"
         align={align}
         // Radix adds the arrow's height to the offset, so the 10px gap needs no extra offset.
         sideOffset={sideOffset ?? (hasArrow(children) ? 0 : 6)}
         className={cn(className)}
         {...props}
+        data-slot="popover-content"
       >
         {children}
       </PopoverPrimitive.Content>
@@ -74,7 +87,7 @@ export function PopoverDescription({
 const ARROW_WIDTH = 20
 const ARROW_HEIGHT = 10
 const hasArrow = (children: React.ReactNode): boolean =>
-  React.Children.toArray(children).some(child => React.isValidElement<{ children?: React.ReactNode }>(child) && (child.type === PopoverArrow || (child.type === React.Fragment && hasArrow(child.props.children))))
+  React.Children.toArray(children).some(child => React.isValidElement<{ children?: React.ReactNode }>(child) && (partType(child) === PopoverArrow || (child.type === React.Fragment && hasArrow(child.props.children))))
 
 /** A decorative arrow pointing at the trigger. Place it inside PopoverContent. */
 export function PopoverArrow({
@@ -84,7 +97,6 @@ export function PopoverArrow({
 }: Omit<React.ComponentProps<typeof PopoverPrimitive.Arrow>, 'children' | 'asChild'>) {
   return (
     <PopoverPrimitive.Arrow
-      data-slot="popover-arrow"
       aria-hidden="true"
       width={ARROW_WIDTH}
       height={ARROW_HEIGHT}
@@ -92,6 +104,7 @@ export function PopoverArrow({
       // Overlap the content's border so the arrow's base covers it.
       style={{ translate: '0 calc(var(--border-width, 1px) * -1)', overflow: 'visible', ...style }}
       {...props}
+      data-slot="popover-arrow"
       asChild
     >
       {/* With asChild, Radix sets its svg props on this svg. */}

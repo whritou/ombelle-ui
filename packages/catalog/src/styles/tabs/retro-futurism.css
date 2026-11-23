@@ -253,7 +253,7 @@
 /* end 0.7.3 variants */
 /* retro-futurism layer */
 [data-slot='tabs-list']{gap:3px;padding:4px;border:0;border-radius:var(--rf-r3);background:var(--muted);box-shadow:none}
-[data-slot='tabs-trigger']{border:0;border-radius:var(--rf-r2);font-weight:700;transition:border-radius 0.3s,background-color var(--motion-duration)}
+[data-slot='tabs-trigger']{border:0;border-radius:var(--rf-r2);font-weight:700;transition:border-radius calc(var(--motion-duration) * 2),background-color var(--motion-duration)}
 [data-slot='tabs-trigger'][data-state='inactive']:not(:disabled):hover{background:var(--card);border-radius:var(--rf-r3)}
 [data-slot='tabs-trigger'][data-state='active']{background:var(--card);color:var(--card-foreground);box-shadow:var(--rf-e1)}
 [data-slot='tabs-trigger']:focus-visible{outline:3px solid var(--ring);outline-offset:2px}

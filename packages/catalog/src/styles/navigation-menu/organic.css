@@ -258,7 +258,7 @@
   font-size: 0.90625rem;
   font-weight: 700;
   color: var(--foreground);
-  transition: border-radius 0.4s, background-color var(--motion-duration, 0.2s);
+  transition: border-radius calc(var(--motion-duration) * 8/3), background-color var(--motion-duration, 0.2s);
 }
 [data-slot='navigation-menu-trigger'] > svg,
 [data-slot='navigation-menu-link'][data-variant='trigger'] > svg {
@@ -318,7 +318,7 @@
   padding-inline: 0.875rem;
   border-radius: var(--o-r3);
   font-weight: 700;
-  transition: border-radius 0.4s, background-color var(--motion-duration, 0.2s);
+  transition: border-radius calc(var(--motion-duration) * 8/3), background-color var(--motion-duration, 0.2s);
 }
 [data-slot='navigation-menu-link'][data-variant='default'] > span {
   font-size: 0.9375rem;

@@ -109,7 +109,7 @@ export function CatalogComponentEditor({ component, name }: { component: Compone
   const [inspectorCollapsed, setInspectorCollapsed] = useState(false)
   const inspectorViewport = useViewportClass()
   const foldInspector = inspectorCollapsed && inspectorViewport === 'desktop'
-  return <main className={styles.root} aria-label={`${name} editor`} data-editor-root="">
+  return <main id="main" tabIndex={-1} className={styles.root} aria-label={`${name} editor`} data-editor-root="">
     <EditorTopBar crumbs={[{ label: 'Components', href: '/editor/component' }, name]}
       back={{ label: 'All components', href: '/editor/component' }} switcher={<ComponentSwitcher current={component} />}
       commands={[familyCommands(offeredStyleFamilies(resolveRecipePreset(recipe.presetRef).styleFamily).filter(style => styleSupport(recipe.component, style) !== 'unavailable'),

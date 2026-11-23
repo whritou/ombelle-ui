@@ -4,6 +4,19 @@ import { Progress as ProgressPrimitive } from '@base-ui/react/progress'
 import { cn } from './utils.js'
 import './progress.css'
 
+/**
+ * The component an element renders. Parts written in a Server Component, such as a Next.js
+ * App Router page, reach this client file as lazy client references rather than as the
+ * components, so `element.type` is resolved before it is compared.
+ */
+function partType(element: React.ReactElement): unknown {
+  const type = element.type as unknown as { $$typeof?: symbol; _init?: (payload: unknown) => unknown; _payload?: unknown } | null
+  if (typeof type === 'object' && type !== null && type.$$typeof === Symbol.for('react.lazy') && typeof type._init === 'function') {
+    try { return type._init(type._payload) } catch { return undefined }
+  }
+  return element.type
+}
+
 type Size = 'sm' | 'default' | 'lg'
 type Tone = 'default' | 'success' | 'warning' | 'destructive'
 type Format = (value: number, max: number) => string
@@ -71,15 +84,14 @@ export function Progress({
         ? 'complete'
         : 'loading'
   const items = progressParts(children)
-  const label = items.find((child): child is React.ReactElement<React.ComponentProps<'span'>> => React.isValidElement(child) && child.type === ProgressLabel)
+  const label = items.find((child): child is React.ReactElement<React.ComponentProps<'span'>> => React.isValidElement(child) && partType(child) === ProgressLabel)
   const labelId = label?.props.id ?? generatedLabelId
   const readout = items.find((child): child is React.ReactElement<ProgressValueProps> =>
-    React.isValidElement(child) && child.type === ProgressValue)
+    React.isValidElement(child) && partType(child) === ProgressValue)
   const text = progressValueText(value, max, readout?.props.format)
   const circle = shape === 'circle'
   const bar = (
     <ProgressPrimitive.Root
-      data-slot="progress"
       data-state={state}
       data-value={value ?? undefined}
       data-max={max}
@@ -92,6 +104,7 @@ export function Progress({
       {...(label ? { 'aria-labelledby': labelId } : {})}
       {...(readout ? { 'aria-valuetext': text } : {})}
       {...props}
+      data-slot="progress"
     >
       {circle ? (
         <>

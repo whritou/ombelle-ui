@@ -102,6 +102,18 @@
   min-inline-size: 0;
 }
 [data-slot='input-otp-slot'] {
-  inline-size: auto;
+  /* Capped, so a slot outside an input-otp-group (a Base UI <input>) is not the browser's default width. */
+  inline-size: min(46px, 100%);
   min-inline-size: 0;
+}
+
+/* Invalid: a field given aria-invalid marks every slot (DES-15). */
+[data-slot='input-otp'][data-invalid] [data-slot='input-otp-slot'] {
+  border-color: var(--destructive);
+  background: color-mix(in oklab, var(--destructive) 10%, var(--card));
+}
+@media (forced-colors: active) {
+  [data-slot='input-otp'][data-invalid] [data-slot='input-otp-slot'] {
+    border: 3px double CanvasText;
+  }
 }

@@ -6,6 +6,19 @@ import { CheckIcon, ChevronDownIcon, ChevronUpIcon } from 'lucide-react'
 import { cn } from './utils.js'
 import './select.css'
 
+/**
+ * The component an element renders. Parts written in a Server Component, such as a Next.js
+ * App Router page, reach this client file as lazy client references rather than as the
+ * components, so `element.type` is resolved before it is compared.
+ */
+function partType(element: React.ReactElement): unknown {
+  const type = element.type as unknown as { $$typeof?: symbol; _init?: (payload: unknown) => unknown; _payload?: unknown } | null
+  if (typeof type === 'object' && type !== null && type.$$typeof === Symbol.for('react.lazy') && typeof type._init === 'function') {
+    try { return type._init(type._payload) } catch { return undefined }
+  }
+  return element.type
+}
+
 type SingleProps = React.ComponentProps<typeof SelectPrimitive.Root> & { multiple?: false }
 type MultipleProps = {
   /** Choose several options: the list stays open and the trigger shows a chip per choice. */
@@ -24,7 +37,7 @@ type MultipleProps = {
 }
 export type SelectProps = SingleProps | MultipleProps
 
-type Option = { value: string; label: React.ReactNode; text: string; disabled: boolean }
+type Option = { value: string; label: React.ReactNode; text: string; disabled: boolean; id?: string }
 type Multi = {
   values: string[]
   toggle: (value: string) => void
@@ -50,17 +63,28 @@ const textOf = (node: React.ReactNode): string =>
 /** The options declared inside, in order, so the closed trigger can show their labels. */
 function collectOptions(node: React.ReactNode, options: Option[]) {
   React.Children.forEach(node, child => {
-    if (!React.isValidElement<{ value?: unknown; children?: React.ReactNode; disabled?: boolean }>(child)) return
-    if (child.type === SelectItem && typeof child.props.value === 'string')
-      options.push({ value: child.props.value, label: child.props.children, text: textOf(child.props.children), disabled: !!child.props.disabled })
+    if (!React.isValidElement<{ value?: unknown; children?: React.ReactNode; disabled?: boolean; textValue?: string; id?: string }>(child)) return
+    if (partType(child) === SelectItem && typeof child.props.value === 'string')
+      options.push({ value: child.props.value, label: child.props.children, text: child.props.textValue ?? textOf(child.props.children), disabled: !!child.props.disabled, id: child.props.id })
     else collectOptions(child.props.children, options)
   })
   return options
 }
 
+/** Runs the caller's handler, then the part's own unless the caller prevented it. */
+function compose<E extends { defaultPrevented: boolean }>(theirs: ((event: E) => void) | undefined, ours: (event: E) => void) {
+  return (event: E) => {
+    theirs?.(event)
+    if (!event.defaultPrevented) ours(event)
+  }
+}
+
 function MultipleSelect({ value, defaultValue, onValueChange, open, defaultOpen, onOpenChange, name, disabled = false, required, children }: MultipleProps) {
-  const [own, setOwn] = React.useState<string[]>(defaultValue ?? [])
+  // The value a form reset returns to: the default on the first render, as for a native field.
+  const [initial] = React.useState<string[]>(() => defaultValue ?? [])
+  const [own, setOwn] = React.useState<string[]>(initial)
   const values = value ?? own
+  const hidden = React.useRef<HTMLSelectElement>(null)
   const [ownOpen, setOwnOpen] = React.useState(defaultOpen ?? false)
   const isOpen = open ?? ownOpen
   const [highlighted, setHighlighted] = React.useState<string>()
@@ -80,10 +104,28 @@ function MultipleSelect({ value, defaultValue, onValueChange, open, defaultOpen,
     if (value === undefined) setOwn(next)
     onValueChange?.(next)
   }, [values, value, onValueChange])
+  const reset = React.useRef(() => {})
+  reset.current = () => {
+    if (open === undefined) setOwnOpen(false)
+    if (initial.join('\n') === values.join('\n')) return
+    if (value === undefined) setOwn(initial)
+    onValueChange?.(initial)
+  }
+  // A form reset returns to the default value, as it does for the native fields beside it.
+  React.useEffect(() => {
+    const form = hidden.current?.form
+    if (!form) return
+    const onReset = () => reset.current()
+    form.addEventListener('reset', onReset)
+    return () => form.removeEventListener('reset', onReset)
+  }, [name, required])
   const context: Multi = {
     values, toggle, options, open: isOpen, setOpen, highlighted, setHighlighted, disabled, required: !!required,
     // An item the Select could not collect (rendered by a wrapper component) still gets an id of its own.
-    optionId: item => { const at = options.findIndex(option => option.value === item); return `${base}-option-${at === -1 ? `v-${encodeURIComponent(item)}` : at}` },
+    optionId: item => {
+      const at = options.findIndex(option => option.value === item)
+      return options[at]?.id ?? `${base}-option-${at === -1 ? `v-${encodeURIComponent(item)}` : at}`
+    },
     listboxId: `${base}-listbox`,
   }
   // Focus stays on the trigger, so the browser does not scroll the list to the highlighted option: this does.
@@ -97,7 +139,7 @@ function MultipleSelect({ value, defaultValue, onValueChange, open, defaultOpen,
       </PopoverPrimitive.Root>
       {/* A hidden native select submits the values and takes part in validation, as Radix Select's own bubble select does. */}
       {name || required ? (
-        <select multiple aria-hidden="true" tabIndex={-1} name={name} required={required} disabled={disabled} value={values} onChange={() => {}}
+        <select ref={hidden} multiple aria-hidden="true" tabIndex={-1} name={name} required={required} disabled={disabled} value={values} onChange={() => {}}
           style={{ position: 'absolute', inlineSize: 1, blockSize: 1, padding: 0, margin: -1, overflow: 'hidden', clip: 'rect(0, 0, 0, 0)', whiteSpace: 'nowrap', border: 0, opacity: 0, pointerEvents: 'none' }}>
           {options.map(option => <option key={option.value} value={option.value}>{option.text}</option>)}
           {values.filter(item => !options.some(option => option.value === item)).map(item => <option key={item} value={item}>{item}</option>)}
@@ -110,7 +152,7 @@ function MultipleSelect({ value, defaultValue, onValueChange, open, defaultOpen,
 export function Select(props: SelectProps) {
   if (props.multiple) return <MultipleSelect {...props} />
   const { multiple: _single, ...rest } = props
-  return <SelectPrimitive.Root data-slot="select" {...rest} />
+  return <SelectPrimitive.Root {...rest} data-slot="select" />
 }
 
 export function SelectGroup({
@@ -120,17 +162,19 @@ export function SelectGroup({
 }: React.ComponentProps<typeof SelectPrimitive.Group>) {
   const multi = React.useContext(MultiContext)
   const label = React.useId()
-  if (multi)
+  if (multi) {
+    const { asChild: _asChild, ...rest } = props
     return (
       <GroupLabelContext.Provider value={label}>
-        <div role="group" aria-labelledby={label} data-slot="select-group" className={cn(className)}>{children}</div>
+        <div role="group" aria-labelledby={label} {...rest} data-slot="select-group" className={cn(className)}>{children}</div>
       </GroupLabelContext.Provider>
     )
+  }
   return (
     <SelectPrimitive.Group
-      data-slot="select-group"
       className={cn(className)}
       {...props}
+      data-slot="select-group"
     >
       {children}
     </SelectPrimitive.Group>
@@ -144,13 +188,14 @@ export function SelectValue({
   const multi = React.useContext(MultiContext)
   if (multi) {
     const chosen = multi.options.filter(option => multi.values.includes(option.value))
+    const { asChild: _asChild, children: _children, className, ...rest } = props
     return (
-      <span data-slot="select-value">
+      <span {...rest} data-slot="select-value" className={cn(className)}>
         {chosen.length ? chosen.map(option => <span key={option.value} data-slot="select-chip" data-select-chip="">{option.label}</span>) : placeholder}
       </span>
     )
   }
-  return <SelectPrimitive.Value data-slot="select-value" placeholder={placeholder} {...props} />
+  return <SelectPrimitive.Value placeholder={placeholder} {...props} data-slot="select-value" />
 }
 
 function MultipleTrigger({ className, size, children, onKeyDown, ...props }: React.ComponentProps<'button'> & { size: 'sm' | 'default' }) {
@@ -221,10 +266,10 @@ export function SelectTrigger({
   if (multi) return <MultipleTrigger className={className} size={size} {...props}>{children}</MultipleTrigger>
   return (
     <SelectPrimitive.Trigger
-      data-slot="select-trigger"
       data-size={size}
       className={cn(className)}
       {...props}
+      data-slot="select-trigger"
     >
       {children}
       <SelectPrimitive.Icon asChild>
@@ -242,21 +287,27 @@ export function SelectContent({
   ...props
 }: React.ComponentProps<typeof SelectPrimitive.Content>) {
   const multi = React.useContext(MultiContext)
-  if (multi)
+  if (multi) {
+    // Radix Select's own props that a popover has no use for are left out; the rest pass to it.
+    const { asChild: _asChild, onCloseAutoFocus, side = 'bottom', align = 'start', style, ...rest } = props
     return (
       <PopoverPrimitive.Portal>
         <PopoverPrimitive.Content
+          // The listbox inside is the popup; focus never enters this wrapper, so it is not a dialog.
+          role="presentation"
+          {...rest}
           data-slot="select-content"
           className={cn(className)}
-          side="bottom"
-          align="start"
+          side={side}
+          align={align}
           sideOffset={sideOffset}
-          // Focus stays on the trigger, which names the highlighted option.
+          // Focus stays on the trigger, which names the highlighted option; a caller's handlers run first.
           onOpenAutoFocus={event => event.preventDefault()}
-          onCloseAutoFocus={event => event.preventDefault()}
+          onCloseAutoFocus={event => { onCloseAutoFocus?.(event); event.preventDefault() }}
           style={{
             '--radix-select-trigger-width': 'var(--radix-popover-trigger-width)',
             '--radix-select-content-available-height': 'var(--radix-popover-content-available-height)',
+            ...style,
           } as React.CSSProperties}
         >
           <div role="listbox" id={multi.listboxId} aria-multiselectable="true" data-slot="select-viewport" data-select-multiple="">
@@ -265,14 +316,15 @@ export function SelectContent({
         </PopoverPrimitive.Content>
       </PopoverPrimitive.Portal>
     )
+  }
   return (
     <SelectPrimitive.Portal>
       <SelectPrimitive.Content
-        data-slot="select-content"
         className={cn(className)}
         position={position}
         sideOffset={position === 'popper' ? sideOffset : undefined}
         {...props}
+        data-slot="select-content"
       >
         <SelectScrollUpButton />
         <SelectPrimitive.Viewport data-slot="select-viewport">
@@ -290,12 +342,15 @@ export function SelectLabel({
 }: React.ComponentProps<typeof SelectPrimitive.Label>) {
   const multi = React.useContext(MultiContext)
   const group = React.useContext(GroupLabelContext)
-  if (multi) return <div id={group} data-slot="select-label" className={cn(className)}>{props.children}</div>
+  if (multi) {
+    const { asChild: _asChild, ...rest } = props
+    return <div id={group} {...rest} data-slot="select-label" className={cn(className)} />
+  }
   return (
     <SelectPrimitive.Label
-      data-slot="select-label"
       className={cn(className)}
       {...props}
+      data-slot="select-label"
     />
   )
 }
@@ -318,8 +373,11 @@ export function SelectItem({
   const hintPart = hint ? <span data-slot="select-item-hint" id={hintId}>{hint}</span> : null
   if (multi) {
     const selected = multi.values.includes(props.value)
+    // textValue and id were read when the options were collected; the handlers run before the item's own.
+    const { asChild: _asChild, value: _value, disabled: _disabled, textValue: _textValue, id: _id, onPointerDown, onPointerMove, onClick, ...rest } = props
     return (
       <div
+        {...rest}
         role="option"
         id={multi.optionId(props.value)}
         aria-selected={selected}
@@ -331,9 +389,9 @@ export function SelectItem({
         data-disabled={props.disabled ? '' : undefined}
         className={cn(className)}
         // Keep focus on the trigger, which owns the keyboard.
-        onPointerDown={event => event.preventDefault()}
-        onPointerMove={() => { if (!props.disabled) multi.setHighlighted(props.value) }}
-        onClick={() => { if (!props.disabled) multi.toggle(props.value) }}
+        onPointerDown={event => { onPointerDown?.(event); event.preventDefault() }}
+        onPointerMove={compose(onPointerMove, () => { if (!props.disabled) multi.setHighlighted(props.value) })}
+        onClick={compose(onClick, () => { if (!props.disabled) multi.toggle(props.value) })}
       >
         {iconPart}
         <span>{children}</span>
@@ -344,10 +402,10 @@ export function SelectItem({
   }
   return (
     <SelectPrimitive.Item
-      data-slot="select-item"
       className={cn(className)}
       aria-describedby={hint ? hintId : undefined}
       {...props}
+      data-slot="select-item"
     >
       {iconPart}
       <SelectPrimitive.ItemText>{children}</SelectPrimitive.ItemText>
@@ -363,12 +421,15 @@ export function SelectSeparator({
   className,
   ...props
 }: React.ComponentProps<typeof SelectPrimitive.Separator>) {
-  if (React.useContext(MultiContext)) return <div role="presentation" data-slot="select-separator" className={cn(className)} />
+  if (React.useContext(MultiContext)) {
+    const { asChild: _asChild, ...rest } = props
+    return <div role="presentation" {...rest} data-slot="select-separator" className={cn(className)} />
+  }
   return (
     <SelectPrimitive.Separator
-      data-slot="select-separator"
       className={cn(className)}
       {...props}
+      data-slot="select-separator"
     />
   )
 }
@@ -379,9 +440,9 @@ export function SelectScrollUpButton({
 }: React.ComponentProps<typeof SelectPrimitive.ScrollUpButton>) {
   return (
     <SelectPrimitive.ScrollUpButton
-      data-slot="select-scroll-up-button"
       className={cn(className)}
       {...props}
+      data-slot="select-scroll-up-button"
     >
       <ChevronUpIcon aria-hidden="true" />
     </SelectPrimitive.ScrollUpButton>
@@ -394,9 +455,9 @@ export function SelectScrollDownButton({
 }: React.ComponentProps<typeof SelectPrimitive.ScrollDownButton>) {
   return (
     <SelectPrimitive.ScrollDownButton
-      data-slot="select-scroll-down-button"
       className={cn(className)}
       {...props}
+      data-slot="select-scroll-down-button"
     >
       <ChevronDownIcon aria-hidden="true" />
     </SelectPrimitive.ScrollDownButton>

@@ -81,4 +81,6 @@ Projects whose `components.json` uses one of shadcn's `base-*` styles receive a 
 
 State bridge: the trigger and popup carry `data-state` `delayed-open` or `closed`, and the popup `data-side` and `data-align`, through each part's `render` function; a custom `render` replaces it. The popup maps Base UI's `--available-width` to `--radix-tooltip-content-available-width`. `TooltipArrow` renders the same SVG triangle as Radix, so the stylesheet's `fill` and `stroke` apply. Radix also distinguishes `instant-open`; the Base UI edition reports `delayed-open` for every open tooltip, which the stylesheet does not distinguish.
 
+Accessibility: Base UI 1.9.0 gives the popup no role and the trigger no description, so the template adds them. `TooltipContent` has `role="tooltip"` and an id (your own `id` if you pass one), and while the tooltip is open `TooltipTrigger` gets `aria-describedby` pointing at it, after any `aria-describedby` of your own. Both editions announce the tooltip text the same way. A trigger tied to the tooltip through a Base UI `handle` instead of sitting inside `Tooltip` gets no description; give it its own full name.
+
 The parity test covers the closed tooltip and the popup opened by focus and by hover, including the portal content and arrow. The Base UI edition has no allowed styling differences.

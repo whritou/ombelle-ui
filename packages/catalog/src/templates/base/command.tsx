@@ -6,6 +6,19 @@ import { SearchIcon } from 'lucide-react'
 import { cn } from './utils.js'
 import './command.css'
 
+/**
+ * The component an element renders. Parts written in a Server Component, such as a Next.js
+ * App Router page, reach this client file as lazy client references rather than as the
+ * components, so `element.type` is resolved before it is compared.
+ */
+function partType(element: React.ReactElement): unknown {
+  const type = element.type as unknown as { $$typeof?: symbol; _init?: (payload: unknown) => unknown; _payload?: unknown } | null
+  if (typeof type === 'object' && type !== null && type.$$typeof === Symbol.for('react.lazy') && typeof type._init === 'function') {
+    try { return type._init(type._payload) } catch { return undefined }
+  }
+  return element.type
+}
+
 /** Base UI parts accept a className function; these components take a string. */
 type Part<T extends React.ElementType> = Omit<React.ComponentProps<T>, 'className'> & {
   className?: string
@@ -28,7 +41,7 @@ const DialogContext = React.createContext(false)
 function textOf(children: React.ReactNode): string {
   return React.Children.toArray(children).map(child => {
     if (typeof child === 'string' || typeof child === 'number') return String(child)
-    if (React.isValidElement<{ children?: React.ReactNode }>(child) && child.type !== CommandShortcut) return textOf(child.props.children)
+    if (React.isValidElement<{ children?: React.ReactNode }>(child) && partType(child) !== CommandShortcut) return textOf(child.props.children)
     return ''
   }).join('').trim()
 }
@@ -46,7 +59,7 @@ const matches = (query: string, entry: Entry) =>
 function entriesIn(children: React.ReactNode): Entry[] {
   return React.Children.toArray(children).flatMap(child => {
     if (!React.isValidElement<{ children?: React.ReactNode }>(child)) return []
-    if (child.type === CommandItem) return [entryOf(child.props as CommandItemProps)]
+    if (partType(child) === CommandItem) return [entryOf(child.props as CommandItemProps)]
     return entriesIn(child.props.children)
   })
 }
@@ -58,11 +71,20 @@ export type CommandProps = React.ComponentProps<'div'> & {
   filter?: boolean
   /** The search text on the first render. */
   defaultSearch?: string
+  /** The search text, when you keep it yourself; pair it with onSearchChange. */
+  search?: string
+  /** Called with the new search text as the user types, for example to fetch filtered items. */
+  onSearchChange?(search: string): void
 }
 
 /** A keyboard-first command menu: a search box over a filtered list of commands. */
-export function Command({ className, filter = true, defaultSearch = '', label = 'Commands', children, ...props }: CommandProps) {
-  const [search, setSearch] = React.useState(defaultSearch)
+export function Command({ className, filter = true, defaultSearch = '', search: searchProp, onSearchChange, label = 'Commands', children, ...props }: CommandProps) {
+  const [ownSearch, setOwnSearch] = React.useState(defaultSearch)
+  const search = searchProp ?? ownSearch
+  const setSearch = (next: string) => {
+    if (searchProp === undefined) setOwnSearch(next)
+    onSearchChange?.(next)
+  }
   const inDialog = React.useContext(DialogContext)
   const query = filter ? search.trim().toLowerCase() : ''
   // Each command registers whether it matches, so commands inside your own components count too.
@@ -89,7 +111,8 @@ export function Command({ className, filter = true, defaultSearch = '', label = 
         inline
         open
         filter={null}
-        autoHighlight
+        // The first command starts highlighted, as in the Radix edition.
+        autoHighlight="always"
         value={search}
         onValueChange={(value, details) => {
           // Choosing a command runs it; only typing changes the search.
@@ -110,7 +133,7 @@ export type CommandDialogProps = React.ComponentProps<typeof DialogPrimitive.Roo
 
 /** A button that opens the dialog. Place it inside CommandDialog, next to the Command. */
 export function CommandDialogTrigger({ className, ...props }: Part<typeof DialogPrimitive.Trigger>) {
-  return <DialogPrimitive.Trigger data-slot="command-dialog-trigger" className={cn(className)} {...props} />
+  return <DialogPrimitive.Trigger className={cn(className)} {...props} data-slot="command-dialog-trigger" />
 }
 
 /**
@@ -119,7 +142,7 @@ export function CommandDialogTrigger({ className, ...props }: Part<typeof Dialog
  */
 export function CommandDialog({ title = 'Command menu', className, children, ...props }: CommandDialogProps) {
   const all = React.Children.toArray(children as React.ReactNode)
-  const triggers = all.filter(child => React.isValidElement(child) && child.type === CommandDialogTrigger)
+  const triggers = all.filter(child => React.isValidElement(child) && partType(child) === CommandDialogTrigger)
   return (
     <DialogPrimitive.Root {...props}>
       {triggers}
@@ -135,18 +158,31 @@ export function CommandDialog({ title = 'Command menu', className, children, ...
 }
 
 export function CommandInput({ className, ...props }: Omit<Part<typeof Autocomplete.Input>, 'value' | 'defaultValue'>) {
-  const { label, inDialog } = React.useContext(SearchContext)
+  const { label, inDialog, count } = React.useContext(SearchContext)
   return (
     <div data-slot="command-search">
       <SearchIcon aria-hidden="true" />
-      <Autocomplete.Input data-slot="command-input" aria-label={label} className={cn(className)} {...props} />
+      <Autocomplete.Input
+        aria-label={label}
+        className={cn(className)}
+        // Base UI keeps pointing at the first option after the last match is gone; with no
+        // options there is nothing to point at.
+        {...(count === 0 && { 'aria-activedescendant': undefined })}
+        {...props}
+        data-slot="command-input"
+      />
       {inDialog && <kbd aria-hidden="true">Esc</kbd>}
     </div>
   )
 }
 
-export function CommandList({ className, ...props }: Part<typeof Autocomplete.List>) {
-  return <Autocomplete.List data-slot="command-list" className={cn(className)} {...props} />
+export type CommandListProps = Part<typeof Autocomplete.List> & {
+  /** The list box's name; default "Suggestions", as in the Radix edition. */
+  label?: string
+}
+
+export function CommandList({ className, label = 'Suggestions', ...props }: CommandListProps) {
+  return <Autocomplete.List aria-label={label} className={cn(className)} {...props} data-slot="command-list" />
 }
 
 export type CommandGroupProps = Omit<Part<typeof Autocomplete.Group>, 'children'> & {
@@ -159,7 +195,7 @@ export function CommandGroup({ className, heading, children, ...props }: Command
   const { query } = React.useContext(SearchContext)
   if (!entriesIn(children).some(entry => matches(query, entry))) return null
   return (
-    <Autocomplete.Group data-slot="command-group" className={cn(className)} {...props}>
+    <Autocomplete.Group className={cn(className)} {...props} data-slot="command-group">
       {heading !== undefined && (
         <Autocomplete.GroupLabel>
           <span data-slot="command-group-heading">{heading}</span>
@@ -188,14 +224,16 @@ export function CommandItem({ className, value, keywords, onSelect, onClick, chi
   if (!matched) return null
   return (
     <Autocomplete.Item
-      data-slot="command-item"
       value={entry.text}
       className={cn(className)}
+      // The highlighted command is the selected option, as in the Radix edition.
+      render={(itemProps, state) => <div {...itemProps} aria-selected={state.highlighted} />}
       onClick={(event) => {
         onClick?.(event)
         if (!event.defaultPrevented) onSelect?.(entry.text)
       }}
       {...props}
+      data-slot="command-item"
     >
       {children}
     </Autocomplete.Item>

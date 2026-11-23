@@ -8,7 +8,7 @@ export default function ComponentsLayout({ children }: { children: ReactNode }) 
   return (
     <SidebarProvider shortcut={false} className="site-shell mx-auto w-full max-w-7xl" style={{ '--sidebar-height': 'calc(100dvh - 4rem)', '--sidebar-width': '14rem' } as CSSProperties}>
       <ComponentsSidebar />
-      <SidebarInset className="min-w-0 px-5 md:px-10">
+      <SidebarInset id="main" tabIndex={-1} className="min-w-0 px-5 md:px-10">
         <div className="mt-6 md:hidden"><SidebarTrigger><PanelLeftIcon aria-hidden="true" />Browse components</SidebarTrigger></div>
         {children}
       </SidebarInset>

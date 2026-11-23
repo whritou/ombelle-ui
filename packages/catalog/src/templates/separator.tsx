@@ -22,12 +22,12 @@ export function Separator({
 }: SeparatorProps) {
   return (
     <SeparatorPrimitive.Root
-      data-slot="separator"
       data-labelled={children ? '' : undefined}
       orientation={orientation}
       decorative={decorative}
       className={cn(className)}
       {...props}
+      data-slot="separator"
     >
       {children ? <span data-slot="separator-label">{children}</span> : null}
     </SeparatorPrimitive.Root>

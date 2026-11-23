@@ -78,7 +78,7 @@ describe('Radio Group catalog contract', () => {
       'data-state="checked"',
       'data-disabled=""',
       'data-slot="radio-group-indicator"',
-      '<label data-slot="radio-group-option"',
+      '<label class="" data-slot="radio-group-option"',
       'Team plan',
     ])
       expect(html).toContain(text)

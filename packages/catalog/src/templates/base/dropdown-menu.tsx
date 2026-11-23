@@ -67,13 +67,13 @@ function MenuPopup({
 export type DropdownMenuProps = React.ComponentProps<typeof MenuPrimitive.Root>
 
 export function DropdownMenu({ ...props }: DropdownMenuProps) {
-  return <MenuPrimitive.Root data-slot="dropdown-menu" {...props} />
+  return <MenuPrimitive.Root {...props} data-slot="dropdown-menu" />
 }
 
 export function DropdownMenuPortal({
   ...props
 }: React.ComponentProps<typeof MenuPrimitive.Portal>) {
-  return <MenuPrimitive.Portal data-slot="dropdown-menu-portal" {...props} />
+  return <MenuPrimitive.Portal {...props} data-slot="dropdown-menu-portal" />
 }
 
 export function DropdownMenuTrigger({
@@ -82,12 +82,12 @@ export function DropdownMenuTrigger({
 }: Part<typeof MenuPrimitive.Trigger>) {
   return (
     <MenuPrimitive.Trigger
-      data-slot="dropdown-menu-trigger"
       className={cn(className)}
       render={(triggerProps, state) => (
         <button {...triggerProps} data-state={openState(state.open)} />
       )}
       {...props}
+      data-slot="dropdown-menu-trigger"
     />
   )
 }
@@ -96,7 +96,7 @@ export function DropdownMenuContent({
   sideOffset = 6,
   ...props
 }: Part<typeof MenuPrimitive.Popup> & Placement) {
-  return <MenuPopup data-slot="dropdown-menu-content" sideOffset={sideOffset} {...props} />
+  return <MenuPopup sideOffset={sideOffset} {...props} data-slot="dropdown-menu-content" />
 }
 
 export function DropdownMenuGroup({
@@ -105,9 +105,9 @@ export function DropdownMenuGroup({
 }: Part<typeof MenuPrimitive.Group>) {
   return (
     <MenuPrimitive.Group
-      data-slot="dropdown-menu-group"
       className={cn(className)}
       {...props}
+      data-slot="dropdown-menu-group"
     />
   )
 }
@@ -122,10 +122,10 @@ export function DropdownMenuLabel({
 }) {
   return (
     <div
-      data-slot="dropdown-menu-label"
       data-inset={inset ? '' : undefined}
       className={cn(className)}
       {...props}
+      data-slot="dropdown-menu-label"
     />
   )
 }
@@ -141,11 +141,11 @@ export function DropdownMenuItem({
 }) {
   return (
     <MenuPrimitive.Item
-      data-slot="dropdown-menu-item"
       data-inset={inset ? '' : undefined}
       data-variant={variant}
       className={cn(className)}
       {...props}
+      data-slot="dropdown-menu-item"
     />
   )
 }
@@ -157,12 +157,12 @@ export function DropdownMenuCheckboxItem({
 }: Part<typeof MenuPrimitive.CheckboxItem>) {
   return (
     <MenuPrimitive.CheckboxItem
-      data-slot="dropdown-menu-checkbox-item"
       className={cn(className)}
       render={(itemProps, state) => (
         <div {...itemProps} data-state={checkedState(state.checked)} />
       )}
       {...props}
+      data-slot="dropdown-menu-checkbox-item"
     >
       <span data-slot="dropdown-menu-item-indicator">
         <MenuPrimitive.CheckboxItemIndicator>
@@ -180,9 +180,9 @@ export function DropdownMenuRadioGroup({
 }: Part<typeof MenuPrimitive.RadioGroup>) {
   return (
     <MenuPrimitive.RadioGroup
-      data-slot="dropdown-menu-radio-group"
       className={cn(className)}
       {...props}
+      data-slot="dropdown-menu-radio-group"
     />
   )
 }
@@ -194,12 +194,12 @@ export function DropdownMenuRadioItem({
 }: Part<typeof MenuPrimitive.RadioItem>) {
   return (
     <MenuPrimitive.RadioItem
-      data-slot="dropdown-menu-radio-item"
       className={cn(className)}
       render={(itemProps, state) => (
         <div {...itemProps} data-state={checkedState(state.checked)} />
       )}
       {...props}
+      data-slot="dropdown-menu-radio-item"
     >
       <span data-slot="dropdown-menu-item-indicator">
         <MenuPrimitive.RadioItemIndicator>
@@ -217,9 +217,9 @@ export function DropdownMenuSeparator({
 }: Part<typeof MenuPrimitive.Separator>) {
   return (
     <MenuPrimitive.Separator
-      data-slot="dropdown-menu-separator"
       className={cn(className)}
       {...props}
+      data-slot="dropdown-menu-separator"
     />
   )
 }
@@ -230,9 +230,9 @@ export function DropdownMenuShortcut({
 }: React.ComponentProps<'span'>) {
   return (
     <span
-      data-slot="dropdown-menu-shortcut"
       className={cn(className)}
       {...props}
+      data-slot="dropdown-menu-shortcut"
     />
   )
 }
@@ -240,7 +240,7 @@ export function DropdownMenuShortcut({
 export function DropdownMenuSub({
   ...props
 }: React.ComponentProps<typeof MenuPrimitive.SubmenuRoot>) {
-  return <MenuPrimitive.SubmenuRoot data-slot="dropdown-menu-sub" {...props} />
+  return <MenuPrimitive.SubmenuRoot {...props} data-slot="dropdown-menu-sub" />
 }
 
 export function DropdownMenuSubTrigger({
@@ -253,13 +253,13 @@ export function DropdownMenuSubTrigger({
 }) {
   return (
     <MenuPrimitive.SubmenuTrigger
-      data-slot="dropdown-menu-sub-trigger"
       data-inset={inset ? '' : undefined}
       className={cn(className)}
       render={(triggerProps, state) => (
         <div {...triggerProps} data-state={openState(state.open)} />
       )}
       {...props}
+      data-slot="dropdown-menu-sub-trigger"
     >
       {children}
       <ChevronRightIcon data-slot="dropdown-menu-sub-icon" aria-hidden="true" />
@@ -270,5 +270,5 @@ export function DropdownMenuSubTrigger({
 export function DropdownMenuSubContent({
   ...props
 }: Part<typeof MenuPrimitive.Popup> & Placement) {
-  return <MenuPopup data-slot="dropdown-menu-sub-content" side="right" {...props} />
+  return <MenuPopup side="right" {...props} data-slot="dropdown-menu-sub-content" />
 }

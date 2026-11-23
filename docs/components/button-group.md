@@ -1,6 +1,6 @@
 # Button Group
 
-Button Group joins its direct children into one control: Buttons, Inputs, Select triggers and Input Groups, with an optional separator and static text. It is available in all five families in light and dark mode. One template serves both editions.
+Button Group joins its direct children into one control: Buttons, Inputs, Select triggers and Input Groups, with an optional separator and static text. It is available in all eight families (the seven stable families and liquid glass) in light and dark mode. One template serves both editions.
 
 This component requires CLI **0.7.5** or later: `npx @ombelle-ui/cli@0.7.5 add button-group`. For a built local checkout:
 

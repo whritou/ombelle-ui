@@ -8,7 +8,7 @@ export default function DocumentationLayout({ children }: { children: ReactNode 
   return (
     <SidebarProvider shortcut={false} className="site-shell mx-auto w-full max-w-6xl" style={{ '--sidebar-height': 'calc(100dvh - 4rem)', '--sidebar-width': '15rem' } as CSSProperties}>
       <DocumentationSidebar />
-      <SidebarInset className="min-w-0 px-5 py-10 lg:px-14 lg:py-16">
+      <SidebarInset id="main" tabIndex={-1} className="min-w-0 px-5 py-10 lg:px-14 lg:py-16">
         <div className="mb-6 md:hidden"><SidebarTrigger><PanelLeftIcon aria-hidden="true" />Documentation</SidebarTrigger></div>
         {children}
       </SidebarInset>

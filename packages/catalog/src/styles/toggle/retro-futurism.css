@@ -12,7 +12,7 @@
   color: var(--foreground);
   font: 600 14px/1 var(--font-family);
   cursor: pointer;
-  transition: background-color 0.15s, color 0.15s;
+  transition: background-color var(--motion-duration), color var(--motion-duration);
 }
 [data-slot='toggle'] > svg {
   flex: none;
@@ -71,7 +71,7 @@
   }
 }
 /* retro-futurism layer */
-[data-slot='toggle']{border:0;border-radius:var(--rf-r2);background:transparent;font-weight:700;transition:background-color 0.2s,border-radius 0.3s}
+[data-slot='toggle']{border:0;border-radius:var(--rf-r2);background:transparent;font-weight:700;transition:background-color calc(var(--motion-duration) * 4/3),border-radius calc(var(--motion-duration) * 2)}
 [data-slot='toggle'][data-size='sm']{min-inline-size:34px;min-block-size:34px}
 [data-slot='toggle'][data-size='default']{min-inline-size:42px;min-block-size:42px}
 [data-slot='toggle'][data-size='lg']{min-inline-size:50px;min-block-size:50px}

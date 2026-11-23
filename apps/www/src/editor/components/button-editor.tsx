@@ -217,7 +217,7 @@ export function ButtonEditor() {
   const [inspectorCollapsed, setInspectorCollapsed] = useState(false)
   const inspectorViewport = useViewportClass()
   const foldInspector = inspectorCollapsed && inspectorViewport === 'desktop'
-  return <main className={styles.root} aria-label="Button editor" data-editor-root="">
+  return <main id="main" tabIndex={-1} className={styles.root} aria-label="Button editor" data-editor-root="">
     <EditorTopBar
       commands={[familyCommands(offeredStyleFamilies(draftFamily(draft.recipe)), draftFamily(draft.recipe), familyNames, chooseFamily)]}
       crumbs={[{ label: 'Components', href: '/editor/component' }, 'Button']}

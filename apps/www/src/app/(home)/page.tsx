@@ -11,7 +11,7 @@ import { catalog09Components, managerRunner, publishedInstaller } from '../../sn
 export const metadata = {
   title: 'Ombelle UI — Your components. Your style.',
   description:
-    `Editable, accessible React components on shadcn and Radix UI for Vite and Next.js with Tailwind v4, in ${familyList()} styles with persistent project presets.`,
+    `Editable React components on shadcn, Radix UI or Base UI for Vite and Next.js with Tailwind v4, in ${familyList()} styles with persistent project presets. WAI-ARIA patterns, checked by automated axe and keyboard tests.`,
 }
 
 /** The colours the landing page reads from a palette, in the order LandingPalette documents. */

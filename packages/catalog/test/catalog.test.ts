@@ -679,7 +679,9 @@ describe('catalog contract', () => {
     const dialog = c.templates.dialog.content
     expect(dialog).toContain("import { XIcon } from 'lucide-react'")
     expect(dialog).toContain('<XIcon aria-hidden="true" />')
-    expect(dialog).toContain('<span className="sr-only">Close</span>')
+    // The close button's name defaults to "Close" and comes from closeLabel (CAT-13).
+    expect(dialog).toContain('<span className="sr-only">{closeLabel}</span>')
+    expect(dialog).toContain("closeLabel = 'Close'")
     const norm = (css: string) => css.replace(/\s+/g, ' ')
     for (const family of supportedStyleFamilies) {
       const css = norm(c.styles[family])

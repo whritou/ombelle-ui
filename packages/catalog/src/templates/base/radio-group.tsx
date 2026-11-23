@@ -25,9 +25,9 @@ export function RadioGroup<Value = string>({
 }: RadioGroupProps<Value>) {
   return (
     <RadioGroupPrimitive
-      data-slot="radio-group"
       className={cn(className)}
       {...props}
+      data-slot="radio-group"
     />
   )
 }
@@ -38,12 +38,12 @@ export function RadioGroupItem({
 }: Part<typeof Radio.Root>) {
   return (
     <Radio.Root
-      data-slot="radio-group-item"
       className={cn(className)}
       render={(itemProps, state) => (
         <span {...itemProps} data-state={checkedState(state.checked)} />
       )}
       {...props}
+      data-slot="radio-group-item"
     >
       <Radio.Indicator
         data-slot="radio-group-indicator"
@@ -62,9 +62,9 @@ export function RadioGroupOption({
 }: React.ComponentProps<'label'>) {
   return (
     <label
-      data-slot="radio-group-option"
       className={cn(className)}
       {...props}
+      data-slot="radio-group-option"
     />
   )
 }
@@ -75,9 +75,9 @@ export function RadioGroupOptionLabel({
 }: React.ComponentProps<'span'>) {
   return (
     <span
-      data-slot="radio-group-option-label"
       className={cn(className)}
       {...props}
+      data-slot="radio-group-option-label"
     />
   )
 }
@@ -88,9 +88,9 @@ export function RadioGroupOptionDescription({
 }: React.ComponentProps<'span'>) {
   return (
     <span
-      data-slot="radio-group-option-description"
       className={cn(className)}
       {...props}
+      data-slot="radio-group-option-description"
     />
   )
 }

@@ -1,6 +1,6 @@
 # Item
 
-Item is a row of media, text and actions, such as a preset in a list. For a table of records use [Table](table.md). It is available in all five families in light and dark mode. One template serves both editions.
+Item is a row of media, text and actions, such as a preset in a list. For a table of records use [Table](table.md). It is available in all eight families (the seven stable families and liquid glass) in light and dark mode. One template serves both editions.
 
 This component requires CLI **0.7.5** or later: `npx @ombelle-ui/cli@0.7.5 add item`. For a built local checkout:
 
@@ -42,7 +42,7 @@ export function Presets() {
 
 - `variant` is `default`, `outline` or `muted`; `size` is `default` or `sm`. They appear as `data-variant` and `data-size`.
 - Parts: `Item`, `ItemGroup`, `ItemSeparator`, `ItemMedia` (`variant` `default`, `icon` or `image`), `ItemContent`, `ItemTitle`, `ItemDescription` and `ItemActions`.
-- With `asChild`, the first element child that is not `ItemActions` (usually a link) becomes the row. It is cloned, with no dependency, so it keeps its `link` role.
+- With `asChild`, the first element child that is not `ItemActions` (usually a link) becomes the row. It is cloned, with no dependency, so it keeps its `link` role. Props merge as Radix `Slot` merges them: the link's own props win, class names and styles merge, both refs are set, and when the Item and the link both have a handler for an event, the link's runs first, then the Item's.
 - `ItemActions` inside an `asChild` Item stay outside the link as its siblings, so a button is never nested in a link. The link then takes `data-item-link`.
 - `ItemGroup` is a `div` with `role="list"`. It wraps each `Item` and `ItemSeparator` child in a `div` with `role="listitem"`, so a link Item keeps its link role and the list stays valid. Name the group with `aria-label`.
 - Every Item link is a keyboard stop, with its focus ring drawn on the link.

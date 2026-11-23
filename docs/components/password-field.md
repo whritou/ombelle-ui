@@ -1,6 +1,6 @@
 # Password Field
 
-Password Field is a password input with a show toggle, a Caps Lock notice and an optional strength meter. Showing the value keeps the caret, the selection and the input element, so password managers keep working, and the value is hidden again whenever its form submits. It is available in all five families in light and dark mode; one client template serves the Radix and Base UI editions.
+Password Field is a password input with a show toggle, a Caps Lock notice and an optional strength meter. Showing the value keeps the caret, the selection and the input element, so password managers keep working, and the value is hidden again whenever its form submits. It is available in all eight families (the seven stable families and liquid glass) in light and dark mode; one client template serves the Radix and Base UI editions.
 
 This component requires CLI **0.7.6** or later: `npx @ombelle-ui/cli@0.7.6 add password-field`. For a built local checkout:
 
@@ -42,7 +42,7 @@ export function NewPassword() {
 - `PasswordFieldToggle` is a toggle button named "Show password" with `aria-pressed` and `aria-controls` pointing at the input. Pressing it switches the type between `password` and `text` without remounting the input, and puts back the caret and selection.
 - The value is hidden again on its form's `submit` event, even when the submit is stopped by validation.
 - `PasswordFieldCapsLock` is a polite status that reads "Caps Lock is on" while Caps Lock is on and the input has focus, read from key events; it clears on blur. Pass children to change the text.
-- `PasswordFieldStrength` takes `checks`, each `{ label, test(value) }` or `{ label, match }` with a regular expression source. It is a `role="meter"` named "Password strength": its value is the number of checks passed, and its value text is the word (Weak, Fair, Strong or Very strong) and the first check that fails, for example "Strong · add a symbol to reach the last check". The component ships no password-strength library.
+- `PasswordFieldStrength` takes `checks`, each `{ label, test(value) }` or `{ label, match }` with a regular expression source. It is a `role="meter"` named "Password strength": its value is the number of checks passed, and its value text is the word (Weak, Fair, Strong or Very strong) and the first check that fails, for example "Strong · add a symbol to reach the last check". `labels` changes the words: `weak`, `fair`, `strong`, `veryStrong`, and `hint(check, last)` for the text after the word; `data-level` keeps its English keys for the styles. A form reset puts the input back to its default value, and the meter follows it. The component ships no password-strength library.
 
 ## Recipe
 

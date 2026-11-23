@@ -98,11 +98,11 @@ export function ScrollArea({
   return (
     <HorizontalBarContext.Provider value={setHorizontal}>
       <ScrollAreaPrimitive.Root
-        data-slot="scroll-area"
         data-overflow-y={tall ? '' : undefined}
         data-horizontal={horizontal ? '' : undefined}
         className={cn(className)}
         {...(props as Omit<React.ComponentProps<typeof ScrollAreaPrimitive.Root>, 'className'>)}
+        data-slot="scroll-area"
       >
         <ScrollAreaPrimitive.Viewport
           ref={viewport}

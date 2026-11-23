@@ -51,6 +51,28 @@ The command preserves the target project's selected manager and lockfile. Manage
 
 Unowned existing target files, locally edited generated source, incompatible shared utilities, or changed content under the same ID/revision or a changed dark selector produce a conflict. Reconcile manually or use a new preset revision. `--yes` cannot override conflicts. Repeating an identical install is a no-op; new revisions coexist. See the [scope contract](04-presets-and-contracts.md#component-scoped-preset-selection) and [component-scoped Button evidence](evidence/component-scoped-button-presets.md).
 
+## Right-to-left layouts
+
+The family styles use logical properties, so `dir="rtl"` on the page mirrors the layout. Arrow keys are a separate step: Radix UI and Base UI read the direction from a provider (or a `dir` prop on each composite), not from the DOM, so without one ArrowLeft still means "previous" in Tabs, Toggle Group, Toolbar and Menubar and "decrease" in Slider and Resizable. Wrap a right-to-left app once, at its root:
+
+```tsx
+// Radix edition (installed with the Radix components)
+import { DirectionProvider } from '@radix-ui/react-direction'
+export function Providers({ children }: { children: React.ReactNode }) {
+  return <DirectionProvider dir="rtl">{children}</DirectionProvider>
+}
+```
+
+```tsx
+// Base UI edition
+import { DirectionProvider } from '@base-ui/react/direction-provider'
+export function Providers({ children }: { children: React.ReactNode }) {
+  return <DirectionProvider direction="rtl">{children}</DirectionProvider>
+}
+```
+
+Carousel and the resizable Sheet handle read the computed direction themselves and need no provider. `@radix-ui/react-direction` is a dependency of the Radix primitives rather than of your project: add it to `package.json` if you import it directly.
+
 ## Package manager selection
 
 Use an explicit `--package-manager` selection when present. Otherwise inspect `package.json.packageManager`, then a unique recognized lockfile. Recognized lockfiles are package-lock.json, pnpm-lock.yaml, yarn.lock, bun.lock, and bun.lockb. Both Bun formats together are ambiguous, just like mixed-manager locks. Keep the existing format; do not convert it as a side effect of installation. A field-only Bun project creates bun.lock only when dependency work requires it.
