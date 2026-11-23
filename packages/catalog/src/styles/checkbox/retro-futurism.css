@@ -270,7 +270,7 @@
 }
 /* end 0.7.6 parts */
 /* retro-futurism layer */
-[data-slot='checkbox']{inline-size:1.375rem;block-size:1.375rem;border-width:2px;border-color:var(--border);border-radius:var(--rf-r1);background:var(--card);box-shadow:none;transition:border-radius 0.3s,background-color var(--motion-duration)}
+[data-slot='checkbox']{inline-size:1.5rem;block-size:1.5rem;border-width:2px;border-color:var(--border);border-radius:var(--rf-r1);background:var(--card);box-shadow:none;transition:border-radius 0.3s,background-color var(--motion-duration)}
 [data-slot='checkbox'][data-state='checked'],[data-slot='checkbox'][data-state='indeterminate']{border-color:var(--primary);border-radius:var(--rf-r1);background:var(--primary);color:var(--primary-foreground)}
 [data-slot='checkbox']:not(:disabled):not([data-disabled]):hover,[data-slot='checkbox']:not(:disabled):not([data-disabled]):active{transform:none;box-shadow:none}
 [data-slot='checkbox']:focus-visible{outline:3px solid var(--ring);outline-offset:2px}

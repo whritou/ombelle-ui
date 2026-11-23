@@ -43,6 +43,13 @@
   transition: none;
   animation: none;
 }
+/* A text-only badge lays its text out in lines, not as a flex item whose minimum width is its longest
+   word: a long unbroken identifier then wraps inside the badge instead of overflowing it, while
+   break-word still keeps short words whole in narrow layouts. */
+[data-slot='badge']:not(:has(> *)) {
+  display: inline-block;
+  align-content: center;
+}
 [data-slot='badge']:nth-child(odd) {
   transform: rotate(-2deg);
 }
