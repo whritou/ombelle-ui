@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test'
+import { expect, test, type Page } from '@playwright/test'
 import AxeBuilder from '@axe-core/playwright'
 import { documentationGuides } from '../../apps/www/src/site/docs/navigation.js'
 import { componentDocs } from '../../apps/www/src/site/components/catalog.js'
@@ -140,25 +140,39 @@ test('the Cycle button restyles the page from anywhere on it, and stops when pre
   await expect(cycle).toHaveAttribute('aria-pressed', 'false')
 })
 
+/** The editor's guide link: in the preset editor's header, or in a component editor's switcher sheet. */
+async function guideLink(page: Page, kind: string) {
+  if (kind === 'preset') return page.getByRole('link', { name: 'Preset editor guide', exact: true })
+  await page.getByRole('button', { name: /^Component: .*Choose a component$/ }).click()
+  return page.getByRole('dialog', { name: 'Choose a component' }).getByRole('link', { name: 'Component editor guide', exact: true })
+}
+
 for (const kind of ['preset', 'component/button', 'component/badge']) {
   test(`${kind} starts in Ombelle, links to its guide, and restores a saved Flat draft`, async ({ page }) => {
     await page.goto(`/editor/${kind}`)
-    const families = page.getByRole('group', { name: 'Style family', exact: true })
-    await expect(families.getByRole('button', { name: /^Ombelle/ })).toHaveAttribute('aria-pressed', 'true')
+    // The editors pick the family in a radio group.
+    const families = page.getByRole('radiogroup', { name: 'Style family', exact: true })
+    await expect(families.getByRole('radio', { name: /^Ombelle/ })).toHaveAttribute('aria-checked', 'true')
     await expect(page.getByRole('button', { name: 'Get code', exact: true })).toBeEnabled()
     const guide = kind === 'preset' ? 'preset-editor' : 'component-editor'
-    await expect(page.getByRole('link', { name: kind === 'preset' ? 'Preset editor guide' : 'Component editor guide', exact: true })).toHaveAttribute('href', `/docs/${guide}`)
-    await families.getByRole('button', { name: /^Flat/ }).click()
-    if (kind === 'preset') await page.getByRole('button', { name: 'Confirm change', exact: true }).click()
-    await expect(families.getByRole('button', { name: /^Flat/ })).toHaveAttribute('aria-pressed', 'true')
+    const link = await guideLink(page, kind)
+    await expect(link).toHaveAttribute('href', `/docs/${guide}`)
+    if (kind !== 'preset') await page.keyboard.press('Escape')
+    const flat = families.getByRole('radio', { name: /^Flat/ })
+    await flat.click()
+    // The preset editor asks first only when the change would drop edits.
+    const confirm = page.getByRole('button', { name: 'Confirm change', exact: true })
+    await expect(confirm.or(flat.and(page.locator('[aria-checked="true"]')))).toBeVisible()
+    if (await confirm.isVisible()) await confirm.click()
+    await expect(flat).toHaveAttribute('aria-checked', 'true')
     const key = kind === 'preset' ? 'ombelle:preset-editor:draft:v1' : kind === 'component/button' ? 'ombelle.button-editor.draft' : 'ombelle.component-editor.badge.draft'
     await expect.poll(() => page.evaluate(key => {
       const saved = JSON.parse(localStorage.getItem(key) ?? '{}')
       return saved.family ?? saved.recipe?.presetRef?.id
     }, key)).toBe(kind === 'preset' ? 'flat' : 'builtin-flat')
     await page.reload()
-    await expect(families.getByRole('button', { name: /^Flat/ })).toHaveAttribute('aria-pressed', 'true')
-    await page.getByRole('link', { name: kind === 'preset' ? 'Preset editor guide' : 'Component editor guide', exact: true }).click()
+    await expect(flat).toHaveAttribute('aria-checked', 'true')
+    await (await guideLink(page, kind)).click()
     await expect(page).toHaveURL(new RegExp(`/docs/${guide}$`))
   })
 }
