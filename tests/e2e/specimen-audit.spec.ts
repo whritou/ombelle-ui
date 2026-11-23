@@ -3,19 +3,24 @@ import path from 'node:path'
 import { expect, test, type Locator, type Page } from '@playwright/test'
 import { familyAccessibilityCaveat, styleFamilies, supportedComponentIds } from '../../packages/contracts/src/index.js'
 import {
-  checkFocusVisible, findClipping, findForcedColors, findOverflow, findSpacing, findTargetSize, installClock, listFocusables, markTranslucent, pauseClock, markBorders, runAxe,
+  checkFocusVisible, findClipping, findForcedColors, findOverflow, findSpacing, findTargetSize, installClock, listFocusables, markSurfaces, pauseClock, markBorders, runAxe,
   type AuditCheck, type Finding,
 } from '../helpers/specimen-audit.js'
 import { editions, modes, specimenArtifacts as artifacts, specimenRunIsPartial } from '../helpers/specimen-run.js'
 import { inShard, specimenShard } from '../helpers/specimen-shard.js'
 
 const checks: AuditCheck[] = ['overflow', 'clipping', 'spacing', 'focus-visible', 'target-size', 'forced-colors', 'axe']
-// Findings whose outcome depends on the colours behind the specimen: a focus ring short of 3:1 and axe's
-// color-contrast rule, each on an element over a translucent surface (TST-07). A focus finding for any
-// other reason (no focus, focus moved), or contrast on an opaque surface, is not one of them.
-const backdropDependent = (finding: Finding) => finding.translucent === true && (
+// Contrast findings: a focus ring short of 3:1 and axe's color-contrast rule. A focus finding for any other
+// reason (no focus, focus moved) is not one of them.
+const contrastFinding = (finding: Finding) =>
   (finding.check === 'focus-visible' && finding.detail.includes(' focus pixels at 3:1 ')) ||
-  (finding.check === 'axe' && finding.detail.startsWith('color-contrast:')))
+  (finding.check === 'axe' && finding.detail.startsWith('color-contrast:'))
+// Liquid glass guarantees contrast on its surfaces only when they are opaque; text and rings on the bare page
+// backdrop are outside its guarantee in every mode (docs/components/liquid-glass.md). So a contrast finding is
+// advisory on a translucent surface or the bare backdrop, and with reduced transparency, which promises opaque
+// surfaces, only on the bare backdrop. On an opaque surface it fails like any family (TST-07).
+const advisoryFinding = (finding: Finding, reduced: boolean) =>
+  contrastFinding(finding) && (finding.surface === 'backdrop' || (!reduced && finding.surface === 'translucent'))
 
 /** How each overlay opens, and where its content appears once open (outside the section when portalled). */
 const overlays: Record<string, {
@@ -121,7 +126,7 @@ for (const [index, { family, edition, mode, transparency }] of configurations.en
           await section.locator('[data-stack]').evaluateAll(list => list.forEach(element => element.setAttribute('data-expanded', '')))
           await section.screenshot({ path: path.join(shots, `${id}.png`), animations: 'disabled' })
           record(await measure(page, [section], section, id, counts))
-          record(await markTranslucent(page, await runAxe(page, [`section[data-audit="${id}"]`])))
+          record(await markSurfaces(page, await runAxe(page, [`section[data-audit="${id}"]`])))
           counts.axe++
           const listed = overlays[component]
           const overlay = component === 'accordion' && !await section.locator('[aria-expanded="false"][aria-controls]').count()
@@ -157,7 +162,7 @@ for (const [index, { family, edition, mode, transparency }] of configurations.en
             await page.screenshot({ path: path.join(shots, `${id}-open.png`), animations: 'disabled' })
             const inside = await content.evaluate((element, owner) => element.closest(`section[data-audit="${owner}"]`) !== null, id)
             record(await measure(page, [content], inside ? section : body, `${id}-open`, counts))
-            record(await markTranslucent(page, await runAxe(page, [`[data-audit-open="${id}"]`])))
+            record(await markSurfaces(page, await runAxe(page, [`[data-audit-open="${id}"]`])))
             counts.axe++
             // Overlays are the surfaces that carry backdrop filters: check them under forced colors while they are open.
             if (mode === 'light') {
@@ -191,8 +196,10 @@ for (const [index, { family, edition, mode, transparency }] of configurations.en
         // A family without an accessibility guarantee (liquid glass) is held to every check except contrast,
         // which depends on the backdrop behind it: its focus-contrast and axe color-contrast findings are
         // recorded and attached as advisory. Everything else fails it like any stable family.
-        const caveat = familyAccessibilityCaveat(family) !== null && !transparency
-        const advisory = caveat ? findings.filter(backdropDependent) : []
+        // A family without an accessibility guarantee (liquid glass) is held to every check; only contrast that
+        // depends on what is behind it is recorded as advisory (see advisoryFinding) and bounded by the baseline.
+        const caveat = familyAccessibilityCaveat(family) !== null
+        const advisory = caveat ? findings.filter(finding => advisoryFinding(finding, Boolean(transparency))) : []
         const blocking = findings.filter(finding => !advisory.includes(finding))
         if (advisory.length)
           test.info().annotations.push({ type: 'contrast advisory findings', description: JSON.stringify(advisory) })

@@ -4,35 +4,45 @@ import AxeBuilder from '@axe-core/playwright'
 import type { Locator, Page } from '@playwright/test'
 
 export type AuditCheck = 'overflow' | 'clipping' | 'spacing' | 'focus-visible' | 'target-size' | 'forced-colors' | 'axe'
-/** `translucent`: for a contrast finding, whether the element's colours depend on what shows through it. */
-export type Finding = { check: AuditCheck; target: string; detail: string; translucent?: boolean }
-
 /**
- * Whether an element is painted over a translucent surface, so its contrast depends on the backdrop:
- * walking out from it, a backdrop filter or a partly transparent background comes before any opaque
- * one, or nothing is painted up to the page (whose glass backdrop then shows through). An opaque
- * surface inside a glass panel (a solid Badge, an Alert card, an opaque fallback) is not translucent.
+ * `surface`: for a contrast finding, what the failing colours are painted on. `opaque`: a surface with an
+ * opaque background (a solid Badge, an Alert card, an opaque fallback). `translucent`: a backdrop filter or a
+ * partly transparent background comes first, so what shows through decides. `backdrop`: nothing is painted
+ * up to the page, so the page backdrop itself is behind it.
  */
-export const translucentSource = `(element) => {
+export type Surface = 'opaque' | 'translucent' | 'backdrop'
+export type Finding = { check: AuditCheck; target: string; detail: string; surface?: Surface }
+
+/** Classify the surface an element's colours sit on, walking out from it (see Surface). */
+export const surfaceSource = `(element) => {
   for (let node = element; node && node !== document.documentElement; node = node.parentElement) {
     const style = getComputedStyle(node)
-    if (style.backdropFilter && style.backdropFilter !== 'none') return true
+    if (style.backdropFilter && style.backdropFilter !== 'none') return 'translucent'
     const match = /rgba?\\(([^)]*)\\)/.exec(style.backgroundColor)
     const parts = match ? match[1].split(/[\\s,\\/]+/).filter(Boolean) : []
     const alpha = parts.length === 4 ? Number.parseFloat(parts[3]) * (parts[3].endsWith('%') ? 0.01 : 1) : 1
-    if (alpha >= 0.999) return false
-    if (alpha > 0 || style.backgroundImage !== 'none') return true
+    if (alpha >= 0.999) return 'opaque'
+    if (alpha > 0 || style.backgroundImage !== 'none') return 'translucent'
   }
-  return true
+  return 'backdrop'
 }`
-/** Mark each contrast finding of `findings` with whether its element is on a translucent surface. */
-export async function markTranslucent(page: Page, findings: Finding[]): Promise<Finding[]> {
+/**
+ * A focus ring drawn outside its control (outline offset 0 or more) lies on whatever is behind the control,
+ * so it is classified from the control's parent; an inset ring lies on the control itself.
+ */
+export const ringSurfaceSource = `(element) => {
+  const classify = ${surfaceSource}
+  const style = getComputedStyle(element)
+  const inset = style.outlineStyle !== 'none' && Number.parseFloat(style.outlineOffset) < 0
+  return classify(inset ? element : (element.parentElement ?? element))
+}`
+const evaluateSource = (source: string) => (node: Element, code: string) => (new Function('return ' + code)() as (e: Element) => Surface)(node)
+/** Mark each axe contrast finding of `findings` with the surface its text sits on. */
+export async function markSurfaces(page: Page, findings: Finding[]): Promise<Finding[]> {
   for (const finding of findings) {
     if (finding.check !== 'axe' || !finding.detail.startsWith('color-contrast:')) continue
     const element = page.locator(finding.target).first()
-    finding.translucent = await element.count()
-      ? await element.evaluate((node, source) => (new Function('return ' + source)() as (e: Element) => boolean)(node), translucentSource)
-      : false
+    finding.surface = await element.count() ? await element.evaluate(evaluateSource(surfaceSource), surfaceSource) : 'opaque'
   }
   return findings
 }
@@ -324,8 +334,8 @@ export async function checkFocusVisible(page: Page, target: Locator, delegated =
   const needed = Math.round(0.9 * 2 * (box.width + box.height))
   if (!focused) return [{ check: 'focus-visible', target: description, detail: 'element could not take focus' }]
   if (strong >= needed) return []
-  const translucent = await target.evaluate((node, source) => (new Function('return ' + source)() as (e: Element) => boolean)(node), translucentSource)
-  return [{ check: 'focus-visible', target: description, detail: `${strong} focus pixels at 3:1 (${changed} changed), ${needed} needed`, translucent }]
+  const surface = await target.evaluate((node, code) => (new Function('return ' + code)() as (e: Element) => Surface)(node), ringSurfaceSource)
+  return [{ check: 'focus-visible', target: description, detail: `${strong} focus pixels at 3:1 (${changed} changed), ${needed} needed`, surface }]
 }
 
 // Items reached with arrow keys: primitives give all but the current one tabindex -1.
