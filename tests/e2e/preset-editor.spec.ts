@@ -971,15 +971,15 @@ test('applies a style palette and a primary colour in one step and returns to th
   expect(preset.modes.light.primary.toLowerCase()).toBe('#e11d48')
   const peachPalette = paletteSchemes('ombelle')[0]!
   // The downloaded preset carries the compiler's normalised colours: oklch(98.6% …) is written oklch(0.986 …).
-  expect(preset.modes.light.background).toBe(normalizeColor(peachPalette.light.background))
-  expect(preset.modes.dark.background).toBe(normalizeColor(peachPalette.dark.background))
+  expect(preset.modes.light.background).toBe(normalizeColor(peachPalette.light.background!))
+  expect(preset.modes.dark.background).toBe(normalizeColor(peachPalette.dark.background!))
   await expect(peach).toHaveAttribute('aria-pressed', 'true')
   await page.getByRole('button', { name: 'Style default palette', exact: true }).click()
   await expect(peach).toHaveAttribute('aria-pressed', 'false')
   await expect(rose).toHaveAttribute('aria-pressed', 'true')
   await page.getByRole('button', { name: 'Undo', exact: true }).click()
   await ready(page)
-  expect(JSON.parse(await download(page)).modes.light.background).toBe(normalizeColor(paletteSchemes('ombelle')[0]!.light.background))
+  expect(JSON.parse(await download(page)).modes.light.background).toBe(normalizeColor(paletteSchemes('ombelle')[0]!.light.background!))
 })
 test('edits numeric design values with a slider and keeps the exact field in sync', async ({
   page,
