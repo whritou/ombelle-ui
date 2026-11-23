@@ -5,20 +5,26 @@ import path from 'node:path'
 import { managerEntry } from '../../packages/cli/src/apply/manager.js'
 
 const roots: string[] = []
-const originalExecPath = process.env.npm_execpath
-const originalPath = process.env.PATH
+// Every variable the locator reads before PATH: an inherited entry, and the
+// user agent that names a release in corepack's cache.
+const saved = ['npm_execpath', 'npm_config_user_agent', 'COREPACK_HOME', 'PATH'] as const
+const original = Object.fromEntries(saved.map((name) => [name, process.env[name]]))
 
 afterEach(async () => {
-  if (originalExecPath === undefined) delete process.env.npm_execpath
-  else process.env.npm_execpath = originalExecPath
-  if (originalPath === undefined) delete process.env.PATH
-  else process.env.PATH = originalPath
+  for (const name of saved) {
+    if (original[name] === undefined) delete process.env[name]
+    else process.env[name] = original[name]
+  }
   await Promise.all(roots.splice(0).map((folder) => fs.rm(folder, { recursive: true, force: true })))
 })
 
 async function root() {
   const folder = await fs.mkdtemp(path.join(os.tmpdir(), 'ombelle-pnpm-manager-'))
   roots.push(folder)
+  // Only the test's PATH may supply pnpm: no inherited entry, no corepack cache.
+  delete process.env.npm_execpath
+  delete process.env.npm_config_user_agent
+  process.env.COREPACK_HOME = path.join(folder, 'corepack')
   return folder
 }
 
