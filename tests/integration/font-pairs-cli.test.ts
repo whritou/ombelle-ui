@@ -5,6 +5,7 @@ import path from 'node:path'
 import type { FileChange } from '@ombelle/contracts'
 import { createProject } from '../helpers/projects.js'
 import { runBuiltCli, jsonRecord } from '../helpers/cli-runtime.js'
+import { snapshotTree } from '../helpers/tree.js'
 
 const roots: string[] = []
 afterEach(async () => {
@@ -169,3 +170,36 @@ it('leaves a font token the user edited in place when a later theme stops emitti
   expect(switched.code, switched.output).toBe(0)
   expect(await fs.readFile(file, 'utf8')).toContain('--font-mono: monospace')
 })
+
+// SITE-6: a Button-scoped preset carries its registry body font like a Button recipe: the scoped stylesheet
+// imports it and its pinned package installs with lifecycle scripts disabled. The global preset, config,
+// tokens and style file keep the project's own (system) fonts.
+it('installs a Button-scoped preset with a registry font without touching the global defaults', async () => {
+  const { root, trio, command } = await setup(false)
+  const init = await command(['init', '--preset', flatPath, '--yes'])
+  expect(init.code, init.output).toBe(0)
+  const packageFile = path.join(root, 'package.json')
+  const pkg = JSON.parse(await fs.readFile(packageFile, 'utf8'))
+  pkg.scripts = { postinstall: `node -e "require('node:fs').writeFileSync('font-install-script-ran','unexpected')"` }
+  await fs.writeFile(packageFile, JSON.stringify(pkg))
+  const before = await snapshotTree(root)
+  const dry = await command(['add', 'button', '--preset', trio, '--dry-run'])
+  expect(dry.code, dry.output).toBe(0)
+  const plan = jsonRecord(dry.data)
+  // Only the body font: a Button shows no heading or code text.
+  expect((plan.dependencyPlan as { name: string }[]).filter(({ name }) => name.startsWith('@fontsource')))
+    .toEqual([{ name: '@fontsource-variable/inter', version: '5.3.0' }])
+  expect(await snapshotTree(root)).toEqual(before)
+  const done = await command(['add', 'button', '--preset', trio, '--yes'])
+  expect(done.code, done.output).toBe(0)
+  const after = await snapshotTree(root)
+  for (const [file, hash] of Object.entries(before))
+    if (!['ui-library.lock.json', 'package.json', 'pnpm-lock.yaml'].includes(file)) expect(after[file], file).toBe(hash)
+  const scoped = Object.keys(after).find((file) => !(file in before) && file.endsWith('/button.css'))
+  expect(scoped, Object.keys(after).filter((file) => !(file in before)).join(', ')).toBeDefined()
+  expect(await fs.readFile(path.join(root, scoped!), 'utf8')).toMatch(/^@import '@fontsource-variable\/inter';/)
+  const installed = JSON.parse(await fs.readFile(packageFile, 'utf8'))
+  expect(installed.dependencies['@fontsource-variable/inter']).toBe('5.3.0')
+  expect(installed.dependencies['@fontsource-variable/fraunces']).toBeUndefined()
+  await expect(fs.stat(path.join(root, 'font-install-script-ran'))).rejects.toMatchObject({ code: 'ENOENT' })
+}, 300000)
