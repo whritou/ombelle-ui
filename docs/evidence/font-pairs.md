@@ -73,6 +73,7 @@ The branch was rebased onto `origin/main` (0.7.7, `69dc9344`) with no conflicts.
 - **Important, fixed:**
   - The site now holds the install command for a font preset until the published CLI is at least 0.7.8 (`fontsMinimumCli`, `fontsInstallBlocked`), on the export panel, Get code and the published page.
   - `compileButtonPreset` rejects registry fonts at `/design/<field>`, because a component preset installs no packages.
+  - **Note (2026-11-23).** The rejection above is what was measured. From 1.0 the scoped install carries the body font (its Fontsource package is installed, heading and mono fonts are dropped); see `tests/integration/font-pairs-cli.test.ts` from PR #193.
   - `theme add` removes the `--font-heading` and `--font-mono` tokens the new preset no longer sets, unless the user edited them or they existed before Ombelle managed them.
   - The plan names the font packages the previous theme imported and the new one does not.
   - The docs that said theme commands never install anything now name the font exception.
