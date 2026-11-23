@@ -29,6 +29,9 @@ for (const family of supportedStyleFamilies)
   for (const mode of ['light', 'dark'] as const)
     for (const { id, states, portal } of portedComponents)
       test(`${family} ${mode} ${id} renders identically in both editions`, async ({ context }) => {
+        // Dropdown Menu reloads both editions for each of its states: about 60 seconds beside the
+        // consumer matrix, so it timed out in a different family each run (23 November).
+        test.setTimeout(120_000)
         const pages: Record<Edition, Page> = {
           radix: await context.newPage(),
           base: await context.newPage(),

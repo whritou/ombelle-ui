@@ -27,7 +27,8 @@ for (const family of supportedStyleFamilies)
         const { snapshot, source } = await publishEditorPreset(page, family)
         await page.goto(`http://127.0.0.1:3000/presets/${snapshot.id}/1`)
         await expect(page.getByRole('heading', { name: snapshot.preset.name })).toBeVisible()
-        await expect(page.getByRole('status').first()).toHaveText('Snapshot gallery ready.')
+        // The gallery frame connects in a few seconds alone, but took over 10 beside the consumer matrix.
+        await expect(page.getByRole('status').first()).toHaveText('Snapshot gallery ready.', { timeout: 30000 })
         await expect(frame(page).locator('html')).toHaveAttribute('data-preset-hash', snapshot.presetHash)
         await page.getByLabel('Color mode', { exact: true }).selectOption(mode)
         await withEditorPresetConsumer({ kind: 'snapshot', source, family, framework }, async ({ root, url, result }) => {
