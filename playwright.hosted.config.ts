@@ -14,7 +14,10 @@ export default defineConfig({
   },
   reporter: [['list'], ['json', { outputFile: '.artifacts/hosted-browser-results.json' }]],
   webServer: {
-    command: 'node apps/www/node_modules/next/dist/bin/next start apps/www --hostname 127.0.0.1 --port 3400',
+    // Started from apps/www, as the deployed site is: Next.js resolves next.config.ts's relative imports
+    // (./src/security-headers) from the working directory, so `next start apps/www` from the root fails.
+    command: 'node node_modules/next/dist/bin/next start --hostname 127.0.0.1 --port 3400',
+    cwd: 'apps/www',
     url: 'http://127.0.0.1:3400/editor/component/button',
     reuseExistingServer: false,
     timeout: 60_000,
