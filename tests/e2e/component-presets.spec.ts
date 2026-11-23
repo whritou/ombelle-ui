@@ -182,8 +182,13 @@ for (const hostFamily of supportedStyleFamilies)
                   ),
               ),
             )
+          // The Button's motion follows the preset's motion token: every duration scales with it (organic
+          // and retro-futurism run some transitions at a multiple of it), and reduced motion turns it off.
           const motionPositiveControlMs = await duration()
-          expect(motionPositiveControlMs).toBe(150)
+          expect(motionPositiveControlMs).toBeGreaterThan(0)
+          await button.evaluate((el) => el.style.setProperty('--motion-duration', '300ms'))
+          expect(await duration()).toBeCloseTo(motionPositiveControlMs * 2, 0)
+          await button.evaluate((el) => el.style.setProperty('--motion-duration', '150ms'))
           await page.emulateMedia({ reducedMotion: 'reduce' })
           const reducedMotionMs = await duration()
           expect(reducedMotionMs).toBe(0)
