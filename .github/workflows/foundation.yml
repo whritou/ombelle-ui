@@ -155,10 +155,52 @@ jobs:
           include-hidden-files: true
           if-no-files-found: ignore
           path: .artifacts/upload/browser
+  # Every component installed with the built CLI into one Vite and one Next shadcn app per
+  # edition (radix-nova and base-nova), built for production and rendered (TST-13). The
+  # consumer matrix above installs 12 components, Radix only.
+  catalog-consumers:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      NEXT_TELEMETRY_DISABLED: '1'
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Set up pinned tools and download caches
+        id: setup
+        uses: ./.github/actions/setup-foundation
+        with:
+          cache-scope: catalog-consumers
+      - name: Cache Playwright browser downloads
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.cache/ms-playwright
+          key: browsers-v1-${{ runner.os }}-${{ runner.arch }}-node-${{ steps.setup.outputs.node-version }}-playwright-${{ steps.setup.outputs.playwright-version }}-${{ hashFiles('pnpm-lock.yaml') }}
+      - name: Install Chromium and system dependencies
+        timeout-minutes: 15
+        run: pnpm exec playwright install --with-deps chromium
+      - name: Build packages
+        run: pnpm build:packages
+      - name: Install the whole catalog into Radix and Base UI apps and build them
+        timeout-minutes: 30
+        run: pnpm prepare:base-consumers
+      - name: Render every component in each app
+        timeout-minutes: 10
+        run: pnpm test:base-consumers
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: always()
+        timeout-minutes: 5
+        with:
+          name: foundation-catalog-consumers
+          include-hidden-files: true
+          if-no-files-found: ignore
+          path: |
+            .artifacts/catalog-consumers-results.json
+            .artifacts/base-consumers.json
+            test-results
   # Branch protection requires the `verify` check from ci.yml; this job only
   # validates the full evidence for scheduled and manual runs.
   verify:
-    needs: [quality, consumers, specimen]
+    needs: [quality, consumers, specimen, catalog-consumers]
     if: always()
     runs-on: ubuntu-latest
     timeout-minutes: 60
@@ -169,7 +211,8 @@ jobs:
           QUALITY_RESULT: ${{ needs.quality.result }}
           CONSUMERS_RESULT: ${{ needs.consumers.result }}
           SPECIMEN_RESULT: ${{ needs.specimen.result }}
-        run: test "$QUALITY_RESULT" = success && test "$CONSUMERS_RESULT" = success && test "$SPECIMEN_RESULT" = success
+          CATALOG_CONSUMERS_RESULT: ${{ needs.catalog-consumers.result }}
+        run: test "$QUALITY_RESULT" = success && test "$CONSUMERS_RESULT" = success && test "$SPECIMEN_RESULT" = success && test "$CATALOG_CONSUMERS_RESULT" = success
       - name: Set up pinned tools and download caches
         uses: ./.github/actions/setup-foundation
         with:

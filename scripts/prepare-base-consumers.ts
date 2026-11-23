@@ -1,6 +1,8 @@
-// Prepares browser-testable Base UI consumers from the genuine shadcn base-nova
-// fixtures: pin React as documented, theme add, add every component (keeping
-// shadcn's own button.tsx with --beside), then build the app for production.
+// Prepares browser-testable consumers that install the whole catalog, one Vite and one Next app per
+// edition, from the genuine shadcn fixtures (radix-nova and base-nova): pin React as documented, theme
+// add, add every component with the built CLI (keeping shadcn's own button.tsx with --beside), then
+// build the app for production. Part of the Foundation gate (TST-13): the ordinary consumer matrix
+// installs 12 components, Radix only.
 // Needs registry access and pnpm 11.25.0 on PATH. Writes
 // .artifacts/base-consumers.json for tests/e2e/base-consumers.spec.ts.
 import fs from 'node:fs/promises'
@@ -10,8 +12,10 @@ import { spawn } from 'node:child_process'
 import { supportedComponentIds } from '@ombelle/contracts'
 
 export const baseConsumers = [
-  { id: 'pnpm-vite-base', fixture: 'vite-base', framework: 'vite', source: 'src', port: 4301 },
-  { id: 'pnpm-next-base', fixture: 'next-base', framework: 'next', source: '.', port: 4302 },
+  { id: 'pnpm-vite-radix', fixture: 'vite', edition: 'radix', framework: 'vite', source: 'src', port: 4303 },
+  { id: 'pnpm-next-radix', fixture: 'next', edition: 'radix', framework: 'next', source: '.', port: 4304 },
+  { id: 'pnpm-vite-base', fixture: 'vite-base', edition: 'base', framework: 'vite', source: 'src', port: 4301 },
+  { id: 'pnpm-next-base', fixture: 'next-base', edition: 'base', framework: 'next', source: '.', port: 4302 },
 ] as const
 
 const run = (command: string, args: string[], cwd: string) =>
@@ -60,7 +64,7 @@ export async function prepareBaseConsumer(spec: (typeof baseConsumers)[number]) 
   await fs.cp(path.join(repo, 'fixtures/shadcn', spec.fixture), root, { recursive: true })
   await fs.writeFile(
     path.join(root, '.ombelle-fixture.json'),
-    JSON.stringify({ owner: repo, framework: spec.framework, edition: 'base' }),
+    JSON.stringify({ owner: repo, framework: spec.framework, edition: spec.edition }),
   )
   // The documented baseline: exact React declarations (the Vite template uses ^19.3.1).
   const pkgPath = path.join(root, 'package.json')

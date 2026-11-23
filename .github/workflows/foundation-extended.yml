@@ -1,7 +1,7 @@
 name: Foundation extended
 # The browser suites and the hosted storage suite outside the Foundation evidence gate
 # (TST-04): the editors and website shell, the catalog expansion pages, the usage
-# example layouts, the Base UI consumers, the hosted website build, and the Postgres
+# example layouts, the hosted website build, and the Postgres
 # snapshot store. Nightly and on demand; a release reads its latest result
 # (docs/cli-release.md).
 on:
@@ -20,7 +20,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        suite: [editors, site, catalog-expansion, usage-examples, base-consumers, hosted-browser]
+        suite: [editors, site, catalog-expansion, usage-examples, hosted-browser]
     env:
       NEXT_TELEMETRY_DISABLED: '1'
     steps:
@@ -56,11 +56,6 @@ jobs:
         run: |
           pnpm generate:usage-audit
           pnpm test:usage-examples
-      - name: Base UI consumers
-        if: matrix.suite == 'base-consumers'
-        run: |
-          pnpm prepare:base-consumers
-          pnpm test:base-consumers
       - name: Hosted website build in the browser
         if: matrix.suite == 'hosted-browser'
         run: |

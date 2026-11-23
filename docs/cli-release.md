@@ -134,9 +134,9 @@ The supported CLI runtime is Node 24.19.0 or newer Node 24; the candidate is als
 **A release needs a green Foundation run on the commit it publishes.** Before publishing any package version, from 1.0 on:
 
 1. Run the Foundation workflow on the release commit (Actions > Foundation > Run workflow, or `gh workflow run foundation.yml --ref <branch>`), or use the nightly run if it ran on exactly that commit.
-2. Require its `verify` job to pass. It validates the quality, consumers and four specimen shard groups together: unit and integration results, every consumer app, the browser matrix and the complete specimen audit, all on one commit.
+2. Require its `verify` job to pass. It validates the quality, consumers and four specimen shard groups together: unit and integration results, every consumer app, the browser matrix and the complete specimen audit, all on one commit. It also requires the catalog consumers job: every component installed with the built CLI into a Radix and a Base UI shadcn app (Vite and Next), built and rendered.
 3. Record the run with `node scripts/record-foundation-run.mjs <run-id>`, which writes `docs/evidence/foundation-run.json` from the run's own aggregate report, and cite that run id in the release evidence.
-4. Read the latest Foundation extended run (`foundation-extended.yml`: editors, website, catalog expansion, usage examples, Base UI consumers, hosted website). A failure there is a release blocker unless the release notes name it.
+4. Read the latest Foundation extended run (`foundation-extended.yml`: editors, website, catalog expansion, usage examples, hosted website). A failure there is a release blocker unless the release notes name it.
 
 Pull requests run a browser subset in `ci.yml` (interaction specs and the specimen audit of the changed components); a green pull request is not a substitute for step 2. Releases 0.8.0 to 0.9.1 shipped while the Foundation gate was red (audit 11, TST-01).
 
