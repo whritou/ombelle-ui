@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test'
+import { maxPixelDifference } from '../helpers/pixel-difference.js'
 import fs from 'node:fs'
 import { expectColorParity } from '../helpers/color-compare.js'
 import { supportedStyleFamilies } from '../../packages/contracts/src/style-families.js'
@@ -102,7 +103,8 @@ for (const family of supportedStyleFamilies)
             // Keep the differing render: the reference alone does not show what changed.
             if (!image.equals(reference))
               await test.info().attach(family + '-' + mode + '-' + app + '-mismatch', { body: image, contentType: 'image/png' })
-            expect(image.equals(reference)).toBe(true)
+            // Identical up to a 1/255 rounding of gradient colours between the preview and a production build.
+            expect(await maxPixelDifference(page, image, reference)).toBeLessThanOrEqual(1)
           }
         }
       },
