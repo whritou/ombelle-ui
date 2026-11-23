@@ -32,9 +32,10 @@ body {
  * (and layout and paint) until they scroll in, so the edit paints in ~13 ms instead of ~50 ms
  * on a desktop CPU. `auto` keeps each section's last size so scrolling does not jump. The
  * containment clips painting at the section box; the margin keeps focus rings, shadows and
- * glass halos at its edges visible.
+ * glass halos at its edges visible. A section with a Scroll Area stays rendered: the area
+ * becomes a tab stop when a resize makes it overflow, which a skipped section never reports.
  */
-:is(.preset-gallery, .preset-sections) > section {
+:is(.preset-gallery, .preset-sections) > section:not(:has([data-slot$='scroll-area-viewport'])) {
   content-visibility: auto;
   contain-intrinsic-size: auto 480px;
   overflow-clip-margin: 32px;
