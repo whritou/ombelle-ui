@@ -431,9 +431,11 @@
   outline: 2px solid var(--ring);
   outline-offset: 2px;
 }
+/* The ring in the focus colour: the checkbox's own colour is its check mark's, near white on the card.
+   The header's, on the primary band, is redrawn below. */
 [data-slot='data-table-cell'] > [data-data-table-select]:focus-visible,
 [data-slot='data-table-head'] > [data-data-table-select]:focus-visible {
-  outline: 2px solid currentColor;
+  outline: 2px solid var(--ring);
   outline-offset: 1px;
 }
 [data-slot='data-table-head'][data-select],

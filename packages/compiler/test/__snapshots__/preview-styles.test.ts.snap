@@ -20,12 +20,12 @@ exports[`compile output is unchanged > minimalist 1`] = `"204459b50e24f68356cd1e
 
 exports[`compile output is unchanged > neo-brutalism 1`] = `"9742de11efed646f2db10e720b0030aabb9bf0bad4b51515117d8c5ad15e7f4b"`;
 
-exports[`compile output is unchanged > ombelle 1`] = `"84d7899387a89f2c366d1f0a46d962a3295bff14f6af19002b18cc5d8d17f0ea"`;
+exports[`compile output is unchanged > ombelle 1`] = `"20655c92954d91e2717789c6a8829b6ab647c88e485634d39412b7795daa823a"`;
 
-exports[`compile output is unchanged > organic 1`] = `"926487bc5a40278b2bf8bf12bfaf3182223208181070f5c75a499d313030da46"`;
+exports[`compile output is unchanged > organic 1`] = `"56eb8b6ecc4a0165b0581c22d1d2e2b046d8594a42398c3229762e340751fbc5"`;
 
-exports[`compile output is unchanged > organic base edition 1`] = `"d75033780e7dc33495166f4655252168b34fb1d0421c2121de86aafa5979ac61"`;
+exports[`compile output is unchanged > organic base edition 1`] = `"4b20b5f0d0c049f8de1a5aaa6f8b3ff68ad7c12a114f73d0477bfcf0a943e3f4"`;
 
 exports[`compile output is unchanged > papier 1`] = `"90913025bb41356b6f3e882be1d3db261000e0c52793f914dea261b619b848a1"`;
 
-exports[`compile output is unchanged > retro-futurism 1`] = `"de901d29420d824c4fc19f93fcbc2ff42d4b49721bab7e7e064576b66d0e1d18"`;
+exports[`compile output is unchanged > retro-futurism 1`] = `"36cd86b281464ead03848acc552f79455f5460bf0bd8ef758a596919611c7d80"`;
