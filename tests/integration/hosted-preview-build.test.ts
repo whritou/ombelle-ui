@@ -13,7 +13,7 @@ it('builds nested static runtime HTML/assets and workers without touching unrela
   await fs.writeFile(sentinel, 'unrelated public asset')
   try {
     const output = await new Promise<{ code: number | null; text: string }>((resolve, reject) => {
-      const child = spawn(process.execPath, ['scripts/build-hosted-preview.mjs'], { windowsHide: true, env: { ...process.env, DATABASE_URL: '', DATABASE_URL_UNPOOLED: '', OMBELLE_SNAPSHOT_BACKEND: '' } })
+      const child = spawn(process.execPath, ['scripts/build-hosted-preview.mjs'], { windowsHide: true, env: { ...process.env, DATABASE_URL: '', DATABASE_URL_UNPOOLED: '', OMBELLE_SNAPSHOT_BACKEND: '', NODE_ENV: 'production' } })
       let text = ''; child.stdout.on('data', value => { text += value }); child.stderr.on('data', value => { text += value })
       child.on('error', reject); child.on('close', code => resolve({ code, text }))
     })
@@ -50,6 +50,8 @@ it('builds nested static runtime HTML/assets and workers without touching unrela
     expect(runtime).toContain('m-90 490c140 590 281 105 466 240s671 535 1050 40')
     for (const color of ['#15265e', '#0b0614', '#f3f6fb', '#fdf0e8', '#f6f8fc', '#db8170'])
       expect(runtime).toContain(color)
+    // Vitest runs with NODE_ENV=test; the build is still the production one the site deploys.
+    expect(runtime).not.toContain('jsx-dev-runtime')
     for (const worker of ['editor', 'preset']) {
       const bytes = await fs.readFile(`apps/www/public/${worker}-compiler.worker.js`, 'utf8')
       expect(bytes).toContain('onmessage')
