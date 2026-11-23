@@ -41,7 +41,7 @@ Give the trigger an accessible name with `aria-labelledby` or `aria-label`. Radi
 ## API and keyboard
 
 - `Select` forwards the Radix Root props: `value`, `defaultValue`, `onValueChange`, `open`, `defaultOpen`, `onOpenChange`, `name`, `required`, `disabled`, `dir`.
-- `SelectTrigger` forwards trigger props and adds `size` (`default` or `sm`). It renders a chevron icon (`select-icon`) that turns while open. Set `aria-invalid` to show the invalid state.
+- `SelectTrigger` forwards trigger props and adds `size` (`sm`, `default` or `lg`, on the [shared size scale](../03-components-styles-accessibility.md#sizes); `lg` is new in 1.0). It renders a chevron icon (`select-icon`) that turns while open. Set `aria-invalid` to show the invalid state.
 - `SelectContent` renders in a portal. It defaults to `position="popper"` with a 6px `sideOffset`, opening below the trigger at least as wide as the trigger. Pass `position="item-aligned"` for the macOS-style overlay. It includes scroll buttons and a viewport.
 - `SelectItem` forwards item props (`value`, `disabled`, `textValue`). Its children become the selected value text. The optional `hint` renders after the label (for example why an option is disabled), stays out of the selected value, and is linked to the option with `aria-describedby`.
 - `SelectGroup`, `SelectLabel`, `SelectSeparator`, `SelectScrollUpButton` and `SelectScrollDownButton` forward their Radix parts.

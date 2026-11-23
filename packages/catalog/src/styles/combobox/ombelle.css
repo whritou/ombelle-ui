@@ -5,7 +5,7 @@
   flex-wrap: wrap;
   align-items: center;
   gap: 6px;
-  min-block-size: 42px;
+  min-block-size: calc(var(--control-height) + 0.125rem + var(--combobox-size-step, 0rem));
   padding: 6px 8px;
   border: 1.5px solid var(--input);
   border-radius: 12px;
@@ -36,7 +36,7 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  min-block-size: 28px;
+  min-block-size: calc(var(--control-height) - 0.75rem);
   padding: 0 2px 0 10px;
   border: 1.5px solid var(--input);
   border-radius: 999px;
@@ -71,7 +71,7 @@
 [data-slot='combobox-input'] {
   flex: 1 1 90px;
   min-inline-size: 90px;
-  block-size: 28px;
+  block-size: calc(var(--control-height) - 0.75rem + var(--combobox-size-step, 0rem));
   padding: 0 2px;
   border: 0;
   background: transparent;
@@ -286,3 +286,8 @@
   }
 }
 /* end 0.7.5 scrollbars */
+/* 1.0 size scale (DES-12): sm and lg sit 0.5rem below and above the default, which follows --control-height */
+[data-slot='combobox'][data-size='sm'] { --combobox-size-step: -0.5rem; --combobox-font-size: 0.8125rem; }
+[data-slot='combobox'][data-size='lg'] { --combobox-size-step: 0.5rem; --combobox-font-size: 1rem; }
+[data-slot='combobox-input'] { font-size: var(--combobox-font-size, 14px); }
+/* end 1.0 size scale */

@@ -7,7 +7,7 @@
   align-items: center;
   inline-size: 100%;
   min-inline-size: 0;
-  min-block-size: var(--control-height, 2.5rem);
+  min-block-size: calc(var(--control-height, 2.5rem) + var(--input-group-size-step, 0rem));
   /* Clips the addon fill to the group's corners. */
   overflow: clip;
   font-family: var(--font-family);
@@ -32,7 +32,7 @@
   box-shadow: none;
 }
 [data-slot='input-group-input'] {
-  min-block-size: var(--control-height, 2.5rem);
+  min-block-size: calc(var(--control-height, 2.5rem) + var(--input-group-size-step, 0rem));
 }
 [data-slot='input-group-textarea'] {
   min-block-size: 6rem;
@@ -296,3 +296,8 @@
 /* papier layer */
 [data-slot='input-group']{background:var(--card);border-radius:var(--radius);box-shadow:inset 0 -2px 0 color-mix(in oklab,var(--foreground) 14%,transparent)}
 [data-slot='input-group-addon']{background:var(--secondary);color:var(--muted-foreground)}
+/* 1.0 size scale (DES-12): sm and lg sit 0.5rem below and above the default, which follows --control-height */
+[data-slot='input-group'][data-size='sm'] { --input-group-size-step: -0.5rem; font-size: 0.8125rem; }
+[data-slot='input-group'][data-size='lg'] { --input-group-size-step: 0.5rem; font-size: 1rem; }
+[data-slot='input-group-input'] { padding-block: 0; }
+/* end 1.0 size scale */

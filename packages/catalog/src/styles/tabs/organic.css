@@ -39,7 +39,7 @@
   gap: 0.375rem;
   justify-content: center;
   min-inline-size: 2.75rem;
-  min-block-size: 2.75rem;
+  min-block-size: max(1.5rem, calc(var(--control-height) + 0.25rem + var(--tabs-size-step, 0rem)));
   padding-block: 0;
   padding-inline: 1rem;
   border: var(--border-width) solid transparent;
@@ -200,7 +200,7 @@
   display: inline-flex;
   align-items: center;
   gap: 0.375rem;
-  min-block-size: 2rem;
+  min-block-size: max(1.5rem, calc(var(--control-height) - 0.5rem + var(--tabs-size-step, 0rem)));
   padding-block: 0;
   padding-inline: 0.875rem;
   border: var(--border-width) solid var(--o-line);
@@ -272,3 +272,7 @@
 [data-slot='tabs-list'][data-appearance='pills'] [data-slot='tabs-trigger'][data-state='active']{background:var(--primary);color:var(--primary-foreground);box-shadow:var(--o-e1)}
 [data-slot='tabs-list'][data-appearance='pills'] [data-slot='tabs-trigger'][data-state='inactive']:not(:disabled):hover{background:var(--secondary)}
 @media (forced-colors: active){[data-slot='tabs-trigger'][data-state='active'],[data-slot='tabs-list'][data-appearance] [data-slot='tabs-trigger'][data-state='active']{background:Highlight;color:HighlightText;border:2px solid Highlight;forced-color-adjust:none;box-shadow:none}[data-slot='tabs-list'][data-appearance='underline'][data-orientation]{box-shadow:none;border-block-end:2px solid CanvasText}}
+/* 1.0 size scale (DES-12): sm and lg sit 0.5rem below and above the default, which follows --control-height */
+[data-slot='tabs-list'][data-size='sm'] { --tabs-size-step: -0.5rem; }
+[data-slot='tabs-list'][data-size='lg'] { --tabs-size-step: 0.5rem; }
+/* end 1.0 size scale */

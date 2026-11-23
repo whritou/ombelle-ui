@@ -44,6 +44,10 @@ export function NewPassword() {
 - `PasswordFieldCapsLock` is a polite status that reads "Caps Lock is on" while Caps Lock is on and the input has focus, read from key events; it clears on blur. Pass children to change the text.
 - `PasswordFieldStrength` takes `checks`, each `{ label, test(value) }` or `{ label, match }` with a regular expression source. It is a `role="meter"` named "Password strength": its value is the number of checks passed, and its value text is the word (Weak, Fair, Strong or Very strong) and the first check that fails, for example "Strong · add a symbol to reach the last check". `labels` changes the words: `weak`, `fair`, `strong`, `veryStrong`, and `hint(check, last)` for the text after the word; `data-level` keeps its English keys for the styles. A form reset puts the input back to its default value, and the meter follows it. The component ships no password-strength library.
 
+## Size (1.0)
+
+`PasswordField` takes `size`; it sizes the control and its input. The input is the control height, so the field is that plus its border: 42px by default (44px in neo-brutalism, organic and retro futurism). The input's block padding gave way to that height in 1.0, so the field follows compact density; in neo-brutalism the default field is 2px shorter than before. `sm` is one 0.5rem step below the density's control height, `default` is the control height (2.5rem, or 2.25rem with compact density) and `lg` is one step above it, as on every control on the [shared size scale](../03-components-styles-accessibility.md#sizes). `sm` text is 0.8125rem and `lg` text 1rem. Leaving `size` out renders what earlier releases render; only `sm` and `lg` set `data-size`.
+
 ## Recipe
 
 The recipe editor sets `strength`, `capsLockNotice` and `confirm` (a second "Confirm password" field) and the label. Compilation emits `components/ui/password-field.tsx`, `components/ui/password-field.css` and `examples/password-field.tsx`. Runtime dependencies are React 19.3.1, clsx 2.1.1, tailwind-merge 3.7.0 and lucide-react 1.55.0.

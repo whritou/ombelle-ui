@@ -15,11 +15,16 @@ export function Tabs({ className, ...props }: TabsProps) {
 export function TabsList({
   className,
   appearance = 'contained',
+  size = 'default',
   ...props
-}: React.ComponentProps<typeof TabsPrimitive.List> & { appearance?: 'contained' | 'underline' | 'pills' }) {
+}: React.ComponentProps<typeof TabsPrimitive.List> & { appearance?: 'contained' | 'underline' | 'pills'
+  /** sm, default or lg on the shared size scale; default follows the density's control height. */
+  size?: 'sm' | 'default' | 'lg'
+}) {
   return (
     <TabsPrimitive.List
       data-appearance={appearance}
+      data-size={size !== 'default' ? size : undefined}
       className={cn(className)}
       {...props}
       data-slot="tabs-list"

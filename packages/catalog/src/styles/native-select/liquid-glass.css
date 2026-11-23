@@ -27,7 +27,7 @@
   box-shadow: inset 0 1px 2px rgb(0 0 0 / 0.06), inset 0 -1px 0 var(--glass-highlight, color-mix(in srgb, white 35%, transparent));
 }
 [data-slot='native-select'][data-size='sm'] {
-  min-block-size: 2rem;
+  min-block-size: calc(var(--control-height) - 0.5rem);
   padding-inline-start: 0.75rem;
 }
 [data-slot='native-select'][multiple] {
@@ -115,3 +115,6 @@ select[multiple] + [data-slot='native-select-icon'] {
     transition: none;
   }
 }
+/* 1.0 size scale (DES-12): sm and lg sit 0.5rem below and above the default, which follows --control-height */
+[data-slot='native-select'][data-size='lg'] { min-block-size: calc(var(--control-height) + 0.5rem); font-size: 1rem; }
+/* end 1.0 size scale */

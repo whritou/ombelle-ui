@@ -49,6 +49,10 @@ export function PresetPicker({ presets, onAdd }: { presets: string[]; onAdd(name
 - `highlightMatch(text, query)` and `shouldOfferCreate(query, labels)` are exported for custom option content.
 - Name the field with a label (`aria-labelledby`, or `FieldControl` inside a Field).
 
+## Size (1.0)
+
+`Combobox` takes `size`. `sm` is one 0.5rem step below the density's control height, `default` is the control height (2.5rem, or 2.25rem with compact density) and `lg` is one step above it, as on every control on the [shared size scale](../03-components-styles-accessibility.md#sizes). `sm` text is 0.8125rem and `lg` text 1rem. Leaving `size` out renders what earlier releases render; only `sm` and `lg` set `data-size`. The default field is 2px taller than the control height (4px in neo-brutalism, organic and retro futurism, whose border is thicker), as before. At `sm`, a field holding chips grows to fit them, because chips keep their 24px remove buttons.
+
 ## Recipe
 
 The recipe editor sets the mode (single or multiple), whether to offer Create, the selected options, the label, placeholder and empty text, and the options with an optional group. Compilation emits `components/ui/combobox.tsx`, `components/ui/combobox.css` and `examples/combobox.tsx`.

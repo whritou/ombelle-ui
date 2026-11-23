@@ -4,7 +4,8 @@ import { cn } from './utils.js'
 import './native-select.css'
 
 export type NativeSelectProps = Omit<React.ComponentProps<'select'>, 'size'> & {
-  size?: 'sm' | 'default'
+  /** sm, default or lg on the shared size scale; default follows the density's control height. */
+  size?: 'sm' | 'default' | 'lg'
 }
 
 export function NativeSelect({

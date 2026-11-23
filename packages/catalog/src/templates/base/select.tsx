@@ -138,7 +138,8 @@ export function SelectTrigger({
   children,
   ...props
 }: Part<typeof SelectPrimitive.Trigger> & {
-  size?: 'sm' | 'default'
+  /** sm, default or lg on the shared size scale; default follows the density's control height. */
+  size?: 'sm' | 'default' | 'lg'
 }) {
   return (
     <SelectPrimitive.Trigger

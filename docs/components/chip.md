@@ -35,6 +35,10 @@ export function Topic({ onRemove }: { onRemove(): void }) {
 - `ChipGroup` is a `role="group"`. Name it with `aria-label` or `aria-labelledby`.
 - The remove button is a 24px target, so a chip stays at least 28px tall.
 
+## Size (1.0)
+
+Chip has no `size` prop. Its height follows density: 0.75rem less than the control height (28px; 32px in organic and retro futurism), so compact density makes chips 4px shorter. Chips are not on the [shared size scale](../03-components-styles-accessibility.md#sizes) because their 24px remove button sets their floor and they sit inside fields that set their own size.
+
 ## Recipe
 
 The recipe editor sets `mode` (`pressable` or `removable`), the pressed chip ids, the group label, and one to six chips. Only chips in the recipe may be pressed.

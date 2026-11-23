@@ -165,6 +165,8 @@ type Common = {
   onCreate?(query: string): void
   /** The search text on the first render. */
   defaultQuery?: string
+  /** sm, default or lg on the shared size scale; default follows the density's control height. */
+  size?: 'sm' | 'default' | 'lg'
   className?: string
   children?: React.ReactNode
 }
@@ -178,7 +180,7 @@ export type ComboboxProps = Common & (
  * chips in the field, and Backspace in the empty field removes the last one.
  */
 export function Combobox(props: ComboboxProps) {
-  const { disabled = false, required = false, labels: strings, name, onCreate, defaultQuery, className, children } = props
+  const { disabled = false, required = false, labels: strings, name, onCreate, defaultQuery, size = 'default', className, children } = props
   const multiple = props.multiple === true
   const { labels, create: hasCreate } = scan(children)
   // The value a form reset returns to: the default on the first render, as for a native field.
@@ -265,7 +267,7 @@ export function Combobox(props: ComboboxProps) {
   }
   return (
     <ComboboxContext.Provider value={state}>
-      <div ref={rootRef} data-slot="combobox" data-disabled={disabled || undefined} className={cn(className)}>
+      <div ref={rootRef} data-slot="combobox" data-size={size !== 'default' ? size : undefined} data-disabled={disabled || undefined} className={cn(className)}>
         <PopoverPrimitive.Root open={open && !disabled} onOpenChange={setOpen}>{children}</PopoverPrimitive.Root>
         {name && values.map(value => <input key={value} type="hidden" name={name} value={value} />)}
         {/* Hidden inputs take no part in validation: this one carries the chosen value, and sends focus to the field. */}

@@ -25,7 +25,9 @@ export function spokenUnit(unit: string): string {
   return spokenUnits[unit] ?? unit
 }
 
-export type NumberInputProps = Omit<React.ComponentProps<'input'>, 'value' | 'defaultValue' | 'onChange' | 'type' | 'min' | 'max' | 'step'> & {
+export type NumberInputProps = Omit<React.ComponentProps<'input'>, 'value' | 'defaultValue' | 'onChange' | 'type' | 'min' | 'max' | 'step' | 'size'> & {
+  /** sm, default or lg on the shared size scale; default follows the density's control height. */
+  size?: 'sm' | 'default' | 'lg'
   /** The number, or null for an empty field. */
   value?: number | null
   defaultValue?: number | null
@@ -67,7 +69,7 @@ const show = (value: number | null | undefined) => (value === null || value === 
  */
 export function NumberInput({
   value, defaultValue = null, text: rawText, onValueChange, min, max, step = 1, largeStep = 10, unit,
-  decrementLabel, incrementLabel, className, disabled, onKeyDown, onBlur, onFocus, ref, ...props
+  decrementLabel, incrementLabel, size = 'default', className, disabled, onKeyDown, onBlur, onFocus, ref, ...props
 }: NumberInputProps) {
   const controlled = value !== undefined
   const [text, setText] = React.useState(() => rawText ?? show(controlled ? value : defaultValue))
@@ -151,7 +153,7 @@ export function NumberInput({
   }
 
   return (
-    <div data-slot="number-input" data-invalid={invalid ? '' : undefined} data-disabled={disabled ? '' : undefined} className={cn(className)}>
+    <div data-slot="number-input" data-size={size !== 'default' ? size : undefined} data-invalid={invalid ? '' : undefined} data-disabled={disabled ? '' : undefined} className={cn(className)}>
       <button type="button" data-slot="number-input-decrement" tabIndex={-1} aria-label={decrementLabel ?? `Decrease ${name}`}
         disabled={disabled || atMin} onPointerDown={keepFocus} onClick={() => move(-step)}>
         <MinusIcon aria-hidden="true" />

@@ -10,7 +10,7 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  min-block-size: 28px;
+  min-block-size: calc(var(--control-height) - 0.75rem);
   padding: 0 4px 0 10px;
   border: 1.5px solid var(--border);
   border-radius: var(--rf-r2);
@@ -85,7 +85,7 @@
   }
 }
 /* retro-futurism layer */
-[data-slot='chip']{min-block-size:32px;padding:0 6px 0 13px;border:0;border-radius:var(--rf-pill);background:var(--card);color:var(--foreground);font-weight:700;box-shadow:inset 0 0 0 2px var(--input)}
+[data-slot='chip']{min-block-size:calc(var(--control-height) - 0.5rem);padding:0 6px 0 13px;border:0;border-radius:var(--rf-pill);background:var(--card);color:var(--foreground);font-weight:700;box-shadow:inset 0 0 0 2px var(--input)}
 [data-slot='chip'][data-mode='pressable']{padding-inline:14px}
 [data-slot='chip'][data-state='on']{background:var(--primary);color:var(--primary-foreground);box-shadow:var(--rf-e1)}
 [data-slot='chip']:focus-visible{outline:3px solid var(--ring);outline-offset:2px}

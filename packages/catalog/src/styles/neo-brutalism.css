@@ -5,10 +5,10 @@
 [data-slot="button"][data-variant="outline"]{background:var(--card);color:var(--card-foreground)}
 [data-slot="button"][data-variant="ghost"],[data-slot="button"][data-variant="link"]{background:transparent;border-color:transparent;color:var(--foreground)}
 [data-slot="button"][data-variant="link"]{background:linear-gradient(transparent 58%,color-mix(in oklab,var(--primary) 50%,var(--background)) 58%) center/100% 1.4em no-repeat;text-decoration:none;padding:0 0.25rem;line-height:1.4}
-[data-slot="button"][data-size="sm"]{min-height:2.125rem;padding:0 0.875rem;font-size:0.75rem}
-[data-slot="button"][data-size="lg"]{min-height:3.375rem;padding:0 1.75rem;font-size:0.9375rem}
+[data-slot="button"][data-size="sm"]{min-height:calc(var(--control-height) - 0.25rem);padding:0 0.875rem;font-size:0.75rem}
+[data-slot="button"][data-size="lg"]{min-height:calc(var(--control-height) + 0.75rem);padding:0 1.75rem;font-size:0.9375rem}
 [data-slot="button"][data-size="icon"]{width:calc(var(--control-height) + 0.25rem);padding:0}
-[data-slot="button"][data-size="icon-sm"]{width:2.125rem;min-height:2.125rem;padding:0;box-shadow:calc(var(--shadow-x) - 1px) calc(var(--shadow-y) - 1px) 0 var(--shadow-color,var(--border))}
+[data-slot="button"][data-size="icon-sm"]{width:calc(var(--control-height) - 0.25rem);min-height:calc(var(--control-height) - 0.25rem);padding:0;box-shadow:calc(var(--shadow-x) - 1px) calc(var(--shadow-y) - 1px) 0 var(--shadow-color,var(--border))}
 [data-slot="input"]{background:var(--card);color:var(--card-foreground);padding:0 0.75rem;font-size:0.9375rem;font-weight:600}
 [data-slot="input"]::placeholder{color:var(--muted-foreground);font-weight:500;opacity:1}
 [data-slot="button"]:focus-visible,[data-slot="input"]:focus-visible,[data-slot="dialog-close"]:focus-visible{outline:3px dashed var(--ring);outline-offset:4px}
@@ -57,13 +57,13 @@
 }
 /* 0.7.3 variants: input */
 [data-slot="input"][data-size="sm"] {
-  min-height: 2rem;
+  min-height: calc(var(--control-height) - 0.25rem);
   padding-block: 0.25rem;
   padding-inline: 0.625rem;
   font-size: 0.8125rem;
 }
 [data-slot="input"][data-size="lg"] {
-  min-height: 3rem;
+  min-height: calc(var(--control-height) + 0.75rem);
   padding-inline: 1rem;
   font-size: 1rem;
 }

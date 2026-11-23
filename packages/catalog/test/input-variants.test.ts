@@ -46,8 +46,9 @@ describe('Input 0.7.3 variants', () => {
     expect(own).toContain('/* 0.7.3 variants */')
     expect(own).toContain('[data-slot="button"][data-variant="link-destructive"]')
     const css = own.slice(own.indexOf('/* 0.7.3 variants: input */')).replaceAll('"', "'")
-    expect(css).toMatch(/\[data-slot='input'\]\[data-size='sm'\][^{]*\{[^}]*min-height: 2rem/)
-    expect(css).toMatch(/\[data-slot='input'\]\[data-size='lg'\][^{]*\{[^}]*min-height: 3rem/)
+    // The shared size scale (DES-12): one 0.5rem step either side of the density's control height.
+    expect(css).toMatch(/\[data-slot='input'\]\[data-size='sm'\][^{]*\{[^}]*min-height: calc\(var\(--control-height\) - /)
+    expect(css).toMatch(/\[data-slot='input'\]\[data-size='lg'\][^{]*\{[^}]*min-height: calc\(var\(--control-height\) \+ /)
     expect(block(`textarea/${family}.css`)).toMatch(/\[data-slot='textarea'\]\[data-size='sm'\]/)
     const group = block(`input-group/${family}.css`)
     expect(group).toMatch(/\[data-slot='input-group-clear'\]:is\(\[role='group'\]:has\(> :placeholder-shown\) > \*, \[role='group'\]:has\(> :placeholder-shown\) > \* > \*\)\s*\{[^}]*display: none/)

@@ -198,7 +198,7 @@ export function SelectValue({
   return <SelectPrimitive.Value placeholder={placeholder} {...props} data-slot="select-value" />
 }
 
-function MultipleTrigger({ className, size, children, onKeyDown, ...props }: React.ComponentProps<'button'> & { size: 'sm' | 'default' }) {
+function MultipleTrigger({ className, size, children, onKeyDown, ...props }: React.ComponentProps<'button'> & { size: 'sm' | 'default' | 'lg' }) {
   const multi = React.useContext(MultiContext)!
   const typed = React.useRef({ text: '', at: 0 })
   const enabled = multi.options.filter(option => !option.disabled)
@@ -260,7 +260,8 @@ export function SelectTrigger({
   children,
   ...props
 }: React.ComponentProps<typeof SelectPrimitive.Trigger> & {
-  size?: 'sm' | 'default'
+  /** sm, default or lg on the shared size scale; default follows the density's control height. */
+  size?: 'sm' | 'default' | 'lg'
 }) {
   const multi = React.useContext(MultiContext)
   if (multi) return <MultipleTrigger className={className} size={size} {...props}>{children}</MultipleTrigger>

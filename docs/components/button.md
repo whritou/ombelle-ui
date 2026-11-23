@@ -34,6 +34,10 @@ These variants need CLI **0.7.3** or later, including in component recipes. Leav
 </Tooltip>
 ```
 
+## Size (1.0)
+
+`size` follows the [shared size scale](../03-components-styles-accessibility.md#sizes): `sm` is one 0.5rem step below the density's control height, `default` is the control height and `lg` one step above it. `icon-sm` and `icon` are `sm` and `default` squares. In neo-brutalism the button adds 0.25rem at every size, and in organic and retro futurism 0.375rem, so `default` looks as it did before 1.0. In 1.0, `sm`, `lg` and `icon-sm` in neo-brutalism and retro futurism, and `icon-sm` in minimalist, ombelle and papier, moved by 2px to sit exactly one step from `default`. All sizes now follow compact density.
+
 ## Style another element as a button
 
 `buttonVariants({ variant, size, className })` returns what an element needs to look like the matching Button: `data-slot="button"`, `data-variant`, `data-size` and the `className`. Spread it onto the element. Every style family selects those attributes, not a class, so a link styled this way matches the Button in every family, edition and mode. Both editions export it, and its defaults follow the saved preset's `componentDefaults.button`, as Button's do.

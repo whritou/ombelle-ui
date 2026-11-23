@@ -38,15 +38,15 @@ it.each([0, 1.25])(
 )
 const scopedArtifactHashes: Record<string, readonly string[]> = {
   flat: [
-    'f7f701238d7a9c85e398c1808aab541d4095678971f4dddf383ce4582900c2d0',
+    '06072fa365acbf199817274bcd0c30959469e92a1212f0835e6d878fb1e1d9cc',
     '1bacf80adf26149b21be735415d2c474396ca2b79cefaff3cca965906a9e4a25',
   ],
   minimalist: [
-    'e5f8a7bc19680f2534792417674040b704575f0aa35883b17e6dae74b07d1ba9',
+    'b4d260cc9e9b63ec111c2ed140a9004d5db8999409aa79d6d48dc8bd642aac6a',
     '197360502dc451e210c7b5f27824154585c9356e7b659e6d2508f8d363102cda',
   ],
   'neo-brutalism': [
-    '33e32b12173987066985afd58478f37db230097acc750dfdf3974382c140144d',
+    '3994920a8d1d7a08f74cb0cd25b4c35585a1bab81d3db0913fb13270b5bd542c',
     'f1890fe5a5b54a4b1306db6cf69d51b2fd8836975ff12eca9cef5650a12c894e',
   ],
 } as const
@@ -118,7 +118,7 @@ it('keeps existing recipe CSS and source output byte-for-byte stable', async () 
   ).toEqual([
     [
       'recipes/rc_primary-button/r2/button.css',
-      '33e32b12173987066985afd58478f37db230097acc750dfdf3974382c140144d',
+      '3994920a8d1d7a08f74cb0cd25b4c35585a1bab81d3db0913fb13270b5bd542c',
     ],
     [
       'recipes/rc_primary-button/r2/button.tsx',

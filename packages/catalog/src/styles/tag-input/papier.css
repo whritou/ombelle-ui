@@ -5,7 +5,7 @@
   flex-wrap: wrap;
   align-items: center;
   gap: 6px;
-  min-block-size: 42px;
+  min-block-size: calc(var(--control-height) + 0.125rem + var(--tag-input-size-step, 0rem));
   padding: 6px 8px;
   border: 1.5px solid var(--input);
   border-radius: 12px;
@@ -36,7 +36,7 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  min-block-size: 28px;
+  min-block-size: calc(var(--control-height) - 0.75rem);
   padding: 0 2px 0 10px;
   border: 1.5px solid var(--input);
   border-radius: var(--radius);
@@ -72,7 +72,7 @@
 [data-slot='tag-input-input'] {
   flex: 1 1 90px;
   min-inline-size: 90px;
-  block-size: 28px;
+  block-size: calc(var(--control-height) - 0.75rem + var(--tag-input-size-step, 0rem));
   padding: 0 2px;
   border: 0;
   background: transparent;
@@ -115,3 +115,8 @@
 /* papier layer */
 [data-slot='tag-input']{background:var(--card);border-radius:var(--radius);box-shadow:inset 0 -2px 0 color-mix(in oklab,var(--foreground) 14%,transparent)}
 [data-slot='tag-input-tag']{background:var(--secondary);color:var(--secondary-foreground);border-radius:var(--radius)}
+/* 1.0 size scale (DES-12): sm and lg sit 0.5rem below and above the default, which follows --control-height */
+[data-slot='tag-input'][data-size='sm'] { --tag-input-size-step: -0.5rem; --tag-input-font-size: 0.8125rem; }
+[data-slot='tag-input'][data-size='lg'] { --tag-input-size-step: 0.5rem; --tag-input-font-size: 1rem; }
+[data-slot='tag-input-input'] { font-size: var(--tag-input-font-size, 14px); }
+/* end 1.0 size scale */
