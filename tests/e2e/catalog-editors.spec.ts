@@ -190,7 +190,7 @@ for (const framework of ['vite', 'next'] as const) test(`installed catalog recip
           if (mode === 'dark') await expect(frameRoot).toHaveClass(/\bdark\b/)
           else await expect(frameRoot).not.toHaveClass(/\bdark\b/)
           await consumer.goto(`${url}/?recipe=${recipe.id}&mode=${mode}`)
-          await expect(consumer.locator('main')).toHaveAttribute('data-ready', 'true')
+          await expect(consumer.locator('main[data-ready]')).toHaveAttribute('data-ready', 'true')
           const id = recipe.component
           // The triggers of Dialog, Sheet, Alert Dialog, Popover, Tooltip and Dropdown Menu carry no catalog
           // style. The editor draws them as buttons (recipe-preview-trigger in apps/preview) so they read as
@@ -250,7 +250,7 @@ for (const framework of ['vite', 'next'] as const) test(`installed catalog recip
       }
       if (glass.length) {
         await consumer.goto(`${url}/?recipe=glass-isolation&mode=dark`)
-        await expect(consumer.locator('main')).toHaveAttribute('data-ready', 'true')
+        await expect(consumer.locator('main[data-ready]')).toHaveAttribute('data-ready', 'true')
         const filterIds = await consumer.locator('filter[id^="ombelle-recipe-"]').evaluateAll(filters => filters.map(filter => filter.id))
         expect(new Set(filterIds).size).toBe(2)
         for (const suffix of ['first', 'second']) {
