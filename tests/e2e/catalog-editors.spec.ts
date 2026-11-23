@@ -113,7 +113,16 @@ async function appearance(parts: Locator) {
       role: element.getAttribute('role'), checked: element.getAttribute('aria-checked'),
       selected: element.getAttribute('aria-selected'), value: element.getAttribute('aria-valuenow'),
       disabled: element.hasAttribute('disabled'),
-      color: rgba(style.color), background: rgba(style.backgroundColor), border: rgba(style.borderTopColor),
+      // Only what paints: text colour where the part has text of its own, border colour where a border
+      // is drawn. A track or a wrapper (Progress, Native Select) inherits the page's colour, which a
+      // host app and the editor are free to differ on; the parts inside it are compared themselves.
+      color: [...element.childNodes].some(node => node.nodeType === Node.TEXT_NODE && node.textContent?.trim())
+        ? rgba(style.color) : null,
+      // Whether the text colour is just the parent's: the editor page and a host app have different page
+      // colours, so a part that inherits its colour on both sides is not compared on it (see below).
+      inheritsColor: element.parentElement !== null && getComputedStyle(element.parentElement).color === style.color,
+      background: rgba(style.backgroundColor),
+      border: parseFloat(style.borderTopWidth) > 0 ? rgba(style.borderTopColor) : null,
       // A flex or grid parent blockifies its children (inline-flex computes as flex): the editor and the
       // installed stage nest the recipe at different depths, so compare the display type, not its inline-ness.
       radius: style.borderTopLeftRadius, display: style.display.replace(/^inline-/, ''),
@@ -130,6 +139,7 @@ function appearanceDifferences(left: Appearance, right: Appearance) {
   return left.flatMap((part, index) => {
     const other = right[index]!
     return (Object.keys(part) as (keyof typeof part)[]).flatMap(key => {
+      if (key === 'inheritsColor' || (key === 'color' && part.inheritsColor && other.inheritsColor)) return []
       const a = part[key], b = other[key]
       const same = Array.isArray(a) && Array.isArray(b)
         ? a.length === b.length && a.every((value, channel) => Math.abs(value - b[channel]!) <= 1)
@@ -173,7 +183,7 @@ for (const framework of ['vite', 'next'] as const) test(`installed catalog recip
         const box = await iframe.boundingBox()
         expect(box).not.toBeNull()
         await consumer.setViewportSize({ width: Math.round(box!.width), height: Math.round(box!.height) })
-        const parts = '[data-ombelle-recipe][data-slot]'
+        const allParts = '[data-ombelle-recipe][data-slot]'
         for (const mode of ['light', 'dark'] as const) {
           await page.getByRole('radiogroup', { name: 'Preview mode' }).getByRole('radio', { name: mode, exact: false }).click()
           const frameRoot = preview.locator('html')
@@ -182,7 +192,18 @@ for (const framework of ['vite', 'next'] as const) test(`installed catalog recip
           await consumer.goto(`${url}/?recipe=${recipe.id}&mode=${mode}`)
           await expect(consumer.locator('main')).toHaveAttribute('data-ready', 'true')
           const id = recipe.component
-          const left = preview.locator(parts), right = consumer.locator(parts)
+          // The triggers of Dialog, Sheet, Alert Dialog, Popover, Tooltip and Dropdown Menu carry no catalog
+          // style. The editor draws them as buttons (recipe-preview-trigger in apps/preview) so they read as
+          // clickable, while an app styles its own. Leave out exactly the parts the editor drew that way, on
+          // both sides; their content parts are still compared. Called once the parts have rendered.
+          const compareParts = async () => {
+            const chrome = await preview.locator(`.recipe-preview-trigger${allParts}`)
+              .evaluateAll(elements => elements.map(element => element.getAttribute('data-slot')!))
+            const parts = allParts + chrome.map(slot => `:not([data-slot="${slot}"])`).join('')
+            const left = preview.locator(parts), right = consumer.locator(parts)
+            const expected = await appearance(right)
+            await expect.poll(async () => appearanceDifferences(await appearance(left), expected), { message: `${id} in ${mode}` }).toEqual([])
+          }
           if (id in overlayParts) {
             const [role, slot] = overlayParts[id as keyof typeof overlayParts]
             const name = 'trigger' in recipe.content ? recipe.content.trigger : 'Edited select'
@@ -198,10 +219,7 @@ for (const framework of ['vite', 'next'] as const) test(`installed catalog recip
             }
             await expect(leftContent).toBeVisible()
             await expect(rightContent).toBeVisible()
-            {
-              const expected = await appearance(right)
-              await expect.poll(async () => appearanceDifferences(await appearance(left), expected), { message: `${id} in ${mode}` }).toEqual([])
-            }
+            await compareParts()
             await page.keyboard.press('Escape')
             await consumer.keyboard.press('Escape')
             await expect(leftContent).toBeHidden()
@@ -209,12 +227,10 @@ for (const framework of ['vite', 'next'] as const) test(`installed catalog recip
             await expect(leftTrigger).toBeFocused()
             await expect(rightTrigger).toBeFocused()
           } else {
-            await expect(left.first()).toBeAttached()
-            await expect(right.first()).toBeAttached()
-            {
-              const expected = await appearance(right)
-              await expect.poll(async () => appearanceDifferences(await appearance(left), expected), { message: `${id} in ${mode}` }).toEqual([])
-            }
+            // A closed Sheet or Alert Dialog may show nothing but its trigger: then both sides compare no parts.
+            await expect(preview.locator(allParts).first()).toBeAttached()
+            await expect(consumer.locator(allParts).first()).toBeAttached()
+            await compareParts()
           }
           if (id === 'progress') {
             await expect(preview.getByRole('progressbar')).toHaveAttribute('aria-valuenow', '25')
