@@ -608,8 +608,9 @@
  * On phones the sidebar ends up a closed sheet. The catalog Sidebar shows it inline above the page until
  * hydration, which pushed the page down by the whole component list and then pulled it back up (CLS 0.92,
  * OPS-08). The site renders the phone layout it will hydrate to instead; Browse components opens the sheet.
+ * Without scripting the page never hydrates, so the links stay inline there.
  */
-@media (max-width: 767.98px) {
+@media (max-width: 767.98px) and (scripting: enabled) {
   [data-slot='sidebar'].site-sidebar:not([data-hydrated]) {
     display: none;
   }
