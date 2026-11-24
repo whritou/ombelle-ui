@@ -86,7 +86,6 @@ export function Accordion({ className, appearance, icon, ...props }: AccordionPr
   return (
     <AccordionIcon.Provider value={icon}>
     <AccordionPrimitive.Root
-      data-slot="accordion"
       className={cn(className)}
       multiple={multiple}
       onKeyDown={(event: React.KeyboardEvent<HTMLDivElement>) => {
@@ -103,6 +102,7 @@ export function Accordion({ className, appearance, icon, ...props }: AccordionPr
         )
       }}
       {...rest}
+      data-slot="accordion"
       data-appearance={appearance}
       data-icon={icon}
     />
@@ -116,12 +116,12 @@ export function AccordionItem({
 }: Part<typeof AccordionPrimitive.Item>) {
   return (
     <AccordionPrimitive.Item
-      data-slot="accordion-item"
       className={cn(className)}
       render={(itemProps, state) => (
         <div {...itemProps} data-state={openState(state.open)} />
       )}
       {...props}
+      data-slot="accordion-item"
     />
   )
 }
@@ -148,12 +148,12 @@ export function AccordionTrigger({
       )}
     >
       <AccordionPrimitive.Trigger
-        data-slot="accordion-trigger"
         className={cn(className)}
         render={(triggerProps, state) => (
           <button {...triggerProps} data-state={openState(state.open)} />
         )}
         {...props}
+        data-slot="accordion-trigger"
       >
         {children}
         <span data-slot="accordion-icon" aria-hidden="true">
@@ -184,7 +184,6 @@ export function AccordionContent({
 }: Part<typeof AccordionPrimitive.Panel>) {
   return (
     <AccordionPrimitive.Panel
-      data-slot="accordion-content"
       className={cn(className)}
       // The shared stylesheet animates with Radix's height variable.
       style={{
@@ -198,6 +197,7 @@ export function AccordionContent({
         </div>
       )}
       {...props}
+      data-slot="accordion-content"
     >
       <div data-slot="accordion-content-inner">{children}</div>
     </AccordionPrimitive.Panel>

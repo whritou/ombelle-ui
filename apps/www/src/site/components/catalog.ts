@@ -604,11 +604,11 @@ export function componentDoc(id: string): ComponentDoc | undefined {
 }
 
 /**
- * Whether the website may say an id is experimental in liquid glass: the
+ * Whether the website may say an id is available in liquid glass: the
  * support table says so and the published installer can add it there.
  */
 export function glassOnSite(id: ComponentId): boolean {
-  if (styleSupport(id, 'liquid-glass') !== 'experimental') return false
+  if (styleSupport(id, 'liquid-glass') === 'unavailable') return false
   const doc = componentDoc(id)
   if (!doc || !componentInstallable(doc)) return false
   return !doc.glassMinimumCli || compareVersions(publishedInstaller.version, doc.glassMinimumCli) >= 0
@@ -620,19 +620,19 @@ function listNames(names: readonly string[]): string {
 }
 
 /**
- * Components that are experimental in liquid glass, from the contracts'
+ * Components available in liquid glass, from the contracts'
  * support table, in its order. `published` keeps only those the published
  * installer can add, for copy shown next to its commands.
  */
 export function glassComponentList({ published = false }: { published?: boolean } = {}): string {
   return listNames(
-    componentsWithStyleSupport('liquid-glass', ['experimental'])
+    componentsWithStyleSupport('liquid-glass', ['stable', 'experimental'])
       .filter((id) => !published || glassOnSite(id))
       .map((id) => docs[id].name),
   )
 }
 
-/** Whether some component experimental in liquid glass still waits for a newer published installer. */
+/** Whether some liquid glass component still waits for a newer published installer. */
 export function glassGatedOnSite(): boolean {
-  return componentsWithStyleSupport('liquid-glass', ['experimental']).some((id) => !glassOnSite(id))
+  return componentsWithStyleSupport('liquid-glass', ['stable', 'experimental']).some((id) => !glassOnSite(id))
 }

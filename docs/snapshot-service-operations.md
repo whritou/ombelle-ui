@@ -1,6 +1,6 @@
 # Immutable preset snapshot service operations
 
-This document describes the implementation and operator contract. The hosted service runs on the existing Ombelle Vercel project with Neon Free at `https://ombelle-ui.vercel.app`, and the installer is published as `@ombelle-ui/cli`. See [hosted deployment](hosted-deployment.md) and [CLI release](cli-release.md) for the deployment and release record. The operations listed at the end of this document remain open. The local SQLite adapter remains available for development.
+This document describes the implementation and operator contract. The hosted service runs on the existing Ombelle Vercel project with Neon Free at `https://ombelle-ui.vercel.app`, and the installer is published as `@ombelle-ui/cli`. See [hosted deployment](hosted-deployment.md) and [CLI release](cli-release.md) for the deployment and release record. The public read contract is [Hosted API v1](hosted-api-v1.md); incident procedures (withdrawal on Postgres, rotation, outages) are in [production operations](production-operations.md#incidents). The local SQLite adapter remains available for development.
 
 ## Implemented contract
 
@@ -32,7 +32,7 @@ The example is illustrative. The embedded preset ID and revision are retained an
 
 The implementation enforces 65,536 UTF-8 bytes for both the incoming and normalized preset, JSON nesting depth 16, a ten-second request-body deadline, and a 128 KiB response/cache/session envelope maximum. Pending editor publication state expires after 24 hours.
 
-Both adapters share 30 POST attempts per client per minute, 200 new publications per client per UTC day, and 5,000 new publications globally per UTC day across presets and recipes (`apps/www/src/snapshots/server/quotas.ts`). The editors publish automatically when a visitor opens Get code, so these budgets cover iterative editing. A client is the trusted ingress IP address; IPv6 clients are keyed on their /64 prefix, since one subscriber can rotate addresses within it. Combined store capacity is 100,000 records and 256 MiB of canonical response bytes. SQLite lock wait is 250 ms. Retry attempts count toward the minute attempt quota; idempotent replay does not consume a new-publication daily quota.
+Both adapters share 30 POST attempts per client per minute, 200 new publications per client per UTC day, 1,000 new publications per network per UTC day, and 5,000 new publications globally per UTC day across presets and recipes (`apps/www/src/snapshots/server/quotas.ts`). The last 1,000 of the global day are held for light networks: once 4,000 publications exist that day, only networks that have published fewer than 50 times today may publish. The editors publish automatically when a visitor opens Get code, so these budgets cover iterative editing. A client is the trusted ingress IP address; IPv6 clients are keyed on their /64 prefix, since one subscriber can rotate addresses within it. A network is the IPv4 address, or the IPv6 /48 a subscriber is usually delegated, so one subscriber cannot multiply the client budget across its /64s (a /56 holds 256 of them). Network counters live in the `client` daily rate buckets under a `network:` key prefix, so neither store's schema changes. A 429 response names the exhausted budget in its `issues` (`/rateLimit/minute`, `client-day`, `network-day` or `global-day`). Combined store capacity is 100,000 records and 256 MiB of canonical response bytes. SQLite lock wait is 250 ms. Retry attempts count toward the minute attempt quota; idempotent replay does not consume a new-publication daily quota.
 
 Recipe publication uses `POST /api/v1/recipes` with exactly `{ "recipe": <recipe> }` and the same request policy. Reads use `/api/v1/recipes/{id}/{revision}` with `rc_<32 lowercase hexadecimal digits>@1` references. The verified envelope contains the normalized recipe and resolved built-in preset, both canonical hashes, and pinned releases. Recipe and preset idempotency keys occupy one shared namespace; reusing a key across kinds conflicts. Withdrawal and conditional-read availability rules apply to both kinds.
 
@@ -67,7 +67,7 @@ The private CLI accepts HTTPS snapshot origins. Literal loopback origins such as
 
 ## Initialize, withdraw, restore
 
-Set `OMBELLE_SNAPSHOT_DB_PATH` to the same absolute file used by the service before running operator commands. The commands are repository-local pnpm scripts:
+Set `OMBELLE_SNAPSHOT_DB_PATH` to the same absolute file used by the service before running operator commands. The commands are repository-local pnpm scripts. The example below uses the SQLite backend; for production Postgres, set `OMBELLE_SNAPSHOT_BACKEND=postgres` with `DATABASE_URL` and `DATABASE_URL_UNPOOLED` instead, as shown in [abusive publisher](production-operations.md#abusive-publisher-or-abusive-content):
 
 ```powershell
 $env:OMBELLE_SNAPSHOT_DB_PATH = 'D:\snapshot-data\snapshots.sqlite'
@@ -108,8 +108,8 @@ In place as of 2026-11-02:
 - an explicit operator withdrawal command;
 - a publicly distributed CLI (`@ombelle-ui/cli`);
 - `/privacy` and `/security` pages, `security.txt`, and GitHub private vulnerability reporting;
-- hourly monitoring of the site, the API and quotas through a read-only database role;
-- a verified Postgres backup and restore drill (first run 2026-11-02).
+- scheduled monitoring (requested hourly, delivered every few hours) of the site, the API, a known code, the advertised CLI, quotas and backup age, through a read-only database role, with an optional external heartbeat and alert webhook;
+- a verified Postgres backup and restore drill (first run 2026-11-02), with daily scheduled backups.
 
 See [production operations](production-operations.md) for the runbook, backup cadence and drill log. Privacy requests have no dedicated email address: requesters open a GitHub issue asking for a private channel.
 

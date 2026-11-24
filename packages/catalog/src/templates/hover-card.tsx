@@ -11,12 +11,12 @@ export type HoverCardProps = React.ComponentProps<typeof HoverCardPrimitive.Root
  * own: keep actions that only the card offers out of it.
  */
 export function HoverCard({ openDelay = 500, closeDelay = 200, ...props }: HoverCardProps) {
-  return <HoverCardPrimitive.Root data-slot="hover-card" openDelay={openDelay} closeDelay={closeDelay} {...props} />
+  return <HoverCardPrimitive.Root openDelay={openDelay} closeDelay={closeDelay} {...props} data-slot="hover-card" />
 }
 
 /** The link the card previews. */
 export function HoverCardTrigger({ className, ...props }: React.ComponentProps<typeof HoverCardPrimitive.Trigger>) {
-  return <HoverCardPrimitive.Trigger data-slot="hover-card-trigger" className={cn(className)} {...props} />
+  return <HoverCardPrimitive.Trigger className={cn(className)} {...props} data-slot="hover-card-trigger" />
 }
 
 export function HoverCardContent({
@@ -29,12 +29,12 @@ export function HoverCardContent({
   return (
     <HoverCardPrimitive.Portal>
       <HoverCardPrimitive.Content
-        data-slot="hover-card-content"
         side={side}
         align={align}
         sideOffset={sideOffset}
         className={cn(className)}
         {...props}
+        data-slot="hover-card-content"
       />
     </HoverCardPrimitive.Portal>
   )
@@ -42,5 +42,5 @@ export function HoverCardContent({
 
 /** The caret pointing at the link. Place it last inside HoverCardContent. */
 export function HoverCardArrow({ className, width = 14, height = 7, ...props }: React.ComponentProps<typeof HoverCardPrimitive.Arrow>) {
-  return <HoverCardPrimitive.Arrow data-slot="hover-card-arrow" width={width} height={height} className={cn(className)} {...props} />
+  return <HoverCardPrimitive.Arrow width={width} height={height} className={cn(className)} {...props} data-slot="hover-card-arrow" />
 }

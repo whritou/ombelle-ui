@@ -1,103 +1,27 @@
-import { compile } from '@ombelle/compiler'
-import {
-  componentsWithStyleSupport,
-  type CompileResult,
-  type PresetSnapshot,
-} from '@ombelle/contracts'
+import { glassContrastReport, resolvePreset } from '@ombelle/compiler'
+import { getCatalogPresets } from '@ombelle/catalog/presets'
+import type { PresetSnapshot } from '@ombelle/contracts'
+import type { SnapshotFrame } from './snapshot-preview'
 
-type FrameStatus = 'connecting' | 'ready' | 'failed'
-type Status = 'compiling' | FrameStatus
-export type SnapshotPreviewState = {
-  identity: string
-  result: CompileResult | null
-  status: Status
-  onStatus: (status: FrameStatus) => void
-}
-const identity = (snapshot: PresetSnapshot) =>
-  `${snapshot.id}@${snapshot.revision}:${snapshot.presetHash}`
+// Server only: the published preset page calls these; its client code imports snapshot-preview.ts.
 
-/** One effect-owned compile/transport lifetime. Disposed sessions never notify. */
-export function createSnapshotPreviewSession(
-  snapshot: PresetSnapshot,
-  options: {
-    compile?: () => Promise<CompileResult>
-    notify?: (state: SnapshotPreviewState) => void
-    isCurrent?: () => boolean
-  } = {},
-) {
-  let disposed = false
-  const current = () => !disposed && options.isCurrent?.() !== false
-  let state: SnapshotPreviewState = {
-    identity: identity(snapshot),
-    result: null,
-    status: 'compiling',
-    onStatus,
-  }
-  function update(next: SnapshotPreviewState) {
-    if (!current()) return
-    state = next
-    options.notify?.(state)
-  }
-  function onStatus(status: FrameStatus) {
-    if (state.result) update({ ...state, status })
-  }
-  return {
-    get state() {
-      return state
-    },
-    async start() {
-      update(state)
-      try {
-        const result = await (options.compile?.() ??
-          compile({
-            preset: snapshot.preset,
-            // Glass previews only the components the family supports; stable
-            // families still compile all twelve in catalog order.
-            componentIds: componentsWithStyleSupport(
-              snapshot.preset.styleFamily,
-              ['stable', 'experimental'],
-            ),
-            catalogRelease: snapshot.catalogRelease,
-            compilerVersion: snapshot.compilerVersion,
-            glassContrast: 'report',
-          }))
-        if (result.preset.hash !== snapshot.presetHash)
-          throw new Error('Snapshot hash mismatch')
-        update({ ...state, result, status: 'connecting' })
-      } catch {
-        update({ ...state, result: null, status: 'failed' })
-      }
-    },
-    dispose() {
-      disposed = true
-    },
-  }
+/** Some Liquid Glass text of the snapshot falls below 4.5:1 in the contrast model. */
+export function snapshotContrastWarning(snapshot: PresetSnapshot): boolean {
+  return snapshot.preset.styleFamily === 'liquid-glass' && !glassContrastReport(snapshot.preset).passes
 }
 
-/** Also gates the render before React runs replacement effect cleanup. */
-export function selectSnapshotPreview(
-  snapshot: PresetSnapshot,
-  state: SnapshotPreviewState | null,
-) {
-  const visible = state?.identity === identity(snapshot) ? state : null
-  const status: Status = visible?.status ?? 'compiling'
-  const messages: Record<Status, string> = {
-    compiling: 'Compiling snapshot preview…',
-    connecting: 'Connecting snapshot gallery…',
-    ready: 'Snapshot gallery ready.',
-    failed: visible?.result
-      ? 'Gallery unavailable. Preset JSON remains available.'
-      : 'Preview compilation unavailable. Preset JSON remains available.',
-  }
-  return {
-    status,
-    message: messages[status],
-    frame: visible?.result
-      ? {
-          key: visible.identity,
-          result: visible.result,
-          onStatus: visible.onStatus,
-        }
-      : null,
+/**
+ * How the page's gallery gets the snapshot, after checking that its preset resolves to its hash. A stable
+ * family goes to the sandboxed gallery as tokens, which it resolves and verifies itself. Liquid glass needs
+ * compiled styles: the page compiles them in the preset worker, off its main thread. Compiling here instead
+ * would cost about 10 s of server time per read of a public page.
+ */
+export async function prepareSnapshotFrame(snapshot: PresetSnapshot): Promise<SnapshotFrame> {
+  try {
+    const resolved = await resolvePreset(snapshot.preset, getCatalogPresets(snapshot.catalogRelease))
+    if (resolved.hash !== snapshot.presetHash) return { kind: 'failed' }
+    return { kind: snapshot.preset.styleFamily === 'liquid-glass' ? 'worker' : 'tokens' }
+  } catch {
+    return { kind: 'failed' }
   }
 }

@@ -1,7 +1,7 @@
 import { useState, type CSSProperties } from 'react'
 import { CircleAlert, RotateCcw } from 'lucide-react'
-import { getCatalog } from '@ombelle/catalog'
-import { styleFamilies, type StyleFamily } from '@ombelle/contracts'
+import { getCatalogPresets } from '@ombelle/catalog/presets'
+import { accessibilityCaveatLabel, familyAccessibilityCaveat, styleFamilies, type StyleFamily } from '@ombelle/contracts'
 import { offeredStyleFamilies } from '../../snapshots/install-command'
 import { ControlRow, SegmentedControl, SliderRow } from '../../editor-shell'
 import { keepChoice } from '../../editor-shell/inspector'
@@ -75,9 +75,7 @@ export function revealPresetField(path: string) {
   const field =
     document.getElementById(fieldId(path) + '-number') ??
     document.getElementById(fieldId(path))
-  // Identity fields live in a closed dialog; open it so they can take focus.
-  const dialog = field?.closest('dialog')
-  if (dialog && !dialog.open) dialog.showModal()
+  // Id and revision live in the editor's ID & revision dialog, which opens them itself.
   field?.focus()
 }
 type ControlProps = {
@@ -134,7 +132,7 @@ export function FamilyPicker({
             <i />
           </span>
           <span className="preset-family-name">{familyNames[family]}</span>
-          {family === 'liquid-glass' && <span className="preset-family-tag">Beta</span>}
+          {familyAccessibilityCaveat(family) && <span className="preset-family-tag">{accessibilityCaveatLabel}</span>}
         </ToggleGroupItem>
       ))}
     </ToggleGroup>
@@ -269,6 +267,15 @@ const shapeKeys: readonly string[] = [
   'density',
   'borderWidthPx',
 ]
+/**
+ * Organic and retro futurism draw their own corners, borders, elevation and control heights, so these
+ * tokens change almost nothing there (DES-02). The editor does not offer them for those families until
+ * the families read them; a preset still accepts the values.
+ */
+export const fixedDesignKeys: Partial<Record<StyleFamily, readonly string[]>> = {
+  organic: ['radiusRem', 'density', 'borderWidthPx', 'shadowOffsetXPx', 'shadowOffsetYPx'],
+  'retro-futurism': ['radiusRem', 'density', 'borderWidthPx', 'shadowOffsetXPx', 'shadowOffsetYPx'],
+}
 /** What an empty value means for the optional font pickers. */
 const unsetFontLabels: Record<string, string> = {
   headingFontFamilyId: 'Same as body font',
@@ -293,9 +300,12 @@ export function DesignControls({
     ...Object.entries(designControls),
     ...(draft.family === 'liquid-glass' ? Object.entries(glassDesignControls) : []),
   ]
-  const shown = designEntries.filter(
+  const inSection = designEntries.filter(
     ([key]) => !section || (section === 'shape') === shapeKeys.includes(key),
   )
+  const fixedKeys = fixedDesignKeys[draft.family] ?? []
+  const shown = inSection.filter(([key]) => !fixedKeys.includes(key))
+  const hidesSome = shown.length < inSection.length
   const glass = draft.family === 'liquid-glass'
   const labelFor = (key: string, fallback: string) =>
     key === 'shadowOffsetXPx' || key === 'shadowOffsetYPx' || key === 'borderWidthPx'
@@ -339,6 +349,11 @@ export function DesignControls({
   }
   return (
     <div className="preset-design-list">
+      {hidesSome && (
+        <p className="preset-control-hint" data-testid="fixed-design-note">
+          {familyNames[draft.family]} draws its own corners, borders, shadows and control sizes, so those settings are not offered for it.
+        </p>
+      )}
       {shown.map(([key, control]) => {
         const path = `/design/${key}` as PresetEditablePath,
           value = presetFieldValue(draft, path)
@@ -474,7 +489,7 @@ export function paletteSwatch(
 }
 /** The style's own colours in one mode, for the Style default swatch. */
 function defaultTokens(family: StyleFamily, mode: SchemeMode): Readonly<Record<string, string | undefined>> {
-  return getCatalog('0.1.0').presets[family].modes[mode]
+  return getCatalogPresets('0.1.0').presets[family].modes[mode]
 }
 /** The disc's custom properties; a primary colour alone has no page colour, so it is a plain filled disc. */
 function swatchStyle(swatch: { background: string; mark?: string } | undefined): CSSProperties | undefined {

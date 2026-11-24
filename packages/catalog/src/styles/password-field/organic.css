@@ -14,7 +14,7 @@
   align-items: center;
   inline-size: 100%;
   min-inline-size: 0;
-  min-block-size: var(--control-height, 2.5rem);
+  min-block-size: calc(var(--control-height, 2.5rem) + var(--password-field-size-step, 0rem));
   overflow: clip;
   font-family: var(--font-family);
   font-size: 0.875rem;
@@ -37,7 +37,7 @@
   box-shadow: none;
 }
 [data-slot='password-field-input'] {
-  min-block-size: var(--control-height, 2.5rem);
+  min-block-size: calc(var(--control-height, 2.5rem) + var(--password-field-size-step, 0rem));
 }
 [data-slot='password-field-input']::placeholder {
   color: var(--muted-foreground);
@@ -250,7 +250,7 @@
   }
 }
 /* organic layer */
-[data-slot='password-field-control']{border-width:2px;border-radius:var(--o-r2);background:var(--card);overflow:hidden;box-shadow:inset 0 2px 4px -2px var(--o-sh);transition:border-color var(--motion-duration),border-radius 0.4s}
+[data-slot='password-field-control']{border-width:2px;border-radius:var(--o-r2);background:var(--card);overflow:hidden;box-shadow:inset 0 2px 4px -2px var(--o-sh);transition:border-color var(--motion-duration),border-radius calc(var(--motion-duration) * 8/3)}
 [data-slot='password-field-control']:focus-within{border-color:var(--primary);border-radius:var(--o-r3h);outline:3px solid var(--ring);outline-offset:2px;box-shadow:inset 0 2px 4px -2px var(--o-sh)}
 [data-slot='password-field-control']:has(> :is(input, textarea)[aria-invalid='true']){border-color:var(--destructive);box-shadow:inset 0 2px 4px -2px var(--o-sh)}
 [data-slot='password-field-toggle']{border-radius:var(--o-r2)}
@@ -258,3 +258,9 @@
 [data-slot='password-field-strength-bar'] > i{border-radius:99px;background:var(--success-foreground,var(--foreground))}
 [data-slot='password-field-strength-bar']:is([data-level='fair'] > *) > i{background:var(--warning-foreground,var(--foreground))}
 @media (forced-colors: active){[data-slot='password-field-strength-bar']{border:1px solid CanvasText}}
+/* 1.0 size scale (DES-12): sm and lg sit 0.5rem below and above the default, which follows --control-height */
+[data-slot='password-field'][data-size='sm'] { --password-field-size-step: -0.5rem; --password-field-font-size: 0.8125rem; }
+[data-slot='password-field'][data-size='lg'] { --password-field-size-step: 0.5rem; --password-field-font-size: 1rem; }
+[data-slot='password-field-control'] { font-size: var(--password-field-font-size, 0.875rem); }
+[data-slot='password-field-input'] { padding-block: 0; }
+/* end 1.0 size scale */

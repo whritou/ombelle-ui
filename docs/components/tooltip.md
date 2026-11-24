@@ -1,10 +1,10 @@
 # Tooltip
 
-Tooltip wraps reviewed Radix Tooltip primitives, with flat, minimalist, neo-brutalism, ombelle, papier, organic, and retro futurism styles in light and dark modes. Liquid glass is experimental; see [liquid glass](liquid-glass.md). The template is a client component.
+Tooltip wraps reviewed Radix Tooltip primitives, with flat, minimalist, neo-brutalism, ombelle, papier, organic, and retro futurism styles in light and dark modes. Liquid glass is supported, without an accessibility guarantee; see [liquid glass](liquid-glass.md). The template is a client component.
 
 ## Install and compose
 
-Build packages and initialize the target project with a local preset before using the private local CLI:
+Build packages and initialize the target project with a local preset before using the CLI:
 
 ```powershell
 pnpm build:packages
@@ -80,5 +80,7 @@ Runtime dependencies are exactly React 19.3.1, @radix-ui/react-tooltip 1.4.1 (MI
 Projects whose `components.json` uses one of shadcn's `base-*` styles receive a Tooltip built on `Tooltip.Provider`, `Root`, `Trigger`, `Portal`, `Positioner`, `Popup` and `Arrow` from `@base-ui/react/tooltip` (`@base-ui/react` 1.9.0) instead of `@radix-ui/react-tooltip`. Part names and `data-slot` values match the Radix edition. `TooltipProvider` keeps Radix's `delayDuration` (700ms by default) and `skipDelayDuration` (300ms), mapped to Base UI's `delay` and `timeout`. `TooltipContent` renders in a portal and keeps `side` (top by default), `sideOffset` (6px), `align`, `alignOffset`, `collisionPadding` and `sticky`, passed to Base UI's positioner. Use `render` on `TooltipTrigger` where the Radix edition uses `asChild`.
 
 State bridge: the trigger and popup carry `data-state` `delayed-open` or `closed`, and the popup `data-side` and `data-align`, through each part's `render` function; a custom `render` replaces it. The popup maps Base UI's `--available-width` to `--radix-tooltip-content-available-width`. `TooltipArrow` renders the same SVG triangle as Radix, so the stylesheet's `fill` and `stroke` apply. Radix also distinguishes `instant-open`; the Base UI edition reports `delayed-open` for every open tooltip, which the stylesheet does not distinguish.
+
+Accessibility: Base UI 1.9.0 gives the popup no role and the trigger no description, so the template adds them. `TooltipContent` has `role="tooltip"` and an id (your own `id` if you pass one), and while the tooltip is open `TooltipTrigger` gets `aria-describedby` pointing at it, after any `aria-describedby` of your own. Both editions announce the tooltip text the same way. A trigger tied to the tooltip through a Base UI `handle` instead of sitting inside `Tooltip` gets no description; give it its own full name.
 
 The parity test covers the closed tooltip and the popup opened by focus and by hover, including the portal content and arrow. The Base UI edition has no allowed styling differences.

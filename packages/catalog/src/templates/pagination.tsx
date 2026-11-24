@@ -55,6 +55,8 @@ export function PaginationLink({
     <a
       {...props}
       href={disabled ? undefined : href}
+      // Without an href an anchor has no role, so a disabled link keeps its link role for its name and aria-disabled.
+      role={disabled ? 'link' : props.role}
       tabIndex={disabled ? -1 : tabIndex}
       onClick={disabled ? undefined : onClick}
       onAuxClick={disabled ? undefined : onAuxClick}

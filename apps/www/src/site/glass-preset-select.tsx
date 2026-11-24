@@ -1,7 +1,7 @@
 'use client'
 
 import { useId } from 'react'
-import type { StartingPresetId } from '@ombelle/catalog'
+import type { StartingPresetId } from '@ombelle/catalog/presets'
 import { Combobox, ComboboxContent, ComboboxEmpty, ComboboxInput, ComboboxItem, ComboboxList } from '../generated/ui/components/ui/combobox'
 import { glassPresetId, glassPresetOptions } from './glass-presets'
 

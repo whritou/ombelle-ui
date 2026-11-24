@@ -1,4 +1,4 @@
-import { fontById, styleFamilyFonts } from '@ombelle/catalog'
+import { fontById, styleFamilyFonts } from '@ombelle/catalog/presets'
 import type { BuiltInFamily } from './routing'
 
 // Ombelle's fonts, self-hosted at the fixed URLs the page preloads (scripts/generate-www-previews.ts). The page CSS

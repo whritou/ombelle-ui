@@ -70,7 +70,9 @@ export default function Stage() {
     <Badge>Ordinary badge</Badge>
     {id === 'glass-isolation' && <><Popover><PopoverTrigger>Ordinary popover</PopoverTrigger><PopoverContent>Ordinary content</PopoverContent></Popover>${glass.join('')}</>}
     {Recipe && <div style={{ boxSizing: 'border-box', minHeight: '100vh', display: 'flex',
-      justifyContent: 'center', alignItems: 'center', padding: '2rem' }}><Recipe /></div>}
+      justifyContent: 'center', alignItems: 'center', padding: '2rem',
+      // Text inherits the preset foreground, as on a shadcn page body and on the editor's stage.
+      color: 'var(--foreground)' }}><Recipe /></div>}
   </main>
 }
 `)

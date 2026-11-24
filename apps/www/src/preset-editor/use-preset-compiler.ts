@@ -1,12 +1,13 @@
 'use client'
 import { useEffect, useRef, useState } from 'react'
-import { canonicalize } from '@ombelle/compiler'
+import { canonicalize } from '@ombelle/compiler/light'
 import {
   validatePreset,
   isStyleFamily,
   type CompileResult,
 } from '@ombelle/contracts'
 import type { PresetEditorDraft } from './model'
+import { acquireWorker, nextRequestId } from '../editor/shared-worker'
 import type {
   PresetCompileRequest,
   PresetCompileResponse,
@@ -93,11 +94,24 @@ export function createPresetCompiler(
   notify: (state: PresetCompilerState) => void,
 ) {
   let state = initial(),
-    serial = 0,
     activeId = 0,
     activeKey: string | null = null,
     pendingKey: string | null = null
   let timer: ReturnType<typeof setTimeout> | undefined
+  // At most one request in flight. The worker compiles requests one after another and never skips a
+  // superseded one, so a post per edit queues every stale draft behind the latest: on a slow machine
+  // the latest result came back about 26 s after the edit. While a request is out, only the latest
+  // draft waits; it is sent when the reply arrives.
+  let inFlight: { requestId: number; key: string } | null = null,
+    queued: PresetCompileRequest | null = null
+  const dispatch = (request: PresetCompileRequest) => {
+    if (inFlight) {
+      queued = request
+      return
+    }
+    inFlight = { requestId: request.requestId, key: canonicalize(request.draft) }
+    send(request)
+  }
   const emit = (next: PresetCompilerState) => {
     state = next
     notify(next)
@@ -109,7 +123,7 @@ export function createPresetCompiler(
     update(draft: PresetEditorDraft) {
       clearTimeout(timer)
       pendingKey = canonicalize(draft)
-      activeId = ++serial
+      activeId = nextRequestId()
       activeKey = pendingKey
       emit({
         ...state,
@@ -119,11 +133,20 @@ export function createPresetCompiler(
       })
       const id = activeId
       timer = setTimeout(
-        () => send({ type: 'compile-preset', requestId: id, draft }),
+        () => dispatch({ type: 'compile-preset', requestId: id, draft }),
         150,
       )
     },
     receive(input: unknown) {
+      if (inFlight && record(input) && input.requestId === inFlight.requestId) {
+        const settled = inFlight.key
+        inFlight = null
+        const next = queued
+        queued = null
+        // A reply for the very draft now current answers it; anything else sends the latest draft.
+        if (next && settled === pendingKey && response(input)) activeId = input.requestId
+        else if (next) dispatch(next)
+      }
       if (
         !response(input) ||
         input.requestId !== activeId ||
@@ -149,7 +172,10 @@ export function createPresetCompiler(
     },
     fail() {
       clearTimeout(timer)
-      activeId = ++serial
+      // The worker is gone or its reply is lost: free the slot, so the next edit or Retry sends at once.
+      inFlight = null
+      queued = null
+      activeId = nextRequestId()
       emit({
         ...state,
         status: 'invalid',
@@ -163,7 +189,9 @@ export function createPresetCompiler(
     },
     dispose() {
       clearTimeout(timer)
-      activeId = ++serial
+      inFlight = null
+      queued = null
+      activeId = nextRequestId()
       pendingKey = null
     },
   }
@@ -179,6 +207,7 @@ export function usePresetCompiler(draft: PresetEditorDraft) {
   const key = canonicalize(draft)
   useEffect(() => {
     let worker: Worker | null = null
+    let release = () => {}
     const handle = createPresetCompiler((request) => {
       try {
         if (worker) worker.postMessage(request)
@@ -188,19 +217,26 @@ export function usePresetCompiler(draft: PresetEditorDraft) {
       }
     }, setState)
     controller.current = handle
+    const onMessage = (event: MessageEvent<unknown>) => handle.receive(event.data)
+    const onFail = () => handle.fail()
     try {
-      worker = new Worker('/preset-compiler.worker.js', { type: 'module' })
-      worker.onmessage = (event: MessageEvent<unknown>) =>
-        handle.receive(event.data)
-      worker.onerror = () => handle.fail()
-      worker.onmessageerror = () => handle.fail()
+      // Shared with the editor's other compiler (the catalog default Get code compares to).
+      const shared = acquireWorker('/preset-compiler.worker.js')
+      worker = shared.worker
+      release = shared.release
+      worker.addEventListener('message', onMessage)
+      worker.addEventListener('error', onFail)
+      worker.addEventListener('messageerror', onFail)
       handle.update(latest.current)
     } catch {
       handle.fail()
     }
     return () => {
       handle.dispose()
-      worker?.terminate()
+      worker?.removeEventListener('message', onMessage)
+      worker?.removeEventListener('error', onFail)
+      worker?.removeEventListener('messageerror', onFail)
+      release()
       controller.current = null
     }
   }, [attempt])

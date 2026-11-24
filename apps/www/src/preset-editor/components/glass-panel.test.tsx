@@ -27,18 +27,18 @@ it('lists every limitation and a passing readout for the built-in glass draft', 
     <GlassPanel report={presetGlassReport(createPresetDraft('liquid-glass'))} />,
   )
   expect(html).toContain(
-    '<section aria-labelledby="glass-limitations-heading"><h2 id="glass-limitations-heading">Liquid glass limitations</h2>',
+    '<section aria-labelledby="glass-limitations-heading"><h2 id="glass-limitations-heading">Liquid glass accessibility</h2>',
   )
   // The limitations sit in a closed Collapsible: its trigger is a collapsed button and its content is not rendered.
-  expect(html).toMatch(/<button[^>]*aria-expanded="false"[^>]*>5 known limitations/)
+  expect(html).toMatch(/<button[^>]*aria-expanded="false"[^>]*>4 known limitations/)
   expect(html).not.toContain('<details')
   for (const item of glassLimitations) expect(html).not.toContain(`<li>${item}</li>`)
-  // Every form control is experimental in glass now, so the panel no longer claims they are unavailable.
-  expect(glassLimitations).toHaveLength(5)
+  // Every component is stable in glass, so the panel no longer claims form controls are unavailable.
+  expect(glassLimitations).toHaveLength(4)
   expect(html).not.toContain('form controls other than Input')
   // The supported list follows the contracts' support table, so it names every component.
   expect(html).toContain(
-    'Liquid glass is experimental. Alert, Accordion, Button, Badge, Avatar, Card, Checkbox, Dialog, Dropdown Menu, Input, Label, Popover, Progress, Native Select, Radio Group, Select, Switch, Separator, Skeleton, Tabs, Table, Textarea, Tooltip, Input Group, Sheet, Alert Dialog, Breadcrumb, Pagination, Toast, Spinner, Kbd, Empty State, Field, Meter, Stepper, Slider, Toggle Group, Chip, Tag Input, Input OTP, Combobox, Command, Hover Card, Context Menu, Calendar, Toggle, Collapsible, Scroll Area, Button Group, Item, Number Input, Color Picker, Code Block, Password Field, Carousel, Aspect Ratio, Toolbar, Prose, Navigation Menu, Sidebar, Resizable, Menubar and Data Table support it.',
+    'Accessibility not guaranteed: liquid glass text contrast depends on the background behind it. Check contrast over your own backgrounds, or set design.transparency to &quot;reduced&quot; for opaque surfaces. Alert, Accordion, Button, Badge, Avatar, Card, Checkbox, Dialog, Dropdown Menu, Input, Label, Popover, Progress, Native Select, Radio Group, Select, Switch, Separator, Skeleton, Tabs, Table, Textarea, Tooltip, Input Group, Sheet, Alert Dialog, Breadcrumb, Pagination, Toast, Spinner, Kbd, Empty State, Field, Meter, Stepper, Slider, Toggle Group, Chip, Tag Input, Input OTP, Combobox, Command, Hover Card, Context Menu, Calendar, Toggle, Collapsible, Scroll Area, Button Group, Item, Number Input, Color Picker, Code Block, Password Field, Carousel, Aspect Ratio, Toolbar, Prose, Navigation Menu, Sidebar, Resizable, Menubar and Data Table support it.',
   )
   // No component is unavailable in glass any more, so the panel names none.
   expect(html).not.toContain('unavailable')

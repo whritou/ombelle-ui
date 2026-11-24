@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { offeredGlassPresetOrder, getCatalog } from '@ombelle/catalog'
+import { offeredGlassPresetOrder, getCatalogPresets } from '@ombelle/catalog/presets'
 import { styleFamilies } from '@ombelle/contracts'
 import { designValues, exampleCode, familyMeta, glassVars, paletteVars, tweakVars, type LandingPalette } from './landing-theme'
 
@@ -11,7 +11,7 @@ const palette: LandingPalette = {
 
 describe('familyMeta', () => {
   it('describes every style family with the design values of its built-in preset', () => {
-    const { presets } = getCatalog('0.1.0')
+    const { presets } = getCatalogPresets('0.1.0')
     for (const family of styleFamilies) {
       const { design } = presets[family]
       expect(familyMeta[family].design, family).toEqual({
@@ -56,7 +56,7 @@ describe('glassVars', () => {
   })
 
   it('has blur and opacity for every offered starting preset', () => {
-    const { startingPresets } = getCatalog('0.1.0')
+    const { startingPresets } = getCatalogPresets('0.1.0')
     for (const id of offeredGlassPresetOrder) {
       expect(startingPresets[id].design.glassBlurPx, id).toBeTypeOf('number')
       expect(startingPresets[id].design.glassOpacity, id).toBeTypeOf('number')

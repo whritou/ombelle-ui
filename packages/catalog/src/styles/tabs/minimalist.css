@@ -41,7 +41,7 @@
   gap: 0.375rem;
   justify-content: center;
   min-inline-size: 1.5rem;
-  min-block-size: 2.75rem;
+  min-block-size: max(1.5rem, calc(var(--control-height) + 0.25rem + var(--tabs-size-step, 0rem)));
   padding-block: 0.5rem;
   padding-inline: 0;
   border: 0;
@@ -203,7 +203,7 @@
   display: inline-flex;
   align-items: center;
   gap: 0.375rem;
-  min-block-size: 2rem;
+  min-block-size: max(1.5rem, calc(var(--control-height) - 0.5rem + var(--tabs-size-step, 0rem)));
   padding-block: 0;
   padding-inline: 0.875rem;
   border: var(--border-width) solid var(--border);
@@ -254,3 +254,7 @@
   }
 }
 /* end 0.7.3 variants */
+/* 1.0 size scale (DES-12): sm and lg sit 0.5rem below and above the default, which follows --control-height */
+[data-slot='tabs-list'][data-size='sm'] { --tabs-size-step: -0.5rem; }
+[data-slot='tabs-list'][data-size='lg'] { --tabs-size-step: 0.5rem; }
+/* end 1.0 size scale */

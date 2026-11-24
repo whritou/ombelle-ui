@@ -1,6 +1,6 @@
 # Code Block
 
-Code Block shows read-only source with a Copy button: a file block with a title and line numbers, or a command block with one tab per package manager. Its surface is dark in both colour modes and every family, as on the 0.7.5 board. It is available in all five families, with Radix and Base UI editions; the template is a client component.
+Code Block shows read-only source with a Copy button: a file block with a title and line numbers, or a command block with one tab per package manager. Its surface is dark in both colour modes and every family, as on the 0.7.5 board. It is available in all eight families, with Radix and Base UI editions; the template is a client component.
 
 This component requires CLI **0.7.5** or later: `npx @ombelle-ui/cli@0.7.5 add code-block`. For a built local checkout:
 
@@ -63,7 +63,7 @@ export function Config({ code }: { code: string }) {
 ### `CodeBlockCode`
 
 - The `pre` is a Tab stop (`tabIndex={0}`) with `role="region"`, so it can be scrolled with the keyboard and is announced with its name. A `role` you pass takes precedence.
-- Its name is "<title> source" inside `CodeBlock`, or "Code" without a title. On `CodeBlockCode`, pass `label`; an `aria-labelledby` you pass replaces the label.
+- Its name is "<title> source" inside `CodeBlock`, or "Code" without a title. With `diff` it is "<title> changes" (or "Changes"), so a file and its diff on one page have different names. On `CodeBlockCode`, pass `label`; an `aria-labelledby` you pass replaces the label.
 - Every Code Block is a named region landmark, so several untitled blocks on one page all share the name "Code". Pass a `title` (or a `label`) to each block so they can be told apart; axe's `landmark-unique` rule reports duplicates as a best practice.
 
 ### Copy
@@ -163,6 +163,6 @@ The Base UI edition uses `Tabs` from `@base-ui/react/tabs` with `activateOnFocus
 
 ## Liquid glass
 
-Liquid glass is experimental for Code Block, as for every glass component, and its findings do not block a release. The glass surface is the same dark surface, with the board's white rim and the family's 2px `--foreground` focus ring drawn in the code foreground. See [liquid glass](liquid-glass.md).
+Liquid glass is supported for Code Block without an accessibility guarantee, as for every glass component; only its contrast findings, which depend on the backdrop, are advisory in the specimen audit. The glass surface is the same dark surface, with the board's white rim and the family's 2px `--foreground` focus ring drawn in the code foreground. See [liquid glass](liquid-glass.md).
 
 See [Code Block evidence](../evidence/code-block-075.md) for the token contrast, the browser tests, the specimen audit and the board comparison.

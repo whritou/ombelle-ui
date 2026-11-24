@@ -1,6 +1,6 @@
 # Number Input
 
-Number Input is a text field for a number, with decrement and increment buttons and an optional unit, such as a border radius in pixels or a duration in milliseconds. It is available in all five families in light and dark mode. One template serves both the Radix and the Base UI edition; it is a client component.
+Number Input is a text field for a number, with decrement and increment buttons and an optional unit, such as a border radius in pixels or a duration in milliseconds. It is available in all eight families in light and dark mode. One template serves both the Radix and the Base UI edition; it is a client component.
 
 This component requires CLI **0.7.5** or later: `npx @ombelle-ui/cli@0.7.5 add number-input`. For a built local checkout:
 
@@ -34,6 +34,12 @@ export function Radius() {
 - When a controlled `value` changes from outside, the text follows, except while the field has focus and its text already spells that value. This is how `1.` survives a parent that stores `1`.
 - The steppers are named "Decrease <label>" and "Increase <label>", from the input's `aria-label` or its label element. Use `decrementLabel` and `incrementLabel` to change the names. They are left out of the Tab order (`tabIndex={-1}`) because the arrow keys cover keyboard use. They are disabled at the bounds and are at least 24 × 24 px.
 - With `name`, the form submits the field's text.
+- A `ref` reaches the input, alongside the component's own, so a form library can focus it.
+- A form reset returns the field to `defaultValue`, clears the invalid mark and calls `onValueChange` when the text changes.
+
+## Size (1.0)
+
+`NumberInput` takes `size`, which replaces the HTML `size` attribute. `sm` is one 0.5rem step below the density's control height, `default` is the control height (2.5rem, or 2.25rem with compact density) and `lg` is one step above it, as on every control on the [shared size scale](../03-components-styles-accessibility.md#sizes). `sm` text is 0.8125rem and `lg` text 1rem. Leaving `size` out renders what earlier releases render; only `sm` and `lg` set `data-size`.
 
 ## Recipe
 
@@ -45,6 +51,6 @@ Number Input has no primitive, so the Base UI edition installs the same template
 
 ## Liquid glass
 
-Liquid glass is experimental for Number Input, as for every glass component, and its findings do not block a release. See [liquid glass](liquid-glass.md).
+Liquid glass is supported for Number Input without an accessibility guarantee, as for every glass component; only its contrast findings, which depend on the backdrop, are advisory in the specimen audit. See [liquid glass](liquid-glass.md).
 
 See [editor inputs evidence](../evidence/editor-inputs-075.md) for the tests, the specimen audit and the board comparison.

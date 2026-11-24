@@ -321,7 +321,7 @@ for (const edition of ['radix', 'base'] as const) {
     test('the code region reads Removed and Added, and the count reads aloud', async ({ page }) => {
       const section = await open(page, edition)
       const diff = section.getByTestId('rg-diff')
-      const region = diff.getByRole('region', { name: 'ui-style.css source' })
+      const region = diff.getByRole('region', { name: 'ui-style.css changes' })
       const text = (await region.evaluate(node => (node as HTMLElement).textContent)) ?? ''
       expect(text).toContain('Removed:   --radius: 0.5rem;')
       expect(text).toContain('Added:   --radius: 0.75rem;')

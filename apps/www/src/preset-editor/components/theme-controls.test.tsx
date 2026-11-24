@@ -1,6 +1,6 @@
 import { expect, it } from 'vitest'
 import { renderToStaticMarkup } from 'react-dom/server'
-import { getCatalog } from '@ombelle/catalog'
+import { getCatalogPresets } from '@ombelle/catalog/presets'
 import { createPresetDraft } from '../model'
 import { accentSchemes, applyColorScheme, paletteSchemes } from '../schemes'
 import { paletteSwatch, schemeSwatches, ThemeControls } from './preset-controls'
@@ -41,7 +41,7 @@ it('draws each palette as its page colour with its primary as the mark, in the p
 })
 
 it('draws the style default in the style\'s own colours, not the editor\'s', () => {
-  const papier = getCatalog('0.1.0').presets.papier.modes
+  const papier = getCatalogPresets('0.1.0').presets.papier.modes
   expect(render('papier', 'light')).toContain(disc({ background: papier.light.background!, mark: papier.light.primary! }))
   expect(render('papier', 'dark')).toContain(disc({ background: papier.dark.background!, mark: papier.dark.primary! }))
   // The old default was a split of the editor's own primary and muted colours.

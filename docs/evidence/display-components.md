@@ -1,12 +1,12 @@
 # Display components evidence
 
-Evidence for Spinner, Kbd, Empty, Field, Meter and Stepper (0.7.3): how each family's default appearance compares with the 0.7.3 design boards, and what the [specimen audit](specimen-audit.md) measured. Design: [display components](../superpowers/specs/2026-11-09-display-components-design.md).
+Evidence for Spinner, Kbd, Empty, Field, Meter and Stepper (0.7.3): how each family's default appearance compares with the 0.7.3 design boards, and what the [specimen audit](specimen-audit.md) measured. Design: [display components](../internal/superpowers/specs/2026-11-09-display-components-design.md).
 
 All runs were local runs by an agent on Windows 11 Home 10.0.26300, with Node 24.19.0 and Playwright's bundled Chromium, headless at device scale factor 1. None is a CI run or a human review.
 
 ## Board comparison
 
-The boards are the 0.7.3 sections of the design artifact, rendered locally. The board images are in [images/display-components](images/display-components/). Each was compared with the audit page specimen in the same family and light mode (Radix edition) in two ways:
+The boards are the 0.7.3 sections of the design artifact, rendered locally. The board images are in [images/display-components](images/display-components). Each was compared with the audit page specimen in the same family and light mode (Radix edition) in two ways:
 
 - **Side by side:** board screenshot next to specimen screenshot.
 - **Computed styles:** a probe reads font size, weight, letter case, colours, padding, borders, radius, shadow and size from matching elements on the board and on the specimen, and lists every property that differs.

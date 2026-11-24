@@ -13,7 +13,7 @@ describe('Toggle Group', () => {
   it('provides ToggleGroup and ToggleGroupItem, on Radix Toggle Group and Base UI', () => {
     expectComponentContract('toggle-group', { client: true, parts: ['ToggleGroup', 'ToggleGroupItem'], slots: ['toggle-group', 'toggle-group-item'],
       dependencies: [{ name: 'react', version: '19.3.1' }, { name: '@radix-ui/react-toggle-group', version: '1.2.1' }, { name: 'clsx', version: '2.1.1' }, { name: 'tailwind-merge', version: '3.7.0' }],
-      selectors: ["[data-slot='toggle-group']", "[data-slot='toggle-group-item']"], glass: 'experimental' })
+      selectors: ["[data-slot='toggle-group']", "[data-slot='toggle-group-item']"], glass: 'stable' })
     expect(getTemplate(getCatalog('0.1.0'), 'toggle-group', 'base').dependencies.map(d => d.name)).toContain('@base-ui/react')
   })
 

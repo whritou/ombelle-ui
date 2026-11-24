@@ -15,7 +15,7 @@ import { writePresetGallery } from './generate-preset-gallery.js'
 import { writeAuditPages } from './generate-audit.js'
 import { generateWwwUi } from './generate-www-ui.js'
 import { generateWwwPreviews } from './generate-www-previews.js'
-import { writeEditorDefaults } from './generate-editor-defaults.js'
+import { writeComponentFontRoles, writeEditorDefaults } from './generate-editor-defaults.js'
 type PreviewFamily = (typeof supportedStyleFamilies)[number] | 'liquid-glass'
 async function writeFamily(family: PreviewFamily) {
   const glass = family === 'liquid-glass'
@@ -28,7 +28,7 @@ async function writeFamily(family: PreviewFamily) {
   const result = await compile({
     preset,
     componentIds: glass
-      ? componentsWithStyleSupport('liquid-glass', ['experimental'])
+      ? componentsWithStyleSupport('liquid-glass', ['stable', 'experimental'])
       : supportedComponentIds,
     catalogRelease: '0.1.0',
     compilerVersion: '0.1.0',
@@ -185,5 +185,6 @@ for (const id of recipeComponents)
     scopeRecipeTemplate(recipeCatalog.templates[id], '../flat/lib/utils.js'))
 // Each component editor's default recipe per family, which the editor preview shows before the first compile.
 await writeEditorDefaults('apps/preview/src/generated/editor-defaults')
+await writeComponentFontRoles('apps/www/src/generated/component-font-roles.ts')
 await fs.writeFile(`${recipeDirectory}/index.ts`,
   `export const scopedCatalogComponents = {\n${recipeComponents.map(id => `  '${id}': () => import('./${id}'),`).join('\n')}\n} as const\n`)

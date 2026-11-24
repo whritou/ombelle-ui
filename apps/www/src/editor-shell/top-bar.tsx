@@ -4,7 +4,7 @@ import dynamic from 'next/dynamic'
 import { ChevronLeft, Ellipsis, Pencil, Redo2, Search, Undo2 } from 'lucide-react'
 import { useEffect, useRef, useState, type ReactNode, type Ref } from 'react'
 import { editableComponents } from '../editor/editable-components'
-import { isCommandShortcut, paletteGroups, type PaletteGroup } from './command-groups'
+import { historyShortcut, isCommandShortcut, paletteGroups, type PaletteGroup } from './command-groups'
 import styles from './editor-shell.module.css'
 import { MoreActionsSheet, type MoreLink } from './more-sheet'
 import { SiteMenu } from './site-menu'
@@ -66,6 +66,8 @@ export function EditorTopBar({
     value: string
     maxLength: number
     invalid?: boolean
+    /** The id of the message that explains an invalid name. */
+    describedBy?: string
     readOnly?: boolean
     onChange(value: string): void
   }
@@ -109,6 +111,20 @@ export function EditorTopBar({
     window.addEventListener('keydown', toggle)
     return () => window.removeEventListener('keydown', toggle)
   }, [commands])
+  // The Edit menu shows Ctrl+Z and Shift+Ctrl+Z, so the keys do what it says.
+  const history = useRef({ undo, redo })
+  history.current = { undo, redo }
+  useEffect(() => {
+    const press = (event: KeyboardEvent) => {
+      const action = historyShortcut(event)
+      if (!action) return
+      const target = history.current[action]
+      event.preventDefault()
+      if (!target.disabled) target.onClick()
+    }
+    window.addEventListener('keydown', press)
+    return () => window.removeEventListener('keydown', press)
+  }, [])
   return (
     <header ref={bar} className={styles.topBar}>
       {/* Below 1200px the site header is not shown; its links live in this menu. */}
@@ -141,6 +157,7 @@ export function EditorTopBar({
           maxLength={nameField.maxLength}
           readOnly={nameField.readOnly}
           aria-invalid={nameField.invalid ? true : undefined}
+          aria-describedby={nameField.invalid ? nameField.describedBy : undefined}
           onChange={(event) => nameField.onChange(event.target.value)}
         />
         {/* The name is a plain field next to a trail and a status, so a pencil says it can be edited. */}
@@ -159,6 +176,7 @@ export function EditorTopBar({
             ref={undo.buttonRef}
             className={styles.iconButton}
             aria-label="Undo"
+            aria-keyshortcuts="Control+Z Meta+Z"
             disabled={undo.disabled}
             onClick={undo.onClick}
           >
@@ -170,6 +188,7 @@ export function EditorTopBar({
             ref={redo.buttonRef}
             className={`${styles.iconButton} ${styles.phoneHidden}`}
             aria-label="Redo"
+            aria-keyshortcuts="Shift+Control+Z Shift+Meta+Z"
             disabled={redo.disabled}
             onClick={redo.onClick}
           >

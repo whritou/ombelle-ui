@@ -10,8 +10,8 @@ const presets: StartingPresetId[] = ['builtin-liquid-glass-cristal', 'builtin-li
 const previewRoot = (page: Page, title: string) =>
   page.locator(`iframe[title="${title}"]`).contentFrame().locator('html')
 
-async function expectScene(root: Locator, scene: ReturnType<typeof glassPresetBackdrop>) {
-  await expect(root).toHaveAttribute('data-backdrop', 'glass')
+async function expectScene(root: Locator, scene: ReturnType<typeof glassPresetBackdrop>, timeout?: number) {
+  await expect(root).toHaveAttribute('data-backdrop', 'glass', { timeout })
   // The kit is the stylesheet's own gradient; naming it would switch that gradient off.
   if (scene === 'kit') await expect(root).not.toHaveAttribute('data-glass-backdrop', /./)
   else await expect(root).toHaveAttribute('data-glass-backdrop', scene)
@@ -34,9 +34,11 @@ for (const id of presets) test(`${id} shows the same backdrop in the preset edit
   await expect(page.getByTestId('preset-preview-status')).toHaveText('Preview ready', { timeout: 30000 })
   await expectScene(previewRoot(page, 'Global preset gallery'), scene)
 
+  // Each page starts its own compiler worker, and the preview waits for its first (cold) compile:
+  // 2.4 s locally, 5-7 s on a CI runner, so the default 10 s leaves too little for the render.
   await page.goto(`http://127.0.0.1:3000/components/card?glass=${id}`)
-  await expectScene(previewRoot(page, 'Card preview'), scene)
+  await expectScene(previewRoot(page, 'Card preview'), scene, 30000)
 
   await page.goto('http://127.0.0.1:3000/editor/component/card')
-  await expectScene(previewRoot(page, 'Card recipe preview'), scene)
+  await expectScene(previewRoot(page, 'Card recipe preview'), scene, 30000)
 })

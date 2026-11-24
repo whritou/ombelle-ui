@@ -84,3 +84,16 @@ export async function findCaseInsensitivePathMismatch(
 }
 
 export const portable = (p: string) => p.split(path.sep).join('/')
+
+/**
+ * The one case rule every planner applies to a file it would create (CLI-04, DUP-03): an existing
+ * directory or file on the way to `relative` whose name differs only in case. On a case-insensitive disk
+ * the file would land there while the lock and the imports name another path, which a case-sensitive CI
+ * or deployment host cannot resolve; on a case-sensitive disk two names would differ only in case.
+ */
+export async function caseMismatch(root: string, relative: string): Promise<string | undefined> {
+  const mismatch = await findCaseInsensitivePathMismatch(root, relative)
+  return mismatch === undefined ? undefined : portable(mismatch)
+}
+export const caseMismatchMessage = (existing: string) =>
+  `Destination differs only in case from existing '${existing}'; rename one of them`

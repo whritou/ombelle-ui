@@ -1,6 +1,6 @@
 # 0.9 app shell evidence
 
-Evidence for the 0.9 app shell ([design](../superpowers/specs/2026-11-17-app-shell-09-design.md)). Track 1 adds Prose, Navigation Menu, Sidebar, Resizable, Menubar and Data Table to the catalog. Track 2 (the website rebuild) records its own section below when it lands.
+Evidence for the 0.9 app shell ([design](../internal/superpowers/specs/2026-11-17-app-shell-09-design.md)). Track 1 adds Prose, Navigation Menu, Sidebar, Resizable, Menubar and Data Table to the catalog. Track 2 (the website rebuild) records its own section below when it lands.
 
 ## Environment
 
@@ -48,7 +48,7 @@ The first audit run reported findings in every opaque family. Each was fixed and
 
 ## The website on the 0.9 components
 
-The site's own parts were rebuilt on the new components (`docs/superpowers/plans/2026-11-17-app-shell-09-site.md`):
+The site's own parts were rebuilt on the new components (`docs/internal/superpowers/plans/2026-11-17-app-shell-09-site.md`):
 
 | Part | Was | Now |
 | --- | --- | --- |

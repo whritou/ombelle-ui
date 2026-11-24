@@ -8,21 +8,26 @@ export type TabsProps = React.ComponentProps<typeof TabsPrimitive.Root>
 
 export function Tabs({ className, ...props }: TabsProps) {
   return (
-    <TabsPrimitive.Root data-slot="tabs" className={cn(className)} {...props} />
+    <TabsPrimitive.Root className={cn(className)} {...props} data-slot="tabs" />
   )
 }
 
 export function TabsList({
   className,
   appearance = 'contained',
+  size = 'default',
   ...props
-}: React.ComponentProps<typeof TabsPrimitive.List> & { appearance?: 'contained' | 'underline' | 'pills' }) {
+}: React.ComponentProps<typeof TabsPrimitive.List> & { appearance?: 'contained' | 'underline' | 'pills'
+  /** sm, default or lg on the shared size scale; default follows the density's control height. */
+  size?: 'sm' | 'default' | 'lg'
+}) {
   return (
     <TabsPrimitive.List
-      data-slot="tabs-list"
       data-appearance={appearance}
+      data-size={size !== 'default' ? size : undefined}
       className={cn(className)}
       {...props}
+      data-slot="tabs-list"
     />
   )
 }
@@ -33,9 +38,9 @@ export function TabsTrigger({
 }: React.ComponentProps<typeof TabsPrimitive.Trigger>) {
   return (
     <TabsPrimitive.Trigger
-      data-slot="tabs-trigger"
       className={cn(className)}
       {...props}
+      data-slot="tabs-trigger"
     />
   )
 }
@@ -46,9 +51,9 @@ export function TabsContent({
 }: React.ComponentProps<typeof TabsPrimitive.Content>) {
   return (
     <TabsPrimitive.Content
-      data-slot="tabs-content"
       className={cn(className)}
       {...props}
+      data-slot="tabs-content"
     />
   )
 }

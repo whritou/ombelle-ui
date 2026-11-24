@@ -5,6 +5,8 @@ export type PublishSnapshotInput = {
   preset: ResolvedPreset
   idempotencyKey: string
   clientKey: string
+  /** The client's network budget key (RL-01); a store treats a missing key as the client's own. */
+  networkKey?: string
   now: number
 }
 export type Awaitable<T> = T | Promise<T>

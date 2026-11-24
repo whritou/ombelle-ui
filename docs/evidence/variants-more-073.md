@@ -1,6 +1,6 @@
 # Variants, batches 6b and 6c, evidence (0.7.3)
 
-The 0.7.3 variants of Tabs, Table, Input, Textarea, Input Group, Pagination and Select (batch 6b), and of Toast and Sheet (batch 6c). Spec: `docs/superpowers/specs/2026-11-11-variants-more-design.md`.
+The 0.7.3 variants of Tabs, Table, Input, Textarea, Input Group, Pagination and Select (batch 6b), and of Toast and Sheet (batch 6c). Spec: `docs/internal/superpowers/specs/2026-11-11-variants-more-design.md`.
 
 ## Specimen audit
 

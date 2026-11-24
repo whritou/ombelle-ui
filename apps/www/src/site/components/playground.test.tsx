@@ -2,7 +2,7 @@
 import { act } from 'react'
 import { createRoot } from 'react-dom/client'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
-import { defaultGlassPresetId } from '@ombelle/catalog'
+import { defaultGlassPresetId } from '@ombelle/catalog/presets'
 import { ComponentPlayground } from './playground'
 
 ;(globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true

@@ -37,6 +37,7 @@ export function SiteHeader() {
 - `NavigationMenuTrigger` is a button that opens its item's panel; its chevron turns while open.
 - `NavigationMenuLink` is a real link, so it works before hydration. `active` marks the current page with `aria-current="page"`. `variant="trigger"` draws a top-level link like a trigger.
 - `NavigationMenuIndicator` draws a small arrow under the open trigger.
+- Keyboard: Left and Right (Up and Down in a vertical menu) move between top-level items, Home and End go to the first and last, Down on an open trigger (Right in a vertical menu) moves into its panel, and Escape closes the panel and returns focus to its trigger.
 - Triggers need JavaScript to open their panel. Make every page a panel leads to reachable from a real link too, such as a section index page or the footer.
 - On narrow screens the panel stacks its links in one column. The component does not turn into a phone menu by itself; on phones, put the same links in a Sheet:
 
@@ -50,8 +51,8 @@ The recipe sets `indicator`, `viewport`, the label and up to five items, each a 
 
 ## Base UI edition
 
-The Base UI edition uses `NavigationMenu` from `@base-ui/react`. It always opens panels in one shared popup, and `NavigationMenuIndicator` draws the popup's arrow.
+The Base UI edition uses `NavigationMenu` from `@base-ui/react`. It always opens panels in one shared popup, and `NavigationMenuIndicator` draws the popup's arrow. Base UI 1.9.0 lacks two of the Radix keys, so the template adds them: Home and End on the list, and Down on an open trigger to move into the panel. The popup renders as a `div` rather than Base UI's `nav`, so an open panel adds no second, unnamed navigation landmark; it stays part of the menu's own named one.
 
 ## Liquid glass
 
-Liquid glass support is experimental.
+Liquid glass is supported, without an accessibility guarantee.

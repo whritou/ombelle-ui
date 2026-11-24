@@ -1,5 +1,5 @@
 'use client'
-import { useEffect, useState, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { Code } from 'lucide-react'
 import type { ResolvedPreset } from '@ombelle/contracts'
 import { usePublication } from '../use-publication'
@@ -52,9 +52,12 @@ export function PresetGetCode({
   /** What the edits change against the catalog default. */
   summary?: CodeSummary
 }) {
-  const publication = usePublication({ preset, current, announce })
-  const { state } = publication
   const [open, setOpen] = useState(false)
+  // While the dialog is open it announces the outcome itself; the editor's status region is hidden behind it.
+  const dialogOpen = useRef(open)
+  dialogOpen.current = open
+  const publication = usePublication({ preset, current, announce: (text) => { if (!dialogOpen.current) announce(text) } })
+  const { state } = publication
   const installUnavailable = preset && semanticPaletteInstallBlocked(preset.data)
     ? semanticPaletteInstallNotice
     : preset && fontsInstallBlocked({ design: preset.data.design })
@@ -102,7 +105,6 @@ export function PresetGetCode({
         code={code}
         scopes={scopes}
         installUnavailable={installUnavailable}
-        announce={announce}
         onRetry={() => void publication.generate()}
         commandFor={(scope, manager) =>
           codeInstallCommand(

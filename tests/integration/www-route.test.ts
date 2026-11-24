@@ -9,7 +9,7 @@ import SecurityPage from '../../apps/www/src/app/security/page.js'
 import HomePage from '../../apps/www/src/app/(home)/page.js'
 import { siteStableFamilies } from '../../apps/www/src/site/families.js'
 import { SiteFooter } from '../../apps/www/src/site/footer.js'
-import { catalog076MinimumCli, compareVersions, publishedInstaller } from '../../apps/www/src/snapshots/install-command.js'
+import { compareVersions, publishedInstaller } from '../../apps/www/src/snapshots/install-command.js'
 
 // The Code Block command wraps its runner in a keyword token span, so commands are read from the text.
 const textOf = (html: string) => html.replace(/<[^>]*>/g, '')
@@ -84,15 +84,15 @@ it('lists the catalog and offers install commands only for components the publis
   const { default: ComponentPage, generateStaticParams } = await import('../../apps/www/src/app/components/[id]/page.js')
   const { supportedComponentIds, styleSupport } = await import('@ombelle/contracts')
   const { componentDocs, componentInstallable, glassOnSite } = await import('../../apps/www/src/site/components/catalog.js')
-  const { catalogRecipeInstallerSupported, compareVersions } = await import('../../apps/www/src/snapshots/install-command.js')
+  const { catalogRecipesAvailable, compareVersions } = await import('../../apps/www/src/snapshots/install-command.js')
   const listed = componentDocs.map((doc) => doc.id)
   expect([...listed].sort()).toEqual([...supportedComponentIds].sort())
   const overview = renderToStaticMarkup(createElement(ComponentsPage))
   for (const id of listed) expect(overview).toContain(`href="/components/${id}"`)
   expect(generateStaticParams().map(({ id }) => id).sort()).toEqual([...listed].sort())
   const runner = `${publishedInstaller.packageName}@${publishedInstaller.version}`
-  // Input is experimental in the catalog's glass family, and the published 0.5.0 installer accepts it.
-  expect(styleSupport('input', 'liquid-glass')).toBe('experimental')
+  // Input is stable in the catalog's glass family, and the published 0.5.0 installer accepts it.
+  expect(styleSupport('input', 'liquid-glass')).toBe('stable')
   expect(glassOnSite('input')).toBe(true)
   for (const doc of componentDocs) {
     const { id } = doc
@@ -107,8 +107,8 @@ it('lists the catalog and offers install commands only for components the publis
       expect(textOf(html)).not.toContain(command)
       expect(html).toContain(`Requires CLI ${doc.minimumCli}`)
     }
-    expect(html).toContain('Liquid glass: experimental.')
-    expect(html.includes(`href="/editor/component/${id}"`)).toBe(id === 'button' || catalogRecipeInstallerSupported(publishedInstaller.version))
+    expect(html).toContain('Liquid glass: stable, accessibility not guaranteed.')
+    expect(html.includes(`href="/editor/component/${id}"`)).toBe(id === 'button' || catalogRecipesAvailable)
     // Glass Button previews show the 0.5.0 restyle, so the Button page says so.
     expect(html.includes('Liquid glass Buttons were restyled to one ink in 0.5.0.')).toBe(id === 'button')
   }
@@ -136,7 +136,7 @@ it('offers form controls in Liquid Glass once the published installer meets the 
   const { componentDoc, glassOnSite } = await import('../../apps/www/src/site/components/catalog.js')
   const formControls = ['label', 'textarea', 'native-select', 'checkbox', 'switch', 'radio-group', 'select'] as const
   for (const id of formControls) {
-    expect(styleSupport(id, 'liquid-glass'), id).toBe('experimental')
+    expect(styleSupport(id, 'liquid-glass'), id).toBe('stable')
     const doc = componentDoc(id)
     expect(doc?.glassMinimumCli ?? doc?.minimumCli, id).toBe('0.5.0')
     expect(glassOnSite(id), id).toBe(true)
@@ -158,5 +158,5 @@ it('offers the lab glass presets in the component directory and installs Select 
   const select = renderToStaticMarkup(await ComponentPage({ params: Promise.resolve({ id: 'select' }) }))
   expect(select).not.toContain('Requires CLI')
   expect(textOf(select)).toContain(`pnpm dlx ${publishedInstaller.packageName}@${publishedInstaller.version} add select`)
-  expect(select).toContain('Liquid glass: experimental.')
+  expect(select).toContain('Liquid glass: stable, accessibility not guaranteed.')
 })

@@ -64,7 +64,13 @@ export function validateInstallableRecipeSnapshot(input: unknown): InstallableRe
 }
 
 function validateSnapshotProvenance<T extends InstallableRecipeSnapshot>(snapshot: T): T {
-  validatePreset(snapshot.preset)
+  // The embedded preset's errors point into it, as preset snapshots' do (DUP-02).
+  try {
+    validatePreset(snapshot.preset)
+  } catch (error) {
+    if (error instanceof FoundationError && error.path) error.path = '/preset' + error.path
+    throw error
+  }
   for (const field of ['catalogRelease', 'compilerVersion'] as const)
     if (snapshot.preset[field] !== snapshot[field] || snapshot.recipe.presetRef[field] !== snapshot[field])
       throw new FoundationError('INVALID_DATA', 'Recipe, preset and snapshot releases must match', '/' + field)

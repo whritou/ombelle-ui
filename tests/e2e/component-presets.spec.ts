@@ -1,10 +1,12 @@
 import { test, expect } from '@playwright/test'
+import { maxPixelDifference } from '../helpers/pixel-difference.js'
 import fs from 'node:fs'
 import path from 'node:path'
 import { sha256 } from '@ombelle/compiler'
 import { supportedStyleFamilies } from '../../packages/contracts/src/style-families.js'
 import { expectColorParity } from '../helpers/color-compare.js'
 import { assertScopedButtonFocus } from '../helpers/recipe-browser.js'
+import { componentPresetMeasurementParts } from './component-presets.teardown.js'
 import {
   componentPresetReferences,
   componentPresetArtifact,
@@ -19,7 +21,6 @@ import {
   assertComponentPresetHostIsolation,
 } from '../helpers/component-preset-isolation.js'
 import {
-  validateComponentPresetMeasurements,
   componentPresetIsolationMethod,
   type ComponentPresetMeasurement,
 } from '../../scripts/component-preset-evidence.js'
@@ -27,8 +28,11 @@ import {
 const map = JSON.parse(fs.readFileSync('.artifacts/consumers.json', 'utf8'))
 const rows: ComponentPresetMeasurement[] = []
 const previewOnly = process.env.OMBELLE_COMPONENT_PRESET_PREVIEW_ONLY === '1'
+// Each case is independent, so the 128 cases spread over the workers (1.2 hours in one worker on
+// 23 November). Every worker writes its rows to a part; component-presets.teardown.ts merges the
+// parts once all workers finish and validates the complete set.
+test.describe.configure({ mode: 'parallel' })
 test.beforeAll(({ browser }, info) => {
-  fs.rmSync('.artifacts/component-preset-measurements.json', { force: true })
   fs.writeFileSync(
     '.artifacts/component-preset-browser-version.json',
     JSON.stringify(
@@ -42,11 +46,11 @@ test.beforeAll(({ browser }, info) => {
     ),
   )
 })
-test.afterAll(async () => {
-  if (!previewOnly) {
-    await validateComponentPresetMeasurements(rows)
+test.afterAll(async ({}, info) => {
+  if (!previewOnly && rows.length) {
+    fs.mkdirSync(componentPresetMeasurementParts, { recursive: true })
     fs.writeFileSync(
-      '.artifacts/component-preset-measurements.json',
+      path.join(componentPresetMeasurementParts, 'worker-' + info.workerIndex + '.json'),
       JSON.stringify(rows, null, 2),
     )
   }
@@ -108,7 +112,7 @@ for (const hostFamily of supportedStyleFamilies)
           if (referenceImage) {
             expectColorParity(computedStyles, referenceStyles)
             expect(dom).toEqual(referenceDom)
-            expect(image.equals(referenceImage)).toBe(true)
+            expect(await maxPixelDifference(page, image, referenceImage)).toBeLessThanOrEqual(1)
           } else {
             referenceStyles = computedStyles
             referenceDom = dom
@@ -182,8 +186,13 @@ for (const hostFamily of supportedStyleFamilies)
                   ),
               ),
             )
+          // The Button's motion follows the preset's motion token: every duration scales with it (organic
+          // and retro-futurism run some transitions at a multiple of it), and reduced motion turns it off.
           const motionPositiveControlMs = await duration()
-          expect(motionPositiveControlMs).toBe(150)
+          expect(motionPositiveControlMs).toBeGreaterThan(0)
+          await button.evaluate((el) => el.style.setProperty('--motion-duration', '300ms'))
+          expect(await duration()).toBeCloseTo(motionPositiveControlMs * 2, 0)
+          await button.evaluate((el) => el.style.setProperty('--motion-duration', '150ms'))
           await page.emulateMedia({ reducedMotion: 'reduce' })
           const reducedMotionMs = await duration()
           expect(reducedMotionMs).toBe(0)

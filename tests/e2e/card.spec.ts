@@ -159,11 +159,15 @@ for (const family of supportedStyleFamilies)
           if (family === 'flat') {
             expect(parseFloat(s.border)).toBe(0)
             expect(s.shadow).toContain('inset')
+          } else if (family === 'organic') {
+            // Organic cards are borderless and lifted by an elevation shadow.
+            expect(parseFloat(s.border)).toBe(0)
           } else {
             expect(parseFloat(s.border)).toBeGreaterThan(0)
-            expect(s.borderStyle).toBe('solid')
+            // Papier tops its card with a double rule.
+            expect(family === 'papier' ? ['double solid solid', 'solid'] : ['solid']).toContain(s.borderStyle)
           }
-          expect(s.shadow === 'none').toBe(family === 'minimalist')
+          expect(s.shadow === 'none').toBe(family === 'minimalist' || family === 'papier')
           expect(s.color).not.toBe(s.background)
         }
         const axe = await new AxeBuilder({ page }).analyze()

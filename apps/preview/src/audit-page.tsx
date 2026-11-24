@@ -10,6 +10,7 @@ import './glass-backdrop.css'
 import { GlassBackdropArt, setGlassBackdrop } from './glass-backdrop-art'
 import { renderSpecimen, type Primitives } from './render-specimen'
 import { auditFontStyles, loadPresetFonts } from './preset-fonts'
+import { startReducedTransparencyMirror } from './reduced-transparency-mirror'
 
 type Module = Record<string, unknown>
 const stylesheets = import.meta.glob('./generated/editions/*/preview.css')
@@ -109,6 +110,12 @@ export async function mountAuditPage(root: HTMLElement, family: string, edition:
   const only = new URLSearchParams(window.location.search).get('only')?.split(',').map(id => id.trim()).filter(Boolean)
   const data = only?.length ? { ...full, specimens: full.specimens.filter(item => only.includes(item.component)) } : full
   const folder = `./generated/editions/${family}-${edition}`
+  // `?transparency=reduced` renders as prefers-reduced-transparency: reduce does: every rule under that
+  // feature is mirrored under html[data-reduced-transparency]. The specimen audit holds it to every check.
+  if (new URLSearchParams(window.location.search).get('transparency') === 'reduced') {
+    startReducedTransparencyMirror(document)
+    document.documentElement.setAttribute('data-reduced-transparency', '')
+  }
   await stylesheets[`${folder}/preview.css`]!()
   // `?fonts=<body>,<heading>,<mono>` audits the page with those registry fonts (empty entries unset).
   const fonts = new URLSearchParams(window.location.search).get('fonts')

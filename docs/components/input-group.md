@@ -3,7 +3,7 @@
 Input Group composes a native input or textarea with adjacent text, icons and
 buttons inside one field surface. It uses the same source for Radix and Base UI
 editions, with no primitive dependency or imports from other components. All five
-style families are available; liquid glass is experimental.
+style families are available; liquid glass is supported, without an accessibility guarantee.
 
 This component requires CLI 0.7.2 or later. Initialize a consumer project, then
 run `npx @ombelle-ui/cli@0.7.2 add input-group`. For a built local checkout:
@@ -122,7 +122,7 @@ fields have double borders so their state has a non-color cue.
 Liquid glass starts with an opaque background. Supported backdrop filters add
 the same inner field glass treatment as Textarea; reduced transparency restores
 the opaque background. Forced colors remove the filter and shadow. This
-experimental family retains the same native semantics and logical layout.
+liquid glass family retains the same native semantics and logical layout.
 
 ## Clear and counter (0.7.3)
 
@@ -138,6 +138,10 @@ These need CLI **0.7.3** or later, including in component recipes. Leaving a pro
   - It is a live region that stays silent until 10 % of the limit, then speaks politely, rather than on every keystroke.
   - Past the limit, it turns the destructive colour, underlined in forced colours.
 - **Dependency**: Input Group now depends on lucide-react, for the Clear icon.
+
+## Size (1.0)
+
+`InputGroup` takes `size`; it sizes the group and its `InputGroupInput`. The input is the control height, so the group is that plus its border: 42px by default (44px in neo-brutalism, organic and retro futurism). The input's block padding gave way to that height in 1.0, so the group follows compact density; in neo-brutalism the default group is 2px shorter than before. A textarea keeps its own height. `sm` is one 0.5rem step below the density's control height, `default` is the control height (2.5rem, or 2.25rem with compact density) and `lg` is one step above it, as on every control on the [shared size scale](../03-components-styles-accessibility.md#sizes). `sm` text is 0.8125rem and `lg` text 1rem. Leaving `size` out renders what earlier releases render; only `sm` and `lg` set `data-size`.
 
 ## Files and ownership
 

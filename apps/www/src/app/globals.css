@@ -114,6 +114,11 @@
   --shadow-soft: 0 1px 2px oklch(0 0 0 / 30%), 0 16px 40px -16px oklch(0 0 0 / 60%);
 }
 
+/* The skip link moves focus to the page's main landmark; outlining the whole page would only distract. */
+main[tabindex="-1"]:focus {
+  outline: none;
+}
+
 @layer base {
   /* Element rules leave inline previews alone: a preview's family sets its own borders, headings and focus rings. */
   *:not(:where([data-preview-family] *)) {
@@ -603,6 +608,17 @@
 /* The docs and component directory sidebars sit below the pinned 4rem header. */
 .site-sidebar > [data-sidebar-inner] {
   inset-block-start: 4rem;
+}
+/*
+ * On phones the sidebar ends up a closed sheet. The catalog Sidebar shows it inline above the page until
+ * hydration, which pushed the page down by the whole component list and then pulled it back up (CLS 0.92,
+ * OPS-08). The site renders the phone layout it will hydrate to instead; Browse components opens the sheet.
+ * Without scripting the page never hydrates, so the links stay inline there.
+ */
+@media (max-width: 767.98px) and (scripting: enabled) {
+  [data-slot='sidebar'].site-sidebar:not([data-hydrated]) {
+    display: none;
+  }
 }
 
 /* The header's Docs and Components triggers stay marked while their section is open. */

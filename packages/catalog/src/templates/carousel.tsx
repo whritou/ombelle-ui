@@ -4,7 +4,46 @@ import { ChevronLeftIcon, ChevronRightIcon } from 'lucide-react'
 import { cn } from './utils.js'
 import './carousel.css'
 
+/**
+ * The component an element renders. Parts written in a Server Component, such as a Next.js
+ * App Router page, reach this client file as lazy client references rather than as the
+ * components, so `element.type` is resolved before it is compared.
+ */
+function partType(element: React.ReactElement): unknown {
+  const type = element.type as unknown as { $$typeof?: symbol; _init?: (payload: unknown) => unknown; _payload?: unknown } | null
+  if (typeof type === 'object' && type !== null && type.$$typeof === Symbol.for('react.lazy') && typeof type._init === 'function') {
+    try { return type._init(type._payload) } catch { return undefined }
+  }
+  return element.type
+}
+
+/** The words the carousel speaks; each has an English default. Positions count from 1. */
+export type CarouselLabels = {
+  /** Names the scrolling viewport; default "Slides". */
+  slides?: string
+  /** Names each slide; default "<position> of <count>". */
+  slide?(position: number, count: number): string
+  /** Names a dot, and a thumbnail whose image has no alt text; default "Slide <position>". */
+  goTo?(position: number): string
+}
+const defaultLabels: Required<CarouselLabels> = {
+  slides: 'Slides',
+  slide: (position, count) => `${position} of ${count}`,
+  goTo: position => `Slide ${position}`,
+}
+
+/** Sets every ref it is given. */
+function mergeRefs<T>(...refs: (React.Ref<T> | undefined)[]) {
+  return (element: T | null) => {
+    for (const ref of refs) {
+      if (typeof ref === 'function') ref(element)
+      else if (ref) (ref as React.RefObject<T | null>).current = element
+    }
+  }
+}
+
 type CarouselState = {
+  labels: Required<CarouselLabels>
   contentId: string
   contentRef: React.RefObject<HTMLDivElement | null>
   count: number
@@ -31,14 +70,14 @@ function useCarousel(part: string): CarouselState {
 }
 
 const isItem = (child: React.ReactNode): child is React.ReactElement<CarouselItemProps> =>
-  React.isValidElement(child) && child.type === CarouselItem
+  React.isValidElement(child) && partType(child) === CarouselItem
 
 /** The number of slides, found while rendering so names and buttons are right in server HTML. */
 function countSlides(children: React.ReactNode): number {
   let count = 0
   React.Children.forEach(children, child => {
     if (!React.isValidElement<{ children?: React.ReactNode }>(child)) return
-    if (child.type === CarouselContent) count += React.Children.toArray(child.props.children).filter(isItem).length
+    if (partType(child) === CarouselContent) count += React.Children.toArray(child.props.children).filter(isItem).length
     else count += countSlides(child.props.children)
   })
   return count
@@ -49,7 +88,7 @@ function firstImage(children: React.ReactNode): SlideImage | null {
   let found: SlideImage | null = null
   React.Children.forEach(children, child => {
     if (found || !React.isValidElement<{ children?: React.ReactNode; src?: unknown; alt?: string }>(child)) return
-    if (child.type === CarouselImage) found = { src: typeof child.props.src === 'string' ? child.props.src : '', alt: child.props.alt ?? '' }
+    if (partType(child) === CarouselImage) found = { src: typeof child.props.src === 'string' ? child.props.src : '', alt: child.props.alt ?? '' }
     else found = firstImage(child.props.children)
   })
   return found
@@ -61,8 +100,8 @@ function readSlides(children: React.ReactNode): { images: (SlideImage | null)[];
   let thumbnails = false
   const walk = (nodes: React.ReactNode) => React.Children.forEach(nodes, child => {
     if (!React.isValidElement<{ children?: React.ReactNode }>(child)) return
-    if (child.type === CarouselThumbnails) thumbnails = true
-    else if (child.type === CarouselContent)
+    if (partType(child) === CarouselThumbnails) thumbnails = true
+    else if (partType(child) === CarouselContent)
       for (const item of React.Children.toArray(child.props.children).filter(isItem)) images.push(firstImage(item.props.children))
     else walk(child.props.children)
   })
@@ -77,13 +116,14 @@ export type CarouselProps = React.ComponentProps<'div'> & {
   variant?: 'default' | 'image'
   /** The image frame's CSS aspect ratio, in the image variant. */
   ratio?: string
+  labels?: CarouselLabels
 }
 
 /**
  * Slides that snap as they scroll. Touch, trackpad and keyboard scrolling work without a script;
  * the buttons and dots only scroll a slide into view. It never autoplays.
  */
-export function Carousel({ slidesPerView = 1, variant, ratio = '16 / 9', className, children, ...props }: CarouselProps) {
+export function Carousel({ slidesPerView = 1, variant, ratio = '16 / 9', labels, className, children, ...props }: CarouselProps) {
   const image = variant === 'image'
   const slides = readSlides(children)
   const contentId = React.useId() + '-content'
@@ -91,6 +131,7 @@ export function Carousel({ slidesPerView = 1, variant, ratio = '16 / 9', classNa
   const [count, setCount] = React.useState(() => countSlides(children))
   const [position, setPosition] = React.useState(() => ({ index: 0, atStart: true, atEnd: count <= slidesPerView }))
   const state: CarouselState = {
+    labels: { ...defaultLabels, ...labels },
     contentId,
     contentRef,
     count,
@@ -128,10 +169,11 @@ export function Carousel({ slidesPerView = 1, variant, ratio = '16 / 9', classNa
 }
 
 /** The scrolling, snapping viewport. Its direct CarouselItem children are the slides. */
-export function CarouselContent({ className, children, onScroll, ...props }: React.ComponentProps<'div'>) {
+export function CarouselContent({ className, children, onScroll, ref, ...props }: React.ComponentProps<'div'>) {
   const carousel = useCarousel('CarouselContent')
   const items = React.Children.toArray(children).filter(isItem)
   const { setCount, setPosition, contentRef } = carousel
+  const setRef = React.useMemo(() => mergeRefs(contentRef, ref), [contentRef, ref])
   React.useLayoutEffect(() => setCount(items.length), [items.length, setCount])
   // Reads the current slide from the scroll position, however it was scrolled.
   const measure = React.useCallback(() => {
@@ -141,8 +183,10 @@ export function CarouselContent({ className, children, onScroll, ...props }: Rea
     const left = Math.abs(content.scrollLeft)
     let index = 0
     const start = slides[0]?.offsetLeft ?? 0
+    // Distances from the first slide, so right-to-left (negative offsets and scrollLeft) reads the same.
+    const distance = (slide: HTMLElement) => Math.abs(Math.abs(slide.offsetLeft - start) - left)
     slides.forEach((slide, at) => {
-      if (Math.abs(slide.offsetLeft - start - left) < Math.abs(slides[index].offsetLeft - start - left)) index = at
+      if (distance(slide) < distance(slides[index]!)) index = at
     })
     const max = content.scrollWidth - content.clientWidth
     const atEnd = left >= max - 1
@@ -160,9 +204,12 @@ export function CarouselContent({ className, children, onScroll, ...props }: Rea
   let index = 0
   return (
     <div
+      // A Tab stop that scrolls with the arrow keys, so it is named.
+      role="group"
+      aria-label={carousel.labels.slides}
       tabIndex={0}
       {...props}
-      ref={contentRef}
+      ref={setRef}
       id={carousel.contentId}
       data-slot="carousel-content"
       className={cn(className)}
@@ -183,12 +230,13 @@ export type CarouselItemProps = React.ComponentProps<'div'> & {
 }
 
 export function CarouselItem({ index = 0, count = 1, className, ...props }: CarouselItemProps) {
+  const labels = React.useContext(CarouselContext)?.labels ?? defaultLabels
   return (
     <CarouselItemContext.Provider value={index}>
       <div
         role="group"
         aria-roledescription="slide"
-        aria-label={`${index + 1} of ${count}`}
+        aria-label={labels.slide(index + 1, count)}
         {...props}
         data-slot="carousel-item"
         data-carousel-item=""
@@ -268,7 +316,7 @@ export function CarouselDots({ className, ...props }: React.ComponentProps<'div'
         <button
           key={index}
           type="button"
-          aria-label={`Slide ${index + 1}`}
+          aria-label={carousel.labels.goTo(index + 1)}
           aria-current={index === carousel.index ? 'true' : undefined}
           aria-controls={carousel.contentId}
           data-slot="carousel-dot"
@@ -279,12 +327,14 @@ export function CarouselDots({ className, ...props }: React.ComponentProps<'div'
   )
 }
 
-/** "1 / 5", for sighted users; the slides already announce their position. */
-export function CarouselCounter({ className, ...props }: React.ComponentProps<'span'>) {
+/** "1 / 5", for sighted users; the slides already announce their position. format changes the text; positions count from 1. */
+export function CarouselCounter({ className, format = (position, count) => `${position} / ${count}`, ...props }: React.ComponentProps<'span'> & {
+  format?: (position: number, count: number) => string
+}) {
   const carousel = useCarousel('CarouselCounter')
   return (
     <span aria-hidden="true" {...props} data-slot="carousel-counter" className={cn(className)}>
-      {`${Math.min(carousel.index + 1, carousel.count)} / ${carousel.count}`}
+      {format(Math.min(carousel.index + 1, carousel.count), carousel.count)}
     </span>
   )
 }
@@ -298,7 +348,7 @@ export function CarouselThumbnails({ className, ...props }: React.ComponentProps
         <button
           key={index}
           type="button"
-          aria-label={image?.alt || `Slide ${index + 1}`}
+          aria-label={image?.alt || carousel.labels.goTo(index + 1)}
           aria-current={index === carousel.index ? 'true' : undefined}
           aria-controls={carousel.contentId}
           data-slot="carousel-thumbnail"

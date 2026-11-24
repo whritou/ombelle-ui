@@ -15,6 +15,9 @@ for (const edition of ['radix', 'base'] as const) {
       const trigger = nav.getByRole('button', { name: 'Docs' })
       await trigger.click()
       await expect(page.getByRole('link', { name: /Installation/ })).toBeVisible()
+      // The pointer rests on the trigger, and Radix also opens on hover after a 200 ms delay: let that timer
+      // run out first, or on a slow runner it reopens the panel just after Escape (seen in CI).
+      await page.waitForTimeout(400)
       await page.keyboard.press('Escape')
       await expect(page.getByRole('link', { name: /Installation/ })).toBeHidden()
       await expect(trigger).toBeFocused()
@@ -164,10 +167,18 @@ for (const edition of ['radix', 'base'] as const) {
     test('Menubar: with a menu open, Left and Right open the neighbouring menu, and Escape returns focus', async ({ page }) => {
       const bar = (await open(page, edition)).getByTestId('s09-menubar')
       const file = bar.getByRole('menuitem', { name: 'File' })
-      await file.click()
+      // An arrow key only moves between menus once focus is inside the open one: on a slow runner it
+      // arrives a moment after the menu shows (seen in CI), so wait for it before each key.
+      const focusIn = (name: string) => expect.poll(() => page.getByRole('menu', { name }).evaluate(menu => menu.contains(document.activeElement))).toBe(true)
+      // Opened from the keyboard: a click leaves the pointer resting on File, and on a loaded runner
+      // ArrowLeft from Edit was sometimes lost (PR CI 45112705060). Opening by pointer is covered above.
+      await file.focus()
+      await page.keyboard.press('Enter')
       await expect(page.getByRole('menuitem', { name: /Download JSON/ })).toBeVisible()
+      await focusIn('File')
       await page.keyboard.press('ArrowRight')
       await expect(page.getByRole('menuitem', { name: /Undo/ })).toBeVisible()
+      await focusIn('Edit')
       await page.keyboard.press('ArrowLeft')
       await expect(page.getByRole('menuitem', { name: /Download JSON/ })).toBeVisible()
       await page.keyboard.press('Escape')
@@ -230,10 +241,10 @@ for (const edition of ['radix', 'base'] as const) {
       await expect(grid.getByRole('cell', { name: 'Preset 10', exact: true })).toHaveCount(0)
       await grid.getByRole('searchbox', { name: 'Filter presets' }).fill('')
       await grid.locator('[data-slot="data-table-toolbar"]').getByRole('button', { name: 'Status' }).click()
-      await page.getByRole('checkbox', { name: /Experimental/ }).check()
+      await page.getByRole('checkbox', { name: /Accessibility caveat/ }).check()
       await page.keyboard.press('Escape')
       await expect(grid.getByRole('cell', { name: 'Stable' })).toHaveCount(0)
-      await expect(grid.getByRole('cell', { name: 'Experimental' }).first()).toBeVisible()
+      await expect(grid.getByRole('cell', { name: 'Accessibility caveat' }).first()).toBeVisible()
       await grid.getByRole('searchbox', { name: 'Filter presets' }).fill('nothing matches this')
       await expect(grid.getByRole('status')).toHaveText('No results.')
     })

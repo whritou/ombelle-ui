@@ -1,4 +1,4 @@
-import { canonicalize } from '@ombelle/compiler'
+import { canonicalize } from '@ombelle/compiler/light'
 import { defaultSiteFamily } from '../snapshots/install-command'
 import { createPresetDraft, validateDraftEnvelope } from './model'
 import { createPresetHistory, type PresetHistory } from './history'

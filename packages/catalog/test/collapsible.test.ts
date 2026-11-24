@@ -14,7 +14,7 @@ describe('Collapsible', () => {
     expectComponentContract('collapsible', { client: true, parts,
       slots: ['collapsible', 'collapsible-trigger', 'collapsible-icon', 'collapsible-content'],
       dependencies: [{ name: 'react', version: '19.3.1' }, { name: '@radix-ui/react-collapsible', version: '1.2.1' }, { name: 'clsx', version: '2.1.1' }, { name: 'tailwind-merge', version: '3.7.0' }, { name: 'lucide-react', version: '1.55.0' }],
-      selectors: ["[data-slot='collapsible']", "[data-slot='collapsible-trigger']", "[data-slot='collapsible-icon']", "[data-slot='collapsible-content']"], glass: 'experimental' })
+      selectors: ["[data-slot='collapsible']", "[data-slot='collapsible-trigger']", "[data-slot='collapsible-icon']", "[data-slot='collapsible-content']"], glass: 'stable' })
     expect(getTemplate(getCatalog('0.1.0'), 'collapsible', 'base').dependencies.map(d => d.name)).toContain('@base-ui/react')
   })
 

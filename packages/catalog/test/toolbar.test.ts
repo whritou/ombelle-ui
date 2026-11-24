@@ -18,7 +18,7 @@ describe('Toolbar', () => {
       dependencies: [{ name: 'react', version: '19.3.1' }, { name: '@radix-ui/react-dropdown-menu', version: '2.2.1' }, { name: '@radix-ui/react-toolbar', version: '1.2.1' },
         { name: 'clsx', version: '2.1.1' }, { name: 'tailwind-merge', version: '3.7.0' }, { name: 'lucide-react', version: '1.55.0' }],
       selectors: ["[data-slot='toolbar']", "[data-slot='toolbar-button']", "[data-slot='toolbar-toggle-item']", "[data-slot='toolbar-separator']", "[data-slot='toolbar-overflow-trigger']", "[data-slot='toolbar-overflow-content']", "[data-slot='toolbar-overflow-item']"],
-      glass: 'experimental' })
+      glass: 'stable' })
     expect(getTemplate(getCatalog('0.1.0'), 'toolbar', 'base').dependencies.map(dependency => dependency.name)).toEqual(expect.arrayContaining(['@base-ui/react', 'lucide-react']))
   })
 

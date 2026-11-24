@@ -3,7 +3,8 @@
   position: fixed;
   inset: 0;
   z-index: 40;
-  background: color-mix(in oklab, var(--foreground) 48%, transparent);
+  /* One scrim per family, dark in both modes (the foreground lightened dark pages). */
+  background: oklch(0% 0 0 / 0.5);
 }
 [data-slot='sheet-content'] {
   box-sizing: border-box;
@@ -229,7 +230,7 @@
 /* 0.7.6 variants */
 @media (prefers-reduced-motion: no-preference) {
   [data-slot='sheet-content'][data-sheet-snap]:not(:has([data-sheet-dragging])) {
-    transition: block-size 200ms ease-out;
+    transition: block-size calc(var(--motion-duration) * 4/3) ease-out;
   }
 }
 /* Forced colours: the snap settle is unchanged; the handle keeps its 0.7.3 forced-colours rules. */

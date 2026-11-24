@@ -1,6 +1,6 @@
 # Context Menu
 
-Context Menu opens a menu at the pointer on right-click, or with Shift+F10 or the context-menu key when its area has focus. It shares Dropdown Menu's parts and item look. It is available in all five families in light and dark mode, with Radix and Base UI editions; the template is a client component.
+Context Menu opens a menu at the pointer on right-click, or with Shift+F10 or the context-menu key when its area has focus. It shares Dropdown Menu's parts and item look. It is available in all eight families in light and dark mode, with Radix and Base UI editions; the template is a client component.
 
 This component requires CLI **0.7.3** or later: `npx @ombelle-ui/cli@0.7.3 add context-menu`. For a built local checkout:
 
@@ -31,7 +31,27 @@ export function LayerActions() {
 
 ## API and accessibility
 
-- The parts mirror [Dropdown Menu](dropdown-menu.md): items (with `variant="destructive"`), checkbox and radio items, label, separator, shortcut and submenus (`ContextMenuSub`, `ContextMenuSubTrigger`, `ContextMenuSubContent`).
+- The parts mirror [Dropdown Menu](dropdown-menu.md). Both editions export the same fifteen parts:
+
+  | Export | `data-slot` | Notes |
+  | --- | --- | --- |
+  | `ContextMenu` | `context-menu` | Root; holds the open state |
+  | `ContextMenuTrigger` | `context-menu-trigger` | The area that opens the menu; `variant="zone"` |
+  | `ContextMenuPortal` | `context-menu-portal` | Portal for custom content. `ContextMenuContent` already renders in one |
+  | `ContextMenuContent` | `context-menu-content` | The menu, opened at the pointer |
+  | `ContextMenuGroup` | `context-menu-group` | Groups related items |
+  | `ContextMenuLabel` | `context-menu-label` | Non-interactive heading for a group; `inset` lines it up with items that have an indicator |
+  | `ContextMenuItem` | `context-menu-item` | `variant="default"` or `"destructive"`, and `inset` |
+  | `ContextMenuCheckboxItem` | `context-menu-checkbox-item` | `checked` and `onCheckedChange`; draws a check in `context-menu-item-indicator` |
+  | `ContextMenuRadioGroup` | `context-menu-radio-group` | `value` and `onValueChange` for its radio items |
+  | `ContextMenuRadioItem` | `context-menu-radio-item` | `value`; draws a dot in `context-menu-item-indicator` |
+  | `ContextMenuSeparator` | `context-menu-separator` | |
+  | `ContextMenuShortcut` | `context-menu-shortcut` | Shortcut text inside an item; display only |
+  | `ContextMenuSub` | `context-menu-sub` | Submenu root |
+  | `ContextMenuSubTrigger` | `context-menu-sub-trigger` | Item that opens the submenu; `inset` |
+  | `ContextMenuSubContent` | `context-menu-sub-content` | The submenu |
+
+  `ContextMenuProps` is also exported, as the root's props type.
 - `ContextMenuTrigger` is the area that opens the menu. `variant="zone"` draws it as a dashed area; by default it keeps the look of what it wraps, so it can wrap a table row with `asChild` (Radix) or `render` (Base UI).
 - Keyboard: give the trigger `tabIndex={0}` and a name when it is not already focusable. Shift+F10 or the context-menu key opens the menu at the trigger's corner, arrow keys move through the items, Right opens a submenu, Left closes it, and Escape closes the menu and returns focus to the trigger.
 - A context menu is a shortcut. Keep its actions reachable in another way, such as a toolbar or a row menu button.
@@ -51,6 +71,6 @@ Part names and `data-slot` values are the same in both editions.
 
 ## Liquid glass
 
-Liquid glass is experimental for Context Menu, as for every glass component, and its findings do not block a release. Over the glass menu the shortcut and destructive text fall below 4.5:1 in the specimen audit. See [liquid glass](liquid-glass.md).
+Liquid glass is supported for Context Menu without an accessibility guarantee, as for every glass component; only its contrast findings, which depend on the backdrop, are advisory in the specimen audit. Over the glass menu the shortcut and destructive text fall below 4.5:1 in the specimen audit. See [liquid glass](liquid-glass.md).
 
 See [overlays and search evidence](../evidence/overlays-search-073.md) for the board comparison, the specimen audit and the browser tests.

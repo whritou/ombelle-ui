@@ -1,14 +1,14 @@
-import type { GlassContrastReport } from '@ombelle/compiler'
+import { familyAccessibilityCaveat } from '@ombelle/contracts'
+import type { GlassContrastReport } from '@ombelle/compiler/light'
 import { glassComponentList } from '../../site/components/catalog'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '../../generated/ui/components/ui/collapsible'
 
-// From docs/superpowers/specs/2026-11-03-liquid-glass-design.md, updated when the form controls became experimental.
+// What the family's accessibility caveat covers (docs/components/liquid-glass.md, Limitations).
 export const glassLimitations = [
-  'no mid-range mobile scrolling measurement',
+  'text contrast depends on the background behind the glass; the bound covers the declared text pairs over the filtered backdrop range, not your own images or content',
+  'set transparency to reduced for opaque surfaces and the full contrast guarantee',
   'no human visual, keyboard or screen-reader review',
-  'contrast is estimated for the declared text pairs; consumer content needs its own checks',
-  'browsers outside the recorded run were not tested',
-  'the hosted snapshot service must be redeployed before glass codes resolve publicly',
+  'not measured on mid-range mobile scrolling, Safari or Firefox',
 ] as const
 export const glassReadoutId = 'glass-contrast-readout'
 export const glassPairsId = 'glass-contrast-pairs'
@@ -90,9 +90,9 @@ export function GlassPanel({ report }: { report: GlassContrastReport | null }) {
   return (
     <>
       <section aria-labelledby="glass-limitations-heading">
-        <h2 id="glass-limitations-heading">Liquid glass limitations</h2>
+        <h2 id="glass-limitations-heading">Liquid glass accessibility</h2>
         <p>
-          Liquid glass is experimental. {glassComponentList()} support it.
+          {familyAccessibilityCaveat('liquid-glass')} {glassComponentList()} support it.
         </p>
         <Collapsible>
           <CollapsibleTrigger>{glassLimitations.length} known limitations</CollapsibleTrigger>

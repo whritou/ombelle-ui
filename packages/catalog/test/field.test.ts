@@ -21,7 +21,7 @@ describe('Field', () => {
       dependencies: [{ name: 'react', version: '19.3.1' }, { name: 'clsx', version: '2.1.1' }, { name: 'tailwind-merge', version: '3.7.0' },
         { name: 'lucide-react', version: '1.55.0' }],
       selectors: ["[data-slot='field']", "[data-slot='field-label']", "[data-slot='field-description']", "[data-slot='field-error']"],
-      glass: 'experimental' })
+      glass: 'stable' })
     expect(getTemplate(getCatalog('0.1.0'), 'field', 'base').dependencies.map(d => d.name)).toContain('@base-ui/react')
   })
 

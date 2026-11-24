@@ -22,6 +22,6 @@ export default defineConfig({
     command:
       'node node_modules/vite/bin/vite.js apps/preview/src/generated/usage-audit --config scripts/usage-audit-vite.config.ts --port 4186 --host 127.0.0.1',
     url: 'http://127.0.0.1:4186',
-    reuseExistingServer: true,
+    reuseExistingServer: false,
   },
 })

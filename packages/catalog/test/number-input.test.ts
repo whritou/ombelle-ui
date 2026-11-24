@@ -10,7 +10,7 @@ describe('Number Input', () => {
     expectComponentContract('number-input', { client: true, parts: ['NumberInput'],
       slots: ['number-input', 'number-input-input', 'number-input-decrement', 'number-input-increment', 'number-input-unit'],
       dependencies: [{ name: 'react', version: '19.3.1' }, { name: 'clsx', version: '2.1.1' }, { name: 'tailwind-merge', version: '3.7.0' }, { name: 'lucide-react', version: '1.55.0' }],
-      selectors: ["[data-slot='number-input']", "[data-slot='number-input-input']", "[data-slot='number-input-unit']"], glass: 'experimental' })
+      selectors: ["[data-slot='number-input']", "[data-slot='number-input-input']", "[data-slot='number-input-unit']"], glass: 'stable' })
     const catalog = getCatalog('0.1.0')
     expect(getTemplate(catalog, 'number-input', 'base').content).toBe(getTemplate(catalog, 'number-input').content)
   })

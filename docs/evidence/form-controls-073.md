@@ -1,6 +1,6 @@
 # Form controls evidence
 
-Evidence for Slider, Toggle Group, Chip, Tag Input and Input OTP (0.7.3), and for the website editor's switch to them. Design: [form controls](../superpowers/specs/2026-11-10-form-controls-design.md).
+Evidence for Slider, Toggle Group, Chip, Tag Input and Input OTP (0.7.3), and for the website editor's switch to them. Design: [form controls](../internal/superpowers/specs/2026-11-10-form-controls-design.md).
 
 All runs are local runs by an agent on Windows 11 Home 10.0.26300 with Node 24.19.0. None is a CI run or a human review.
 

@@ -1,9 +1,11 @@
 import {
-  FoundationError, parseRecipeSnapshotReference, validateRecipe, validateRecipeSnapshot,
+  FoundationError, normalizeRecipe, parseRecipeSnapshotReference, validateRecipe, validateRecipeSnapshot,
   validateInstallableRecipe, validateInstallableRecipeSnapshot,
   type RecipeSnapshot, type RecipeCompileResult, type InstallableRecipeSnapshot, type InstallableRecipeCompileResult,
 } from '@ombelle/contracts'
 import { canonicalize } from './canonicalize.js'
+import { sha256 } from './hash.js'
+import { assertStoredPresetNormalized } from './snapshot.js'
 import { compileRecipe } from './recipe.js'
 import { compileInstallableRecipe } from './component-recipe.js'
 
@@ -54,10 +56,20 @@ async function verifySnapshot<T extends InstallableRecipeSnapshot>(
     if (snapshot.recipeHash !== expected.recipeHash)
       throw new FoundationError('INVALID_DATA', 'Recipe snapshot does not match the expected recipe hash', '/recipeHash')
   }
-  const compiled = await normalizePublishedInstallableRecipe(snapshot.recipe)
-  if (canonicalize(compiled.recipe.data) !== canonicalize(snapshot.recipe) || compiled.recipe.hash !== snapshot.recipeHash)
+  // A snapshot is identified by its stored bytes (decision 0009). The stored recipe and preset are checked
+  // against their own hashes and normal form, never against today's built-in preset or catalog defaults.
+  const recipe = validateInstallableRecipe(snapshot.recipe)
+  const normalized = recipe.schemaVersion === '2.0'
+    ? recipe
+    : normalizeRecipe(recipe, snapshot.preset.componentDefaults?.button)
+  if (canonicalize(normalized) !== canonicalize(snapshot.recipe) ||
+    await sha256(canonicalize(snapshot.recipe)) !== snapshot.recipeHash)
     throw new FoundationError('INVALID_DATA', 'Recipe snapshot must contain normalized recipe bytes with their canonical hash', '/recipe')
-  if (canonicalize(compiled.preset.data) !== canonicalize(snapshot.preset) || compiled.preset.hash !== snapshot.presetHash)
-    throw new FoundationError('INVALID_DATA', 'Recipe snapshot preset must match its resolved built-in preset', '/preset')
+  assertStoredPresetNormalized(snapshot.preset, '/preset')
+  const ref = recipe.presetRef
+  if (snapshot.preset.id !== ref.id || snapshot.preset.revision !== ref.revision ||
+    snapshot.preset.catalogRelease !== ref.catalogRelease || snapshot.preset.compilerVersion !== ref.compilerVersion ||
+    await sha256(canonicalize(snapshot.preset)) !== snapshot.presetHash)
+    throw new FoundationError('INVALID_DATA', 'Recipe snapshot preset must be the built-in preset its recipe names, with its canonical hash', '/preset')
   return snapshot
 }

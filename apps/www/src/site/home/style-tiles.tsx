@@ -1,8 +1,8 @@
 'use client'
 
-import type { StyleFamily } from '@ombelle/contracts'
+import { accessibilityCaveatLabel, type StyleFamily } from '@ombelle/contracts'
 import { Plus } from 'lucide-react'
-import { useState, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { KitSegmented, KitSwitch, LookPicker, useLookName } from './kit'
 import { useLanding } from './landing-state'
 import { familyMeta } from './landing-theme'
@@ -119,16 +119,41 @@ const specimens: Record<StyleFamily, (componentCount: number, familyCount: numbe
   ),
 }
 
+/**
+ * True once the element comes within 600 px of the viewport. A tile wears its family's fonts only from then
+ * on (landing.css): a browser downloads a font for any text laid out in it, on screen or not, so the first
+ * visit fetched every family's fonts, about 500 KB on a phone (OPS-13).
+ */
+function useNearViewport<T extends Element>() {
+  const ref = useRef<T>(null)
+  const [seen, setSeen] = useState(false)
+  useEffect(() => {
+    const element = ref.current
+    if (!element || seen) return
+    if (typeof IntersectionObserver === 'undefined') {
+      setSeen(true)
+      return
+    }
+    const observer = new IntersectionObserver((entries) => {
+      if (entries.some((entry) => entry.isIntersecting)) setSeen(true)
+    }, { rootMargin: '600px 0px' })
+    observer.observe(element)
+    return () => observer.disconnect()
+  }, [seen])
+  return { ref, seen }
+}
+
 function Tile({ family, index }: { family: StyleFamily; index: number }) {
   const { family: worn, wear, lookStyle, componentCount, families } = useLanding()
   const meta = familyMeta[family]
   const glass = family === 'liquid-glass'
   const lookName = useLookName(family)
+  const near = useNearViewport<HTMLElement>()
   return (
-    <article className="ol-tile rv" data-family={family} style={lookStyle(family)} aria-labelledby={`tile-${family}`}>
+    <article ref={near.ref} className="ol-tile rv" data-family={family} data-fonts={near.seen ? '' : undefined} style={lookStyle(family)} aria-labelledby={`tile-${family}`}>
       <div className="ol-tile-hd">
         <div><h3 className="ol-tile-h" id={`tile-${family}`}>{meta.name}</h3><p className="ol-tile-p">{meta.blurb}</p></div>
-        <div className="ol-tile-top"><span>Style {String(index + 1).padStart(2, '0')}</span><span>{glass ? 'Experimental' : 'Stable'}</span></div>
+        <div className="ol-tile-top"><span>Style {String(index + 1).padStart(2, '0')}</span><span>{glass ? `Stable · ${accessibilityCaveatLabel}` : 'Stable'}</span></div>
       </div>
       {specimens[family](componentCount, families.length)}
       <div className="ol-tile-ft">

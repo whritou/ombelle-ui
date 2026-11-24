@@ -26,10 +26,10 @@ export function TooltipProvider({
 }) {
   return (
     <TooltipPrimitive.Provider
-      data-slot="tooltip-provider"
       delay={delayDuration}
       timeout={skipDelayDuration}
       {...props}
+      data-slot="tooltip-provider"
     />
   )
 }
@@ -50,6 +50,14 @@ function useCloseOnDocumentLeave(open: boolean, close: () => void) {
     return () => root.removeEventListener('mouseleave', leave)
   }, [open, close])
 }
+
+/**
+ * Base UI gives the popup no role and the trigger no description, so a screen reader never
+ * hears the text. The Root shares the open state and the content's id; the trigger is
+ * described by the content while it is open, as in the Radix edition.
+ */
+type Description = { open: boolean; contentId: string; setContentId(id: string | undefined): void }
+const DescriptionContext = React.createContext<Description | null>(null)
 
 type TooltipRootProps = React.ComponentProps<typeof TooltipPrimitive.Root>
 type OpenChangeRest = TooltipRootProps['onOpenChange'] extends ((open: boolean, ...rest: infer Rest) => void) | undefined ? Rest : never
@@ -72,21 +80,32 @@ export function Tooltip({
     ;(onOpenChange as ((open: boolean) => void) | undefined)?.(false)
   }, [openProp, onOpenChange])
   useCloseOnDocumentLeave(open, close)
-  return <TooltipPrimitive.Root data-slot="tooltip" {...props} open={open} onOpenChange={setOpen} />
+  const fallbackId = React.useId()
+  const [ownId, setContentId] = React.useState<string | undefined>()
+  const description = React.useMemo(() => ({ open, contentId: ownId ?? fallbackId, setContentId }), [open, ownId, fallbackId])
+  return (
+    <DescriptionContext.Provider value={description}>
+      <TooltipPrimitive.Root {...props} data-slot="tooltip" open={open} onOpenChange={setOpen} />
+    </DescriptionContext.Provider>
+  )
 }
 
 export function TooltipTrigger({
   className,
+  'aria-describedby': describedBy,
   ...props
 }: Part<typeof TooltipPrimitive.Trigger>) {
+  const description = React.useContext(DescriptionContext)
+  const ids = [describedBy, description?.open ? description.contentId : undefined].filter(Boolean).join(' ')
   return (
     <TooltipPrimitive.Trigger
-      data-slot="tooltip-trigger"
       className={cn(className)}
       render={(triggerProps, state) => (
         <button {...triggerProps} data-state={openState(state.open)} />
       )}
+      aria-describedby={ids || undefined}
       {...props}
+      data-slot="tooltip-trigger"
     />
   )
 }
@@ -108,8 +127,15 @@ export function TooltipContent({
   alignOffset,
   collisionPadding,
   sticky,
+  id,
   ...props
 }: TooltipContentProps) {
+  const description = React.useContext(DescriptionContext)
+  const setContentId = description?.setContentId
+  React.useEffect(() => {
+    setContentId?.(id)
+    return () => setContentId?.(undefined)
+  }, [id, setContentId])
   return (
     <TooltipPrimitive.Portal>
       <TooltipPrimitive.Positioner
@@ -121,7 +147,8 @@ export function TooltipContent({
         sticky={sticky}
       >
         <TooltipPrimitive.Popup
-          data-slot="tooltip-content"
+          id={id ?? description?.contentId}
+          role="tooltip"
           className={cn(className)}
           // The shared stylesheet reads Radix's available-width variable.
           style={{
@@ -137,6 +164,7 @@ export function TooltipContent({
             />
           )}
           {...props}
+          data-slot="tooltip-content"
         />
       </TooltipPrimitive.Positioner>
     </TooltipPrimitive.Portal>
@@ -150,7 +178,6 @@ export function TooltipArrow({
 }: Part<typeof TooltipPrimitive.Arrow>) {
   return (
     <TooltipPrimitive.Arrow
-      data-slot="tooltip-arrow"
       className={cn(className)}
       render={(arrowProps) => (
         <svg
@@ -164,6 +191,7 @@ export function TooltipArrow({
         </svg>
       )}
       {...props}
+      data-slot="tooltip-arrow"
     />
   )
 }
@@ -199,11 +227,11 @@ export function TooltipShortcut({
 }: Omit<React.ComponentProps<'span'>, 'children'> & { keys: string[] }) {
   return (
     <span
-      data-slot="tooltip-shortcut"
       data-tooltip-shortcut=""
       aria-hidden="true"
       className={cn(className)}
       {...props}
+      data-slot="tooltip-shortcut"
     >
       {keys.map((key, index) => (
         <kbd key={index} data-slot="tooltip-shortcut-key">

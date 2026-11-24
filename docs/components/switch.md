@@ -1,10 +1,10 @@
 # Switch
 
-Switch wraps the reviewed Radix Switch primitive. It supports flat, minimalist, neo-brutalism, ombelle, papier, organic, and retro futurism in light and dark modes through semantic tokens. Liquid glass is experimental; see [Liquid glass](#liquid-glass). The template is a client component.
+Switch wraps the reviewed Radix Switch primitive. It supports flat, minimalist, neo-brutalism, ombelle, papier, organic, and retro futurism in light and dark modes through semantic tokens. Liquid glass is supported, without an accessibility guarantee; see [Liquid glass](#liquid-glass). The template is a client component.
 
 ## Install and compose
 
-Build packages and initialize the target project with a local preset, then use the private local CLI:
+Build packages and initialize the target project with a local preset, then use the CLI:
 
 ```powershell
 pnpm build:packages

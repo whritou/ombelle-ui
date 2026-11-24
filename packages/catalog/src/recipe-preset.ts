@@ -1,14 +1,18 @@
-import { FoundationError, type Recipe, type Preset } from '@ombelle/contracts'
-import { getCatalog } from './index.js'
+import { FoundationError, isSupportedContractRelease, type Recipe, type Preset } from '@ombelle/contracts'
+import { getCatalogPresets } from './presets.js'
 export function resolveRecipePreset(ref: Recipe['presetRef']): Preset {
-  if (ref.compilerVersion !== '0.1.0')
+  if (!isSupportedContractRelease(ref.compilerVersion))
     throw new FoundationError(
       'UNSUPPORTED_RELEASE',
       'Unsupported recipe compiler version',
       '/presetRef/compilerVersion',
     )
-  const catalog = getCatalog(ref.catalogRelease)
-  const preset = [...Object.values(catalog.presets), ...Object.values(catalog.startingPresets)].find(
+  const catalog = getCatalogPresets(ref.catalogRelease)
+  const preset = [
+    ...Object.values(catalog.presets),
+    ...Object.values(catalog.startingPresets),
+    ...catalog.retiredPresets,
+  ].find(
     (p) => p.id === ref.id && p.revision === ref.revision,
   )
   if (!preset)

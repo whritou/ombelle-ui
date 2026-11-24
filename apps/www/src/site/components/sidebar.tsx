@@ -13,7 +13,7 @@ const groups = [
   { title: 'Editors', links: [{ href: '/editor/preset', label: 'Preset editor' }, componentEditorLink] },
 ]
 
-/** The component directory's sidebar: a sheet on phones, inline before hydration. */
+/** The component directory's sidebar: a sheet on phones (hidden until hydration, see globals.css), inline from 768 px. */
 export function ComponentsSidebar({ label = 'Components' }: { label?: string }) {
   const pathname = usePathname()
   const content = useRef<HTMLDivElement>(null)

@@ -48,10 +48,23 @@
   padding: 0;
   border: var(--border-width) solid var(--border);
   border-radius: 999px;
-  background: color-mix(in oklab, var(--background) 55%, transparent);
+  background: var(--background);
   color: var(--foreground);
   cursor: pointer;
   transition: background-color var(--motion-duration, 0.2s), opacity var(--motion-duration, 0.2s);
+}
+/* The translucent control is an enhancement; the fallback and reduced transparency keep it opaque. */
+@supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  [data-slot='carousel-previous'],
+  [data-slot='carousel-next'] {
+    background: color-mix(in oklab, var(--background) 55%, transparent);
+  }
+  @media (prefers-reduced-transparency: reduce) {
+    [data-slot='carousel-previous'],
+    [data-slot='carousel-next'] {
+      background: var(--background);
+    }
+  }
 }
 [data-slot='carousel-previous'] {
   grid-area: previous;
@@ -237,3 +250,12 @@
   }
 }
 /* end 0.7.6 variants */
+/* Forced colours: opaque system surfaces, so the system colour pair holds over any backdrop. Each selector outranks the translucent variants and leaves the highlighted states to their own rules. */
+@media (forced-colors: active) {
+  [data-slot='carousel-previous']:not(:hover) {
+    background-color: ButtonFace;
+  }
+  [data-slot='carousel-next']:not(:hover) {
+    background-color: ButtonFace;
+  }
+}

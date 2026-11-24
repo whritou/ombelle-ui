@@ -1,10 +1,10 @@
 # Native Select
 
-Native Select styles the browser's own `select` control. It follows shadcn's Native Select names, `data-slot` markers, and markup, and has no client boundary. It supports `flat`, `minimalist`, `neo-brutalism`, and `ombelle` in light and dark modes. Liquid glass is experimental for Native Select; see [Liquid glass](#liquid-glass). A fully custom Select is a later component.
+Native Select styles the browser's own `select` control. It follows shadcn's Native Select names, `data-slot` markers, and markup, and has no client boundary. It supports `flat`, `minimalist`, `neo-brutalism`, and `ombelle` in light and dark modes. Liquid glass is supported for Native Select, without an accessibility guarantee; see [Liquid glass](#liquid-glass). A fully custom Select is a later component.
 
 ## Install and compose
 
-Build the packages and initialize the target project with a local preset before using the private local CLI:
+Build the packages and initialize the target project with a local preset before using the CLI:
 
 ```powershell
 pnpm build:packages
@@ -36,7 +36,7 @@ export function RegionField() {
 
 | Export | Renders | Additional prop |
 | --- | --- | --- |
-| `NativeSelect` / `NativeSelectProps` | `div` wrapper containing `select` and a chevron icon | `size?: 'sm' \| 'default'`, default `default` |
+| `NativeSelect` / `NativeSelectProps` | `div` wrapper containing `select` and a chevron icon | `size?: 'sm' \| 'default' \| 'lg'`, default `default`, on the [shared size scale](../03-components-styles-accessibility.md#sizes); `lg` is new in 1.0 |
 | `NativeSelectOption` | `option` | — |
 | `NativeSelectOptGroup` | `optgroup` | — |
 

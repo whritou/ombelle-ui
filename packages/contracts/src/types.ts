@@ -11,6 +11,8 @@ export type { StyleFamily } from './style-families.js'
 
 export type ResolvedPreset = { data: Preset; hash: string }
 export type Dependency = { name: string; version: string }
+/** A planned dependency change; `current` is the project's declaration it replaces, when there is one. */
+export type PlannedDependency = Dependency & { current?: string }
 export type Artifact = {
   logicalPath: string
   kind: 'component' | 'style' | 'usage' | 'utility'
@@ -112,6 +114,8 @@ export type ProjectContext = {
   edition: Edition
   /** False when components.json names a style Ombelle doesn't support. */
   upstreamStyleSupported: boolean
+  /** Notices about accepted but untested versions (a React major newer than the tested one). */
+  supportNotices?: string[]
   bunLockfile?: BunLockfile
   preconditions: Record<string, string | null>
   root: string
@@ -166,7 +170,7 @@ export type InstallPlan = {
   provenance: CompileResult['provenance']
   changes: FileChange[]
   managedDeclarations: ManagedDeclaration[]
-  dependencyPlan: Dependency[]
+  dependencyPlan: PlannedDependency[]
   diagnostics: {
     code: string
     message: string

@@ -51,4 +51,4 @@ The Base UI edition uses `Menubar` and `Menu` from `@base-ui/react`.
 
 ## Liquid glass
 
-Liquid glass support is experimental.
+Liquid glass is supported, without an accessibility guarantee.

@@ -5,6 +5,7 @@ import { componentRecipeParts } from './component-recipe-appearance.js'
 import { FoundationError } from './diagnostics.js'
 import { validateRecipe, type Recipe } from './recipe.js'
 import { assertColorValue } from './validate.js'
+import { assertFontForRole, type FontRoleField } from './fonts.js'
 import { isParsableColor } from './color-syntax.js'
 
 export type ComponentRecipe = FromSchema<typeof componentRecipeSchema>
@@ -55,6 +56,9 @@ export function validateComponentRecipe(input: unknown): ComponentRecipe {
   const recipe = structuredClone(input as ComponentRecipe)
   Object.assign(recipe, { props: { ...defaultRecipeFields(componentRecipeFields(recipe.component).props), ...recipe.props } })
   validateComposition(recipe)
+  // Every named font is checked, whatever slots the component has today (CMP-04).
+  for (const [field, id] of Object.entries(recipe.appearance?.fonts ?? {}))
+    if (id !== undefined) assertFontForRole(id, field as FontRoleField, '/appearance/fonts/' + field)
   for (const [slot, part] of Object.entries(recipe.appearance?.parts ?? {})) {
     const path = '/appearance/parts/' + slot
     if (!componentRecipeParts[recipe.component].some(candidate => candidate.slot === slot))

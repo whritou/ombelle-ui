@@ -128,7 +128,7 @@ Key evidence files are `matrix.json` (Next.js rows), `matrix-vite.json`, `browse
 Each test repository is under this directory:
 
 ```text
-C:\Users\whrit\.codex\visualizations\2026\11\08\01a1bbd4-18c5-73e0-ba99-6b0cad85a604\realworld-apps
+<local-path>sualizations\2026\11\08\01a1bbd4-18c5-73e0-ba99-6b0cad85a604\realworld-apps
 ```
 
 | Repository directory | Committed test state |

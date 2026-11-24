@@ -1,6 +1,6 @@
 # Empty
 
-Empty is a zero-data screen: optional media, a title, a description, then actions. It is available in all five families in light and dark mode, with Radix and Base UI editions and no client boundary.
+Empty is a zero-data screen: optional media, a title, a description, then actions. It is available in all eight families in light and dark mode, with Radix and Base UI editions and no client boundary.
 
 This component requires CLI **0.7.3** or later: `npx @ombelle-ui/cli@0.7.3 add empty`. For a built local checkout:
 
@@ -48,6 +48,6 @@ The recipe editor sets `media` (`icon` or `none`), the title, the description an
 
 ## Liquid glass
 
-Liquid glass is experimental for Empty, as for every glass component, and its findings do not block a release. See [liquid glass](liquid-glass.md).
+Liquid glass is supported for Empty without an accessibility guarantee, as for every glass component; only its contrast findings, which depend on the backdrop, are advisory in the specimen audit. See [liquid glass](liquid-glass.md).
 
 See [display components evidence](../evidence/display-components.md) for the board comparison and the specimen audit.

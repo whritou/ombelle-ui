@@ -1,6 +1,6 @@
 # Slider
 
-Slider picks a value, or a range with two thumbs, along a track, with an optional row of tick labels. It is available in all five families in light and dark mode, with Radix and Base UI editions; the template is a client component.
+Slider picks a value, or a range with two thumbs, along a track, with an optional row of tick labels. It is available in all eight families in light and dark mode, with Radix and Base UI editions; the template is a client component.
 
 This component requires CLI **0.7.3** or later: `npx @ombelle-ui/cli@0.7.3 add slider`. For a built local checkout:
 
@@ -82,6 +82,6 @@ The Base UI edition is built on `Slider.Root`, `Slider.Control`, `Slider.Track`,
 
 ## Liquid glass
 
-Liquid glass is experimental for Slider, as for every glass component, and its findings do not block a release. See [liquid glass](liquid-glass.md).
+Liquid glass is supported for Slider without an accessibility guarantee, as for every glass component; only its contrast findings, which depend on the backdrop, are advisory in the specimen audit. See [liquid glass](liquid-glass.md).
 
 See [form controls evidence](../evidence/form-controls-073.md) for the board comparison, the specimen audit and the browser tests.

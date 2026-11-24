@@ -41,7 +41,7 @@ describe.each(Object.keys(editions) as (keyof typeof editions)[])('%s TooltipSho
 
   it('renders one kbd per key inside an aria-hidden span', () => {
     const html = renderToStaticMarkup(h(ui.TooltipShortcut, { keys: ['Ctrl', 'Z'] }))
-    expect(html).toBe('<span data-slot="tooltip-shortcut" data-tooltip-shortcut="" aria-hidden="true" class=""><kbd data-slot="tooltip-shortcut-key">Ctrl</kbd><kbd data-slot="tooltip-shortcut-key">Z</kbd></span>')
+    expect(html).toBe('<span data-tooltip-shortcut="" aria-hidden="true" class="" data-slot="tooltip-shortcut"><kbd data-slot="tooltip-shortcut-key">Ctrl</kbd><kbd data-slot="tooltip-shortcut-key">Z</kbd></span>')
   })
 
   it('passes className and other span props through, and keeps the hidden attributes', () => {
@@ -63,8 +63,8 @@ describe.each(Object.keys(editions) as (keyof typeof editions)[])('%s TooltipSho
 
 // A closed Tooltip with a trigger only, as the Task 1 commit (db22321b) renders it.
 const unchanged: Record<keyof typeof editions, string> = {
-  radix: '<button data-state="closed" data-slot="tooltip-trigger" class="" type="button">Undo</button>',
-  base: '<button data-base-ui-tooltip-trigger="" data-slot="tooltip-trigger" type="button" data-state="closed">Undo</button>',
+  radix: '<button data-state="closed" class="" type="button" data-slot="tooltip-trigger">Undo</button>',
+  base: '<button data-base-ui-tooltip-trigger="" type="button" data-slot="tooltip-trigger" data-state="closed">Undo</button>',
 }
 
 describe('Tooltip shortcut styles', () => {

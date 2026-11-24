@@ -62,7 +62,7 @@ const slideImage = (index: number) => {
 const dataTableRows = [
   ['Accordion', 'Disclosure', 'Stable'], ['Button', 'Action', 'Stable'], ['Calendar', 'Date', 'Stable'], ['Data Table', 'Data', 'Stable'],
   ['Dialog', 'Overlay', 'Stable'], ['Menubar', 'Navigation', 'Stable'], ['Navigation Menu', 'Navigation', 'Stable'], ['Prose', 'Typography', 'Stable'],
-  ['Resizable', 'Layout', 'Stable'], ['Sidebar', 'Navigation', 'Stable'], ['Liquid glass Sheet', 'Overlay', 'Experimental'], ['Liquid glass Toolbar', 'Action', 'Experimental'],
+  ['Resizable', 'Layout', 'Stable'], ['Sidebar', 'Navigation', 'Stable'], ['Liquid glass Sheet', 'Overlay', 'Accessibility caveat'], ['Liquid glass Toolbar', 'Action', 'Accessibility caveat'],
 ].map(([name, kind, status]) => ({ name: name!, kind: kind!, status: status! }))
 // The Ombelle preset's primary foreground in light and dark.
 const primaryForeground = { light: 'oklch(0.99 0 0)', dark: 'oklch(0.16 0.01 275)' } as const

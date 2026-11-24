@@ -1,7 +1,7 @@
 // Generated from schemas/recipe-snapshot-source.schema.json; do not edit independently.
 export const recipeSnapshotSourceSchema = {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ui.example.com/schemas/recipe-snapshot-source-1.0.json",
+  "$id": "https://ombelle-ui.vercel.app/schemas/recipe-snapshot-source-1.0.json",
   "title": "Recipe Snapshot Source",
   "type": "object",
   "additionalProperties": false,

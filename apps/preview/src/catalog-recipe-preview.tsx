@@ -1,5 +1,6 @@
 import * as React from 'react'
 import { describeComponentRecipe } from '@ombelle/compiler'
+import { stripFontImports } from '@ombelle/compiler/light'
 import type { ComponentRecipe, ComponentRecipeCompileResult } from '@ombelle/contracts'
 import { renderSpecimen, type Primitives } from './render-specimen'
 import { measureCatalogParts, type CatalogPreviewRender, type MeasuredParts } from '../../www/src/editor/catalog-preview-protocol'
@@ -61,7 +62,8 @@ export function CatalogSpecimenCell({ component, result, onRendered }: {
   }, [rendered, onRendered])
   const css = result.artifacts.find(artifact => artifact.logicalPath.endsWith(`/${component}.css`))?.content
   return <>
-    <style>{css}</style>
+    {/* Font imports name packages this page cannot resolve; preset-fonts.ts loads the fonts. */}
+    <style>{css === undefined ? undefined : stripFontImports(css)}</style>
     {instance && <LiquidGlassFilter key={result.scope} scope={result.scope} instance={instance} />}
     {/* The stage carries the preset's tokens, so triggers and plain labels around the component use them too. */}
     {rendered && <div ref={stage} className="recipe-stage" data-ombelle-recipe={result.scope} data-component={component}>

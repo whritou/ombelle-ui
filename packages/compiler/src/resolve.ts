@@ -1,10 +1,14 @@
 import {
   validatePreset,
   FoundationError,
+  isSupportedContractRelease,
   type Preset,
+  type Recipe,
   type ResolvedPreset,
 } from '@ombelle/contracts'
 import type { Catalog } from '@ombelle/catalog'
+/** What resolution reads from a catalog: its release and family presets (getCatalogPresets provides them without templates). */
+type PresetCatalog = Pick<Catalog, 'release' | 'presets'>
 import { canonicalize } from './canonicalize.js'
 import { sha256 } from './hash.js'
 /** Canonical spelling of a schema-valid color (lowercase hex, plain OKLCH numbers). */
@@ -28,7 +32,7 @@ export function normalizeColor(color: string): string {
  * The resolved preset data without validation or hashing: catalog defaults
  * merged in and colors normalized. Idempotent on already-resolved data.
  */
-export function presetWithDefaults(p: Preset, catalog: Catalog): ResolvedPreset['data'] {
+export function presetWithDefaults(p: Preset, catalog: PresetCatalog): ResolvedPreset['data'] {
   const base = catalog.presets[p.styleFamily]
   if (!base)
     throw new FoundationError(
@@ -62,15 +66,33 @@ export function presetWithDefaults(p: Preset, catalog: Catalog): ResolvedPreset[
 }
 export async function resolvePreset(
   input: unknown,
-  catalog: Catalog,
+  catalog: PresetCatalog,
 ): Promise<ResolvedPreset> {
   const p = validatePreset(input)
-  if (p.catalogRelease !== catalog.release || p.compilerVersion !== '0.1.0')
+  if (p.catalogRelease !== catalog.release || !isSupportedContractRelease(p.compilerVersion))
     throw new FoundationError(
       'UNSUPPORTED_RELEASE',
       'Preset release mismatch',
       '/catalogRelease',
     )
   const data = presetWithDefaults(p, catalog)
+  return { data, hash: await sha256(canonicalize(data)) }
+}
+
+/**
+ * A resolved built-in preset stored by a recipe snapshot or lock row, checked against the recipe's
+ * `presetRef` and used in place of today's built-in, so a published recipe keeps the preset it was
+ * published with (decision 0009).
+ */
+export function pinnedRecipePreset(preset: Preset, ref: Recipe['presetRef']): Preset {
+  const pinned = validatePreset(preset)
+  if (pinned.id !== ref.id || pinned.revision !== ref.revision ||
+    pinned.catalogRelease !== ref.catalogRelease || pinned.compilerVersion !== ref.compilerVersion)
+    throw new FoundationError('INVALID_DATA', 'The stored preset is not the built-in preset the recipe names', '/preset')
+  return pinned
+}
+/** A stored, already resolved preset identified by its own bytes rather than by re-resolution. */
+export async function storedPresetIdentity(preset: Preset): Promise<ResolvedPreset> {
+  const data = structuredClone(preset) as ResolvedPreset['data']
   return { data, hash: await sha256(canonicalize(data)) }
 }

@@ -27,7 +27,7 @@ export function EditorSplit() {
 
 - `ResizablePanelGroup` takes `direction` (`horizontal` or `vertical`) and `autoSaveId`, which remembers the layout in local storage. A saved value that is malformed, out of range or blocked by the browser is ignored, and the default sizes apply.
 - `ResizablePanel` passes `defaultSize`, `minSize`, `maxSize`, `collapsible`, `collapsedSize` and `panelRef` to react-resizable-panels.
-- `ResizableHandle` is a focusable separator with `aria-valuenow`: the arrow keys resize in steps, Home and End jump to the limits. `withHandle` draws a grip. Its hit area is at least 24 px across (44 px on touch), even though the drawn line is thin. Name it with `aria-label` when there are several.
+- `ResizableHandle` is a focusable separator with `aria-valuenow`: the arrow keys resize in steps, Home and End jump to the limits. `withHandle` draws a grip. Its hit area is at least 24 px across (44 px on touch), even though the drawn line is thin; a `resizeTargetMinimumSize` you pass to `ResizablePanelGroup` sets other sizes. Name it with `aria-label` when there are several.
 - To offer "Reset layout", keep a `panelRef` and call `resize` or `expand` on it.
 
 ## Recipe
@@ -36,4 +36,4 @@ The recipe sets `direction`, `withHandle`, `panels` (2 or 3) and one label per p
 
 ## Liquid glass
 
-Liquid glass support is experimental.
+Liquid glass is supported, without an accessibility guarantee.

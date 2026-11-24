@@ -29,7 +29,7 @@ export function ReleaseNotes() {
 - `Prose` takes `measure`: `narrow` (60ch), `default` (72ch) or `wide` (88ch). A `className` with a max-width overrides it.
 - `ProseLead` is the opening paragraph, larger and quieter than the body text.
 - Element styles sit at the prose slot's specificity, so a utility class on an element wins. Elements inside another catalog component, such as a Code Block or a Table, keep that component's look.
-- Long words and addresses wrap, and a wide table scrolls inside its own box, so the page never scrolls sideways at 320 px.
+- Long words and addresses wrap, and a wide table scrolls inside its own box, so the page never scrolls sideways at 320 px. Prose has no script and cannot tell which tables overflow, so give a table that may be wider than the text `tabIndex={0}` and a name (`aria-label` or a `caption`): a keyboard can then reach and scroll it. Chromium and Firefox focus a scrolling box on their own; Safari does not.
 - Headings keep their levels: Prose changes how they look, not the outline.
 
 ## Recipe
@@ -38,4 +38,4 @@ The recipe sets `measure` and the article heading. Compilation emits `components
 
 ## Liquid glass
 
-Liquid glass support is experimental.
+Liquid glass is supported, without an accessibility guarantee.

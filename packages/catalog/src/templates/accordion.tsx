@@ -21,9 +21,9 @@ export function Accordion({ className, appearance, icon, ...props }: AccordionPr
   return (
     <AccordionIcon.Provider value={icon}>
       <AccordionPrimitive.Root
-        data-slot="accordion"
         className={cn(className)}
         {...props}
+        data-slot="accordion"
         data-appearance={appearance}
         data-icon={icon}
       />
@@ -37,9 +37,9 @@ export function AccordionItem({
 }: React.ComponentProps<typeof AccordionPrimitive.Item>) {
   return (
     <AccordionPrimitive.Item
-      data-slot="accordion-item"
       className={cn(className)}
       {...props}
+      data-slot="accordion-item"
     />
   )
 }
@@ -62,9 +62,9 @@ export function AccordionTrigger({
     <AccordionPrimitive.Header data-slot="accordion-header" asChild>
       <Heading>
         <AccordionPrimitive.Trigger
-          data-slot="accordion-trigger"
           className={cn(className)}
           {...props}
+          data-slot="accordion-trigger"
         >
           {children}
           <span data-slot="accordion-icon" aria-hidden="true">
@@ -93,9 +93,9 @@ export function AccordionContent({
 }: React.ComponentProps<typeof AccordionPrimitive.Content>) {
   return (
     <AccordionPrimitive.Content
-      data-slot="accordion-content"
       className={cn(className)}
       {...props}
+      data-slot="accordion-content"
     >
       <div data-slot="accordion-content-inner">{children}</div>
     </AccordionPrimitive.Content>

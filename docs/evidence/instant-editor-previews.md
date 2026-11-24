@@ -60,7 +60,7 @@ The Liquid Glass fast path, other `PresetPreviewFrame` surfaces, inline scenes, 
 
 ## Preset editor audit
 
-Branch `feat/instant-editor-previews`, measured and read on commit `337eb0b488d94d3b4b629ceacfd5b194031baf23` (no product change yet). Design: `docs/superpowers/specs/2026-11-20-instant-editor-previews-design.md`.
+Branch `feat/instant-editor-previews`, measured and read on commit `337eb0b488d94d3b4b629ceacfd5b194031baf23` (no product change yet). Design: `docs/internal/superpowers/specs/2026-11-20-instant-editor-previews-design.md`.
 
 ### Baseline
 

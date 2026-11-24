@@ -1,4 +1,4 @@
-import { expansionExamples } from '@ombelle/catalog'
+import { expansionExamples } from '@ombelle/catalog/expansion-examples'
 import type { ComponentDoc } from './catalog'
 
 export const expansionDocs = {

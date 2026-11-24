@@ -131,7 +131,7 @@
 }
 /* end 0.7.5 variants */
 /* organic layer */
-[data-slot='switch']{border-color:var(--border);border-radius:99px 90px 99px 94px;background:var(--secondary);box-shadow:none;transition:background-color 0.25s,border-color 0.25s}
+[data-slot='switch']{border-color:var(--border);border-radius:99px 90px 99px 94px;background:var(--secondary);box-shadow:none;transition:background-color calc(var(--motion-duration) * 5/3),border-color calc(var(--motion-duration) * 5/3)}
 [data-slot='switch'][data-state='checked']{border-color:var(--primary);background:var(--primary)}
 [data-slot='switch']:not(:disabled):not([data-disabled]):hover,[data-slot='switch']:not(:disabled):not([data-disabled]):active{transform:none;box-shadow:none}
 [data-slot='switch']:focus-visible{outline:3px solid var(--ring);outline-offset:2px}

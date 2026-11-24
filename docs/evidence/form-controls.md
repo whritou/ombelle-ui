@@ -98,4 +98,4 @@ The run measured automated checks in one Chromium build, version 156 through the
 
 Liquid glass is unavailable for Label, Textarea, and Native Select. Component-scoped presets and recipes remain Button-only.
 
-See the [Label](../components/label.md), [Textarea](../components/textarea.md), and [Native Select](../components/native-select.md) documents, the [approved design](../superpowers/specs/2026-10-25-native-form-controls-design.md), and the [implementation plan](../superpowers/plans/2026-10-25-native-form-controls.md).
+See the [Label](../components/label.md), [Textarea](../components/textarea.md), and [Native Select](../components/native-select.md) documents, the [approved design](../internal/superpowers/specs/2026-10-25-native-form-controls-design.md), and the [implementation plan](../internal/superpowers/plans/2026-10-25-native-form-controls.md).

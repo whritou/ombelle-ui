@@ -1,5 +1,5 @@
 'use client'
-import { useEffect, useState, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { Code } from 'lucide-react'
 import type { InstallableRecipeCompileResult } from '@ombelle/contracts'
 import { useRecipePublication } from '../use-publication'
@@ -37,12 +37,15 @@ export function RecipeGetCode({
   componentName?: string
   storageKey?: string
 }) {
-  const publication = useRecipePublication({ recipe, current, announce, storageKey })
+  const [open, setOpen] = useState(false)
+  // While the dialog is open it announces the outcome itself; the editor's status region is hidden behind it.
+  const dialogOpen = useRef(open)
+  dialogOpen.current = open
+  const publication = useRecipePublication({ recipe, current, storageKey, announce: (text) => { if (!dialogOpen.current) announce(text) } })
   const scopes = [{ id: 'recipe', label: componentName,
     description: `Run in an initialized app folder to add this ${componentName} recipe. The CLI shows its plan and asks before writing.` }] as const
   const installUnavailable = recipe ? installableRecipeInstallNotice(recipe.data) : undefined
   const { state } = publication
-  const [open, setOpen] = useState(false)
   const last = state.lastPublished
   const matches =
     current && recipe !== null && last?.recipeHash === recipe.hash
@@ -80,7 +83,6 @@ export function RecipeGetCode({
         code={code}
         scopes={scopes}
         installUnavailable={installUnavailable}
-        announce={announce}
         onRetry={() => void publication.generate()}
         commandFor={(_scope, manager) =>
           codeInstallCommand(

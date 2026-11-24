@@ -23,7 +23,7 @@ Use [preset.schema.json](../schemas/preset.schema.json) and [preset.example.json
 
 Color inputs in this initial schema accept six-digit hex or numeric OKLCH. They deliberately exclude arbitrary CSS expressions, URLs, and user-defined `var()` chains. A color parser must additionally reject invalid numbers, out-of-range values, unsupported gamut policy, or misleading syntax. Future syntax support must be versioned and tested.
 
-Sparse preset inputs inherit the exact defaults from `catalogRelease`. For project initialization and snapshot publishing, the resolver materializes a complete normalized preset containing every token needed by selected components. Store that normalized data locally and hash it; never rely on mutable remote defaults.
+Sparse preset inputs inherit the defaults of the family's built-in preset in the installed catalog; built-in presets are frozen per `id@revision`, so a default only changes with a new revision. `catalogRelease` and `compilerVersion` name the contract version (schemas, canonical form, colour normalization, default materialization and the scope-hash input), not catalog bytes; see decision 0009. For project initialization and snapshot publishing, the resolver materializes a complete normalized preset containing every token needed by selected components. Store that normalized data locally and hash it; never rely on mutable remote defaults. A published snapshot is verified against its own stored bytes and hash, never against the installed catalog's defaults or built-ins, and a recipe snapshot compiles against the preset it stored.
 
 The initial schema includes Button defaults only. Adding controls for another component requires corresponding schema, compiler, documentation, and test changes. A generic JSON bag is not an acceptable shortcut.
 
@@ -77,7 +77,7 @@ Global palette and token declarations are merged directly into the configured st
 
 The lockfile records a lock version, exact CLI and compiler releases, catalog release, normalized preset hash, dependency requirements, and installed artifact records. Each artifact record includes its original source identity, transformed content hash, relative destination, template version, and associated recipe when present. Dependency packages remain locked by the project's ordinary package manager lockfile.
 
-An ordinary `add` operation reads the local preset and lockfile each time. It never chooses a new upstream default because the process restarted or a new release exists. The proposed `add <component> --preset <code-or-file>` explicitly selects a preset for that component installation only. It preserves the saved project preset and the defaults used by later ordinary `add` operations. Use `preset apply` or `theme add` to change project-wide defaults.
+An ordinary `add` operation reads the local preset and lockfile each time. It never chooses a new upstream default because the process restarted or a new release exists. The `add button --preset <code-or-file>` command explicitly selects a preset for that Button installation only. It preserves the saved project preset and the defaults used by later ordinary `add` operations. Use `preset apply` or `theme add` to change project-wide defaults.
 
 ## Component-scoped preset selection
 
@@ -90,7 +90,7 @@ add button --preset ps_brand@3
 add button --preset ./brand.preset.json
 ```
 
-The current private foundation supports the local Button command `add button --preset <local.json>` and exact immutable snapshot references in the supported global and Button-scoped paths. It installs a separate scoped Button and preserves the saved project preset and defaults for later ordinary additions. The `ps_brand@3` examples above are illustrative proposed identifiers, not valid references in the current implementation. Component-scoped support beyond Button remains pending. See [local usage](foundation-local-usage.md#component-scoped-button-presets) and [snapshot operations](snapshot-service-operations.md) for the supported commands and boundaries.
+The CLI supports `add button --preset <local.json or ps_code@1>` and exact immutable snapshot references in the supported global and Button-scoped paths. It installs a separate scoped Button and preserves the saved project preset and defaults for later ordinary additions. The `ps_brand@3` examples above are illustrative proposed identifiers, not valid references in the current implementation. Component-scoped support beyond Button remains pending. See [local usage](foundation-local-usage.md#component-scoped-button-presets) and [snapshot operations](snapshot-service-operations.md) for the supported commands and boundaries.
 
 The public interface uses the named flag `--preset <code-or-file>`. A generated opaque code is a value, never a dynamically named flag such as `--random-string`. Published commands pin an immutable preset revision; if a friendly alias is accepted, show and lock its resolved revision and hash before installation. Local JSON is a permanent offline and version-control option, not a development-only substitute.
 
@@ -130,11 +130,11 @@ Installation writes the base component, scoped recipe CSS, and an example usage 
 
 A local recipe JSON can reference a built-in preset available in the pinned catalog or an accompanying preset file using an explicitly supported bundle format. The initial example uses a built-in preset ID. A remotely published recipe resolves its preset revision by ID. No path or arbitrary URL is accepted through `presetRef.id`.
 
-The local foundation implements the built-in-only Button path described in the [approved recipe design](superpowers/specs/2026-10-21-local-button-recipes-design.md). It generates a separate `RecipeButton` and self-contained CSS rather than replacing the app's ordinary Button. Recipe revisions are recorded separately from global preset provenance and survive ordinary additions and compatible theme changes. File bundles and remote resolution remain future work. See [local usage](foundation-local-usage.md#local-button-recipes) for commands and current limitations.
+The local foundation implements the built-in-only Button path described in the [approved recipe design](internal/superpowers/specs/2026-10-21-local-button-recipes-design.md). It generates a separate `RecipeButton` and self-contained CSS rather than replacing the app's ordinary Button. Recipe revisions are recorded separately from global preset provenance and survive ordinary additions and compatible theme changes. Remote resolution of recipe and preset codes is implemented (see [Hosted API v1](hosted-api-v1.md)); file bundles remain future work. See [local usage](foundation-local-usage.md#local-button-recipes) for commands and current limitations.
 
 ## Snapshot model
 
-The private local snapshot service stores immutable preset snapshots. It stores the canonical normalized preset, content hash, revision, catalog release, compiler version, creation time, and validation status. The implemented identifier is `ps_` plus 32 lowercase hexadecimal characters with revision `1`; embedded preset identity remains unchanged. Every new intent creates a new identifier; only a matching idempotent retry within 24 hours reuses one. A schema-valid user snapshot remains a `draft`, not a verified or quality-reviewed preset. Recipe snapshots are not implemented.
+The hosted snapshot service stores immutable preset snapshots. It stores the canonical normalized preset, content hash, revision, catalog release, compiler version, creation time, and validation status. The implemented identifier is `ps_` plus 32 lowercase hexadecimal characters with revision `1`; embedded preset identity remains unchanged. Every new intent creates a new identifier; only a matching idempotent retry within 24 hours reuses one. A schema-valid user snapshot remains a `draft`, not a verified or quality-reviewed preset. Recipe snapshots (`rc_` plus 32 lowercase hexadecimal characters, revision `1`) follow the same rules and are published, read and installed the same way.
 
 Publishing returns an exact immutable reference. Reads and installer resolution require the reference and expected hash. Human-friendly aliases and revision updates are not implemented.
 
@@ -142,9 +142,9 @@ The private CLI syntax is `ps_<32 lowercase hex>@1`; it is not a shadcn feature.
 
 ## Compatibility and migration
 
-Schema version, catalog release, compiler version, artifact hashes, and verification status are separate concerns. Increment the JSON schema version when data meaning or allowed structure breaks. Use semantic versioning for published packages and catalog contracts, with extra caution during `0.x` releases.
+Schema version, catalog release, compiler version, artifact hashes, and verification status are separate concerns. Increment the JSON schema version when data meaning or allowed structure breaks. From 1.0, a release that adds a value or a field to a document also raises its `schemaVersion`; a CLI refuses a `schemaVersion`, value or field it does not know with `UNSUPPORTED_RELEASE` and an upgrade instruction (see the [CLI specification](05-cli-specification.md#inputs)). Use semantic versioning for published packages and catalog contracts, with extra caution during `0.x` releases.
 
-Workspace packages are version 0.9.1. The published installer is version 0.9.1. Website commands follow the published version. The workspace CLI accepts recipe and recipe snapshot format 2.0 for the 28 additional catalog components. Button keeps recipe and snapshot format 1.0, including its existing generated bytes and hashes. Catalog and compiler compatibility remain 0.1.0.
+Workspace packages are version 0.9.1. The published installer is version 0.9.1. Website commands follow the published version. The workspace CLI accepts recipe and recipe snapshot format 2.0 for every catalog component except Button (the `oneOf` branches of `schemas/component-recipe.schema.json`). Button keeps recipe and snapshot format 1.0, including its existing generated bytes and hashes. Catalog and compiler compatibility remain 0.1.0.
 
 Provide explicit migrations with before and after previews. Unknown major versions fail with a clear upgrade instruction. A migration cannot silently drop unsupported tokens, convert web effects into native code, or change a user's selected primitive implementation.
 

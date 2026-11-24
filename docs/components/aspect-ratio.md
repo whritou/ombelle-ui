@@ -1,6 +1,6 @@
 # Aspect Ratio
 
-Aspect Ratio keeps a preview, video or image at a fixed ratio while its width follows the layout, so nothing jumps while media loads. It is available in all five families in light and dark mode; one server template serves the Radix and Base UI editions, and it has no dependency beyond React.
+Aspect Ratio keeps a preview, video or image at a fixed ratio while its width follows the layout, so nothing jumps while media loads. It is available in all eight families in light and dark mode; one server template serves the Radix and Base UI editions, and it has no dependency beyond React.
 
 This component requires CLI **0.7.6** or later: `npx @ombelle-ui/cli@0.7.6 add aspect-ratio`. For a built local checkout:
 
@@ -38,4 +38,4 @@ The Base UI edition uses the same template: Aspect Ratio has no primitive.
 
 ## Liquid glass
 
-Liquid glass support is experimental: the frame uses a translucent surface over the backdrop.
+Liquid glass is supported, without an accessibility guarantee: the frame uses a translucent surface over the backdrop.

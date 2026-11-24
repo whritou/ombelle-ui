@@ -104,7 +104,7 @@ it.each(['flat', 'minimalist', 'neo-brutalism'] as const)(
     ).toBeLessThanOrEqual(65_536)
   },
 )
-it('accepts the experimental liquid-glass family for publication', async () => {
+it('accepts the liquid-glass family for publication', async () => {
   const normalized = await normalizePublishedPreset(
     getCatalog('0.1.0').presets['liquid-glass'],
   )

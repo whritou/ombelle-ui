@@ -143,6 +143,19 @@ for (const edition of ['radix', 'base'] as const) {
       await expect(next).toBeDisabled()
     })
 
+    test('Carousel advances through every slide in a right-to-left page (CAT-03)', async ({ page }) => {
+      const section = await open(page, edition)
+      await page.evaluate(() => { document.documentElement.dir = 'rtl' })
+      const carousel = section.getByTestId('c076-carousel')
+      const next = carousel.getByRole('button', { name: 'Next slide' })
+      const counter = carousel.locator('[data-slot="carousel-counter"]')
+      for (const n of [2, 3, 4]) {
+        await next.click()
+        await expect(counter).toHaveText(`${n} / 5`)
+        await expect(carousel.getByRole('button', { name: `Slide ${n}`, exact: true })).toHaveAttribute('aria-current', 'true')
+      }
+    })
+
     test('a Carousel with one slide disables both buttons, and a new slide adds a dot', async ({ page }) => {
       const section = await open(page, edition)
       const one = section.getByTestId('c076-carousel-one')
@@ -205,6 +218,10 @@ for (const edition of ['radix', 'base'] as const) {
       // Resized from script, so focus stays on the toolbar item.
       const resize = (size: number) => box.evaluate((element, value) => { (element as HTMLElement).style.inlineSize = value + 'px' }, size)
       await expect(more).toBeHidden()
+      // Every item in order, at full width. How many overflow at 160px depends on the font's widths
+      // (three on Linux Chromium, two on Windows); that they leave from the end, in order, does not.
+      const names = await toolbar.locator('[data-toolbar-item]').evaluateAll(list => list.map(item => item.textContent!.trim()))
+      expect(names.slice(-2)).toEqual(['Grid', 'Open preview'])
       await toolbar.getByRole('link', { name: 'Open preview' }).focus()
       await resize(160)
       await expect(toolbar.getByRole('link', { name: 'Open preview' })).toBeHidden()
@@ -213,7 +230,12 @@ for (const edition of ['radix', 'base'] as const) {
       await more.click()
       const menu = page.getByRole('menu', { name: 'More' })
       const items = menu.getByRole(/menuitem/ as never)
-      await expect(menu.locator('[data-slot="toolbar-overflow-item"]')).toHaveText(['Grid', 'Open preview'])
+      const overflowed = menu.locator('[data-slot="toolbar-overflow-item"]')
+      await expect(overflowed.first()).toBeVisible()
+      const count = await overflowed.count()
+      expect(count).toBeGreaterThanOrEqual(2)
+      expect(count).toBeLessThan(names.length)
+      await expect(overflowed).toHaveText(names.slice(-count))
       const grid = menu.getByRole('menuitemcheckbox', { name: 'Grid' })
       await expect(grid).toHaveAttribute('aria-checked', 'false')
       await grid.click()

@@ -1,4 +1,4 @@
-import { canonicalize } from '@ombelle/compiler'
+import { canonicalize } from '@ombelle/compiler/light'
 import type { PresetEditorDraft } from './model'
 import type { PresetCompilerState } from './use-preset-compiler'
 export function canExportPreset(

@@ -125,7 +125,7 @@ if (process.platform !== 'win32') test('handles a real POSIX termination signal 
   })
   children.push(child)
   const closed = new Promise<number | null>((resolve) => child.once('close', resolve))
-  await until(async () => (await read(path.join(root, '.artifacts/logs/test-unit.log'))).includes('waiting'))
+  await until(async () => (await read(path.join(root, '.artifacts/logs/generate-preview.log'))).includes('waiting'))
   child.kill('SIGTERM')
   expect(await closed).toBe(143)
   const report = JSON.parse(await read(path.join(root, '.artifacts/foundation-report.json')))
@@ -220,4 +220,11 @@ test('the default gate preserves child failure and durable stage details', async
   expect(report.steps[0]).toMatchObject({ name: 'build:packages', status: 'failed', exitCode: 7 })
   expect(report.completedAt).toEqual(expect.any(String))
   expect(await read(path.join(root, '.artifacts/logs/build-packages.log'))).toContain('gate child failed')
+})
+test('stages every evidence file the aggregate validates', async () => {
+  // A file the aggregate reads but staging drops reaches verify as ENOENT (specimen-results.json, 24 November).
+  const { coreFiles } = await import(new URL('../../scripts/stage-foundation-evidence.mjs', import.meta.url).href)
+  const { evidenceFiles } = await import(new URL('../../scripts/foundation-evidence.mjs', import.meta.url).href)
+  for (const file of Object.values(evidenceFiles as Record<string, string[]>).flat()) expect(coreFiles).toContain(file)
+  expect(coreFiles).toContain('foundation-report.json')
 })

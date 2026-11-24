@@ -16,7 +16,7 @@ for (const id of ['builtin-liquid-glass', 'builtin-liquid-glass-cristal', 'built
       const result = await compile({ preset, componentIds: supportedComponentIds,
         catalogRelease: '0.1.0', compilerVersion: '0.1.0', glassContrast: 'report' })
       await page.goto(`/editions/liquid-glass/radix/?mode=${mode}`)
-      await expect(page.locator('main')).toHaveAttribute('data-ready', 'true')
+      await expect(page.locator('main[data-ready]')).toHaveAttribute('data-ready', 'true')
       await page.addStyleTag({ content: presetRuntimeStyles(result) })
       await page.addStyleTag({ content: await fs.readFile('apps/preview/src/glass-backdrop.css', 'utf8') })
       await page.addStyleTag({ content: '[data-expansion].specimen{background:transparent}' })
@@ -79,7 +79,7 @@ for (const family of families)
         const errors: string[] = []
         page.on('pageerror', (error) => errors.push(error.message))
         await page.goto(`/editions/${family}/${edition}/?mode=${mode}`)
-        await expect(page.locator('main')).toHaveAttribute('data-ready', 'true')
+        await expect(page.locator('main[data-ready]')).toHaveAttribute('data-ready', 'true')
         const section = (name: string) => page.locator(`[data-expansion="${name}"]`)
         await expect(section('input-group')).toBeVisible()
 
@@ -98,7 +98,8 @@ for (const family of families)
           expect(await invalid.evaluate((element: HTMLInputElement) => element.checkValidity())).toBe(false)
           await expect(form.getByLabel('Expansion disabled field', { exact: true })).toBeDisabled()
           await form.getByLabel('Expansion message', { exact: true }).fill('Review the generated source.')
-          await expect(form.locator('textarea')).toHaveValue('Review the generated source.')
+          // The Input Group section now also shows Bio and Notes textareas: name the one under test.
+          await expect(form.getByLabel('Expansion message', { exact: true })).toHaveValue('Review the generated source.')
           await input.focus()
           await expect.poll(() => input.evaluate((element) => {
             const group = element.closest('[data-slot="input-group"]')!

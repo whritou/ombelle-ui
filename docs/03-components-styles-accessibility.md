@@ -3,30 +3,30 @@
 ## Component authoring contract
 
 The catalog expansion in 0.7.2 adds Input Group, Sheet, Alert Dialog,
-Breadcrumb, Pagination and Toast in all five families. Liquid glass remains
-experimental. Both Radix and Base UI editions are supported; Base UI Toast uses
+Breadcrumb, Pagination and Toast in all eight families. Liquid glass is stable,
+without an accessibility guarantee. Both Radix and Base UI editions are supported; Base UI Toast uses
 its native manager API. Tabs appearances, Table density/striping, Card surfaces,
 Badge size/dot composition and Alert success/warning/info intents are also
-implemented. See the individual [component references](components/) and the
-[batch design](superpowers/specs/2026-11-08-forms-navigation-overlays-design.md).
+implemented. See the individual [component references](components) and the
+[batch design](internal/superpowers/specs/2026-11-08-forms-navigation-overlays-design.md).
 The public CLI 0.7.2 includes these additions and their new API options.
 
 The 0.7.3 display components add [Spinner](components/spinner.md),
 [Kbd](components/kbd.md), [Empty](components/empty.md),
 [Field](components/field.md), [Meter](components/meter.md) and
-[Stepper](components/stepper.md) in all five families, with Radix and Base UI
+[Stepper](components/stepper.md) in all eight families, with Radix and Base UI
 editions and recipe editors. Field is a composition that wires a label, hint and
 error to the control you already use. Meter covers segmented progress. Liquid
-glass remains experimental. Installing them needs CLI 0.7.3 or later. See the [display components design](superpowers/specs/2026-11-09-display-components-design.md)
+glass is stable, without an accessibility guarantee. Installing them needs CLI 0.7.3 or later. See the [display components design](internal/superpowers/specs/2026-11-09-display-components-design.md)
 and the [evidence](evidence/display-components.md).
 
 The 0.7.3 form controls add [Slider](components/slider.md),
 [Toggle Group](components/toggle-group.md), [Chip](components/chip.md),
 [Tag Input](components/tag-input.md) and [Input OTP](components/input-otp.md)
-in all five families, with Radix and Base UI editions and recipe editors. The
+in all eight families, with Radix and Base UI editions and recipe editors. The
 website editor uses the catalog Toggle Group, Slider and Chip, compiled at
 build time, so its single choices are radio groups with one Tab stop. See the
-[form controls design](superpowers/specs/2026-11-10-form-controls-design.md)
+[form controls design](internal/superpowers/specs/2026-11-10-form-controls-design.md)
 and the [evidence](evidence/form-controls-073.md).
 
 The 0.9 app shell adds [Sidebar](components/sidebar.md),
@@ -39,8 +39,8 @@ hydration, and toggles with Ctrl or Cmd + B except while typing. A Resizable
 handle is a separator the arrow keys move, with a hit area of at least 24 px.
 A Data Table's sorted headers carry aria-sort and its selection count is
 announced. Each component draws the looks it borrows (sheet, tooltip, menus,
-table) under its own slots. Liquid glass remains experimental. Installing them
-needs CLI 0.9.0. See the [design](superpowers/specs/2026-11-17-app-shell-09-design.md)
+table) under its own slots. Liquid glass is stable, without an accessibility guarantee. Installing them
+needs CLI 0.9.0. See the [design](internal/superpowers/specs/2026-11-17-app-shell-09-design.md)
 and the [evidence](evidence/app-shell-09.md).
 
 The 0.7.6 components add [Password Field](components/password-field.md),
@@ -48,38 +48,38 @@ The 0.7.6 components add [Password Field](components/password-field.md),
 and [Toolbar](components/toolbar.md), and the parts
 [Form, FormErrorSummary, FieldSet and FieldLegend](components/field.md#form-and-fieldset-076)
 in Field and [Checkbox Group](components/checkbox.md#checkbox-group-076) in
-Checkbox, in all five families with Radix and Base UI editions and recipe
+Checkbox, in all eight families with Radix and Base UI editions and recipe
 editors. A Form leaves validation to the browser until it hydrates, then
 collects its fields' errors on submit into a summary that takes focus. A
 Password Field's toggle keeps the caret and the input element. A Carousel
 scrolls with CSS scroll snap and never autoplays. A Toolbar is one Tab stop
 whose items overflow, in order, into a More menu; the website editors' top bar
-uses it. Liquid glass remains experimental. Installing them needs CLI 0.7.6 or
-later. See the [design](superpowers/specs/2026-11-13-components-076-design.md)
+uses it. Liquid glass is stable, without an accessibility guarantee. Installing them needs CLI 0.7.6 or
+later. See the [design](internal/superpowers/specs/2026-11-13-components-076-design.md)
 and the [evidence](evidence/components-076.md).
 
 The 0.7.5 primitives add [Toggle](components/toggle.md),
 [Collapsible](components/collapsible.md), [Scroll Area](components/scroll-area.md),
 [Button Group](components/button-group.md) and [Item](components/item.md) in
-all five families, with Radix and Base UI editions and recipe editors. A Scroll
+all eight families, with Radix and Base UI editions and recipe editors. A Scroll
 Area viewport is a keyboard stop only while its content overflows, closed
 Collapsible content leaves the Tab order, and an Item link keeps its link role
 inside an Item Group. Command, Combobox, Select and Sheet draw the family
 scrollbar on their lists. The website's editors and docs use the compiled
-components. Liquid glass remains experimental. Installing the five needs CLI
-0.7.5 or later. See the [design](superpowers/specs/2026-11-12-primitives-075-design.md)
+components. Liquid glass is stable, without an accessibility guarantee. Installing the five needs CLI
+0.7.5 or later. See the [design](internal/superpowers/specs/2026-11-12-primitives-075-design.md)
 and the [evidence](evidence/primitives-075.md).
 
 The 0.7.5 editor inputs add [Number Input](components/number-input.md) and
 [Color Picker](components/color-picker.md), with `ColorPickerPair` for a light
-and dark token, in all five families with Radix and Base UI editions and recipe
+and dark token, in all eight families with Radix and Base UI editions and recipe
 editors. A Number Input keeps a half-typed value and reports it instead of
 clearing it. The Color Picker's area is a 2D slider with spoken saturation and
 brightness, its contrast readout states the WCAG level in text, and its
 eyedropper appears only where the browser has the EyeDropper API. The website's
 preset and component editors use them in place of native colour inputs and
-number fields. Liquid glass remains experimental. Installing them needs CLI
-0.7.5 or later. See the [design](superpowers/specs/2026-11-12-editor-inputs-075-design.md)
+number fields. Liquid glass is stable, without an accessibility guarantee. Installing them needs CLI
+0.7.5 or later. See the [design](internal/superpowers/specs/2026-11-12-editor-inputs-075-design.md)
 and the [evidence](evidence/editor-inputs-075.md).
 
 The 0.7.5 variants add, with recipe fields that need CLI 0.7.5:
@@ -89,12 +89,12 @@ sizes, tones, a label and a value, a [Popover arrow](components/popover.md#varia
 a scrolling [Dialog](components/dialog.md#variants-075) body, footer and sizes,
 [Alert Dialog](components/alert-dialog.md#variants-075) media and typed confirmation,
 and a [Breadcrumb](components/breadcrumb.md#collapse-075) that collapses into a menu.
-See the [design](superpowers/specs/2026-11-12-variants-075-design.md) and the
+See the [design](internal/superpowers/specs/2026-11-12-variants-075-design.md) and the
 [evidence](evidence/variants-075.md).
 
 The 0.7.5 [Code Block](components/code-block.md) shows read-only source with
 Copy: a file block with a title and line numbers, or a command block with one
-tab per package manager. It is available in all five families with Radix and
+tab per package manager. It is available in all eight families with Radix and
 Base UI editions and a recipe editor, on the board's dark surface in both
 modes. Its own highlighter covers TSX, CSS, JSON and shell, and another
 highlighter's output can be passed as children. The code is a named, scrollable
@@ -102,25 +102,25 @@ region; line numbers are a CSS counter, so they are neither read nor copied;
 Copy announces "Copied" or "Copy failed" in a polite live region; and every
 token colour reaches 4.5:1 on the surface (line numbers 3:1). The website's
 docs, component pages, playground, editors' artifact views and Get code dialog
-use it in place of the site's own code block. Liquid glass remains
-experimental. Installing it needs CLI 0.7.5 or later. See the
-[design](superpowers/specs/2026-11-12-code-block-075-design.md) and the
+use it in place of the site's own code block. Liquid glass is stable,
+without an accessibility guarantee. Installing it needs CLI 0.7.5 or later. See the
+[design](internal/superpowers/specs/2026-11-12-code-block-075-design.md) and the
 [evidence](evidence/code-block-075.md).
 
 The 0.7.3 overlays add [Combobox](components/combobox.md),
 [Command](components/command.md), [Hover Card](components/hover-card.md) and
-[Context Menu](components/context-menu.md) in all five families, with Radix and
+[Context Menu](components/context-menu.md) in all eight families, with Radix and
 Base UI editions and recipe editors. The website editor gains a Ctrl+K command
 palette, loaded on first open, and searchable Combobox pickers for the Button
 icon and the glass preset. See the
-[overlays and search design](superpowers/specs/2026-11-10-overlays-search-design.md)
+[overlays and search design](internal/superpowers/specs/2026-11-10-overlays-search-design.md)
 and the [evidence](evidence/overlays-search-073.md).
 
 The 0.7.3 [Calendar](components/calendar.md) chooses a date or a range in all
-five families, with Radix and Base UI editions and a recipe editor. Both
+the eight families, with Radix and Base UI editions and a recipe editor. Both
 editions use react-day-picker 10.0.2 for the grid; its Date Picker opens the
 Calendar in the edition's popover. The preview scenes use it; the website
-editor does not. See the [Calendar design](superpowers/specs/2026-11-10-calendar-design.md)
+editor does not. See the [Calendar design](internal/superpowers/specs/2026-11-10-calendar-design.md)
 and the [evidence](evidence/calendar-073.md).
 
 Every component must ship its source, dependencies, prop and composition reference, editor metadata, preview fixtures, supported style matrix, keyboard behavior, and accessibility evidence. Follow the selected shadcn edition's composition model and preserve familiar names wherever they mean the same thing.
@@ -133,18 +133,18 @@ Styles cannot change semantics or keyboard expectations. A neo brutalist Dialog 
 
 | Component | Core API or composition | Minimum states | Native HTML basis | Glass alpha |
 | --- | --- | --- | --- | --- |
-| Button | `variant`, `size`, `loading`, optional supported composition | Default, hover, focus, pressed, disabled, loading | `button`, or valid link composition | Experimental |
-| Badge | `variant`, `className` | Default, destructive | `span`; interactive usage must use a real control | Experimental |
-| Card | Root, header, title, description, content, footer | Default, dense | Section or div with deliberate headings | Experimental |
-| Input | Native input props, invalid and disabled states | Empty, filled, focus, invalid, disabled | `input` | Experimental |
-| Textarea | Native textarea props | Empty, filled, focus, invalid, disabled | `textarea` | Experimental |
-| Label | Association and native label props | Default, required indication | `label` | Experimental |
-| Checkbox | Checked, mixed, disabled, change handling | Unchecked, checked, mixed, focus, invalid | Primitive with verified form behavior | Experimental |
-| Switch | Checked and change handling | Off, on, focus, disabled | Primitive with switch semantics | Experimental |
-| Native Select | Native select props, options | Default, selected, focus, invalid, disabled | `select` | Experimental |
-| Dialog | Trigger, content, title, description, close | Open, closed, scroll, focus return | Reviewed dialog primitive | Experimental |
-| Tabs | Root, list, trigger, content, orientation | Active, inactive, focus, disabled | Reviewed tabs primitive | Experimental |
-| Tooltip | Provider, trigger, content | Keyboard, hover, dismissal | Reviewed tooltip primitive | Experimental |
+| Button | `variant`, `size`, `loading`, optional supported composition | Default, hover, focus, pressed, disabled, loading | `button`, or valid link composition | Stable, accessibility not guaranteed |
+| Badge | `variant`, `className` | Default, destructive | `span`; interactive usage must use a real control | Stable, accessibility not guaranteed |
+| Card | Root, header, title, description, content, footer | Default, dense | Section or div with deliberate headings | Stable, accessibility not guaranteed |
+| Input | Native input props, invalid and disabled states | Empty, filled, focus, invalid, disabled | `input` | Stable, accessibility not guaranteed |
+| Textarea | Native textarea props | Empty, filled, focus, invalid, disabled | `textarea` | Stable, accessibility not guaranteed |
+| Label | Association and native label props | Default, required indication | `label` | Stable, accessibility not guaranteed |
+| Checkbox | Checked, mixed, disabled, change handling | Unchecked, checked, mixed, focus, invalid | Primitive with verified form behavior | Stable, accessibility not guaranteed |
+| Switch | Checked and change handling | Off, on, focus, disabled | Primitive with switch semantics | Stable, accessibility not guaranteed |
+| Native Select | Native select props, options | Default, selected, focus, invalid, disabled | `select` | Stable, accessibility not guaranteed |
+| Dialog | Trigger, content, title, description, close | Open, closed, scroll, focus return | Reviewed dialog primitive | Stable, accessibility not guaranteed |
+| Tabs | Root, list, trigger, content, orientation | Active, inactive, focus, disabled | Reviewed tabs primitive | Stable, accessibility not guaranteed |
+| Tooltip | Provider, trigger, content | Keyboard, hover, dismissal | Reviewed tooltip primitive | Stable, accessibility not guaranteed |
 
 Flat, minimalist, neo brutalism, ombelle, papier, organic, and retro futurism target stable status across all rows. Stable status is awarded after testing, not merely because the primitive is accessible by default. Native Select is an explicitly named browser-control alternative; a fully custom Select is a later component.
 
@@ -153,14 +153,56 @@ Flat, minimalist, neo brutalism, ombelle, papier, organic, and retro futurism ta
 | Style | Visual rules | Customization surface | Special review |
 | --- | --- | --- | --- |
 | Flat | Solid fills, restrained elevation, clear outlines | Color, radius, border, density | Distinguishable boundaries and selected states |
-| Minimalist | Quiet surfaces, generous space, restrained decoration | Typography, spacing, subtle borders | Muted labels and focus must remain readable |
+| Minimalist | Quiet surfaces, generous space, restrained decoration, hairlines, underlined fields (a bottom line, no box) | Typography, spacing, subtle borders | Muted labels and focus must remain readable; an underlined field's line must meet 3:1 |
 | Neo brutalism | Strong outlines, offset shadows, assertive contrast | Border width, shadow offset, radius, vivid color | Press transforms cannot move the hit target or obscure focus |
 | Ombelle | Pill controls, ink outlines, hard offset shadows, key-press states, a solid focus ring, uppercase letter-spaced labels | Color, radius, border width, shadow offset, density | Press transforms cannot move the hit target or obscure focus; pink-on-ink contrast and reduced motion |
+| Papier | Warm paper with ink rules and a serif voice: cream page, 1px ink borders, 2px radius, raised controls on a 0 by 2px ink shadow they sink onto when pressed, a double rule on top of cards, popovers, dialogs and command menus, ruled inputs with a red focus ring, dotted dividers, serif italic links, one red accent ([decision 0006](decisions/0006-papier-family.md)) | Color, radius, border width, shadow offset | Press transforms cannot move the hit target or obscure focus; the red accent and ring on cream and on the dark page |
+| Organic | Cream and deep moss with a clay accent: soft borders, unequal corner radii that shift on hover and focus, soft shadows with a 96% press scale, a tinted corner on cards and dialogs, wavy-underlined bold links, pill dividers and fills, pebble switch thumb and calendar selection ([decision 0007](decisions/0007-organic-family.md)) | Color. Radius, shadow offset, border width and density reach only a few slots: the shapes and elevations are fixed in the family stylesheet | Soft borders and fields must still meet 3:1; highlighted menu rows need a ring, not a tint alone; decoration must stay inside its box |
+| Retro futurism | 1970s space age: cream and indigo, or a violet night sky in dark; pill controls with a 2px indigo outline and a hard key shadow, two-tone filled buttons with scanlines, a sunset band on card and table headers, striped progress, meter and slider fills, sun-shaped thumbs; Michroma headings, Exo 2 text, Space Mono code ([decision 0008](decisions/0008-retro-futurism-family.md)) | Color. Radius, shadow offset, border width and density reach only a few slots: the shapes and elevations are fixed in the family stylesheet | Focus rings on orange fills and on the sunset band; key-press transforms cannot move the hit target or obscure focus; the wide heading face must not overflow |
 | Liquid glass | Translucent surfaces, blur, highlights, layered depth | Opacity, blur, border, opaque fallback | Contrast against changing backgrounds, reduced transparency, GPU cost |
 
 A style pack includes reviewed slot CSS, compatible component IDs, minimum token contract version, light and dark defaults, motion rules, and fallbacks. Components inherit the global family through generated CSS rather than requiring a `styleFamily` prop at every use.
 
 Reserve variants for semantic intent. For Button, begin with default, secondary, outline, ghost, link, and destructive; begin sizes with small, default, large, and icon. Some components have different meaningful variants. Do not force every component to expose identical options.
+
+## Sizes
+
+Every sized control uses one scale (1.0, DES-12). `size` is `sm`, `default` or `lg`, and the values mean the same thing everywhere:
+
+- **`default`** is the density's control height, `--control-height`: 2.5rem with `density: comfortable` and 2.25rem with `density: compact`. A family may add a fixed edge to a control, such as Flat's 2px field rule. That edge is the same at every size.
+- **`sm`** is one step, 0.5rem, below `default`. **`lg`** is one step above it.
+- The scale changes the control's height. `sm` and `lg` text fields also set their text to 0.8125rem and 1rem. Buttons, toggles and tabs keep each family's own text sizes.
+- Compact density moves all three sizes by 0.25rem. A pointer target never goes below 24px: Toggle Group `sm` segments and `sm` pill tabs stop there.
+- Leaving `size` out renders `default`, which looks as it did before 1.0. Only `sm` and `lg` set `data-size` on the new size props, so default markup is unchanged.
+- A control sized by its own `data-size` (Button, Input, Select, Native Select, Number Input, Toggle) has a rule per size. A compound control sets a step on its root (`--combobox-size-step`, `--tag-input-size-step`, `--password-field-size-step`, `--input-group-size-step`, `--color-picker-size-step`, `--tabs-size-step` on `TabsList`, `--toggle-group-size-step`: -0.5rem or 0.5rem), and its parts add it to their height, because liquid glass styles name one slot per selector.
+
+Heights in px with `density: comfortable`, measured in Edge in every family. Compact is 4px less, with the 24px floor.
+
+| Control | Size prop on | `sm` | `default` | `lg` |
+| --- | --- | --- | --- | --- |
+| Button (`icon-sm` is `sm` square, `icon` is `default` square) | `Button` | 32; neo-brutalism 36; organic, retro futurism 38 | 40; 44; 46 | 48; 52; 54 |
+| Input | `Input` | 32; flat 34; neo-brutalism, organic, retro futurism 36 | 40; 42; 44 | 48; 50; 52 |
+| Select trigger | `SelectTrigger` | 32; flat, neo-brutalism 34 | 40; 42 | 48; 50 |
+| Native Select | `NativeSelect` | 32; flat 34; neo-brutalism 36 | 40; 42; 44 | 48; 50; 52 |
+| Combobox field, Tag Input | `Combobox`, `TagInput` | 34; neo-brutalism, organic, retro futurism 36 | 42; 44 | 50; 52 |
+| Password Field, Input Group (the input is the control height, inside the field's border) | `PasswordField`, `InputGroup` | 34; neo-brutalism, organic, retro futurism 36 | 42; 44 | 50; 52 |
+| Number Input, Color Picker trigger | `NumberInput`, `ColorPicker` | 32 | 40 | 48 |
+| Toggle | `Toggle` | 32; organic, retro futurism 34 | 40; 42 | 48; 50 |
+| Toggle Group, toolbar items | `ToggleGroup` | 32; organic, retro futurism 34 | 40; 42 | 48; 50 |
+| Toggle Group, segmented items (inside a padded track) | `ToggleGroup` | 26; organic, retro futurism 28; neo-brutalism 32 | 34; 36; 40 | 42; 44; 48 |
+| Tabs trigger (pills: 24, 32, 40) | `TabsList` | 36 | 44 | 52 |
+
+A Combobox or Tag Input at `sm` holding chips grows to fit them. Chips keep their default height so that their remove buttons stay 24px targets.
+
+These components are not on the scale:
+
+- **Chip** follows density but has no `size`: 28px, or 32px in organic and retro futurism. Chips sit inside fields and filter rows, and their 24px remove button sets the floor.
+- **Badge** is a label, not a control. It keeps its own `sm` and does not follow density.
+- **Switch** keeps `sm` and `default`. They size the track and thumb, not a row height.
+- **Textarea** `sm` and `lg` set its minimum height (4rem, 6rem and 8rem), not a row height.
+- **Input OTP** cells are sized for one character.
+- **Avatar, Spinner, Progress, Dialog, Sheet and Item** sizes are dimensions of their own, not control heights.
+- **Menu and list rows** (Accordion, Collapsible, Command, Menubar, Navigation Menu, Pagination, Toolbar, Sidebar menu button) keep fixed heights and do not follow density yet.
 
 ## Token layers and override order
 
@@ -177,11 +219,13 @@ Later values replace only allowlisted values. Arrays replace rather than concate
 
 Use semantic color pairs such as background and foreground, primary and primary foreground, card and card foreground. Existing shadcn tokens can map to these roles. Additional tokens use a clear prefix such as `--ui-control-height`, `--ui-border-width`, and `--ui-shadow-offset-x`.
 
+> **Open decision (PUB-09): token prefix.** The paragraph above is the design intent. The installed CSS does not follow it yet: it writes the unprefixed names `--control-height`, `--border-width`, `--shadow-x`, `--shadow-y`, `--motion-duration` and `--font-family` into your global stylesheet (`packages/compiler/src/preview-styles.ts`). Until the owner chooses between renaming the code to `--ui-*` or correcting this paragraph ([1.0 decisions](1.0-decisions.md)), neither spelling is a stable name; the [1.0 public contract](1.0-public-contract.md) lists the tokens as undecided.
+
 The MVP root theme intentionally updates shared shadcn color variables for a consistent application. Explain this in the install diff because existing components using those variables can change appearance. Arbitrary unrelated components may need their own adjustments.
 
 ## Accessibility target
 
-The technical foundation implements Button, Badge, Card, Dialog, Input, Label, Native Select, and Textarea for flat, minimalist, and neo-brutalism; ombelle was added later as a further stable family (see [decision 0004](decisions/0004-ombelle-family.md)). This eight-component scope is separate from the twelve-component alpha roadmap and does not label the full catalog stable. Badge begins M2 catalog expansion; its [API](components/badge.md) and [evidence](evidence/badge.md) describe the supported slice. Card follows with its [API](components/card.md) and [evidence](evidence/card.md). Label, Textarea, and Native Select are documented in [Label](components/label.md), [Textarea](components/textarea.md), and [Native Select](components/native-select.md), with [form controls evidence](evidence/form-controls.md); that slice also adds Input invalid styling in every implemented family and an icon close control for Dialog. Liquid glass is implemented as an experimental family for all twenty-three components; none is unavailable in glass. Its [documentation](components/liquid-glass.md) states the contrast bound, fallbacks, and limitations, and its [evidence](evidence/liquid-glass.md) records automated checks in one Chromium build with no human review. The [glass foundation evidence](evidence/glass-foundation.md) records the kit-parity foundation: repurposed controls, tinted Button pairs, the one-ink Button and the kit backdrop. The [glass form controls evidence](evidence/glass-form-controls.md) records the form controls on that backdrop and the built-in preset tune they required, and the [glass display evidence](evidence/glass-display.md) records Avatar, Separator, Table, Accordion, Progress, and Skeleton. The [minimalist evidence](evidence/minimalist-style-support.md) identifies measured environments, agent-operated visual review, synthetic text enlargement, and pending native text zoom, human keyboard, NVDA, VoiceOver, and broader-browser review. Arbitrary preset overrides and consuming applications require their own checks. The next catalog batch adds [Select](components/select.md), [Radio Group](components/radio-group.md), [Dropdown Menu](components/dropdown-menu.md), and [Alert](components/alert.md) in all four stable families, with [batch 1 evidence](evidence/next-components-batch-1.md), then [Popover](components/popover.md), [Avatar](components/avatar.md), and [Separator](components/separator.md) with [batch 2 evidence](evidence/next-components-batch-2.md), then [Table](components/table.md) and [Accordion](components/accordion.md) with [batch 3 evidence](evidence/next-components-batch-3.md), and [Progress](components/progress.md) and [Skeleton](components/skeleton.md) with [batch 4 evidence](evidence/next-components-batch-4.md); Select, Radio Group, and Dropdown Menu use pinned Radix primitives for keyboard and screen-reader behavior.
+The technical foundation implements Button, Badge, Card, Dialog, Input, Label, Native Select, and Textarea for flat, minimalist, and neo-brutalism; ombelle was added later as a further stable family (see [decision 0004](decisions/0004-ombelle-family.md)). This eight-component scope is separate from the twelve-component alpha roadmap and does not label the full catalog stable. Badge begins M2 catalog expansion; its [API](components/badge.md) and [evidence](evidence/badge.md) describe the supported slice. Card follows with its [API](components/card.md) and [evidence](evidence/card.md). Label, Textarea, and Native Select are documented in [Label](components/label.md), [Textarea](components/textarea.md), and [Native Select](components/native-select.md), with [form controls evidence](evidence/form-controls.md); that slice also adds Input invalid styling in every implemented family and an icon close control for Dialog. Input itself is documented in [Input](components/input.md). Liquid glass is implemented as a stable family for all 63 components, with the caveat that accessibility is not guaranteed; none is unavailable in glass. Its [documentation](components/liquid-glass.md) states the contrast bound, fallbacks, and limitations, and its [evidence](evidence/liquid-glass.md) records automated checks in one Chromium build with no human review. The [glass foundation evidence](evidence/glass-foundation.md) records the kit-parity foundation: repurposed controls, tinted Button pairs, the one-ink Button and the kit backdrop. The [glass form controls evidence](evidence/glass-form-controls.md) records the form controls on that backdrop and the built-in preset tune they required, and the [glass display evidence](evidence/glass-display.md) records Avatar, Separator, Table, Accordion, Progress, and Skeleton. The [minimalist evidence](evidence/minimalist-style-support.md) identifies measured environments, agent-operated visual review, synthetic text enlargement, and pending native text zoom, human keyboard, NVDA, VoiceOver, and broader-browser review. Arbitrary preset overrides and consuming applications require their own checks. The next catalog batch adds [Select](components/select.md), [Radio Group](components/radio-group.md), [Dropdown Menu](components/dropdown-menu.md), and [Alert](components/alert.md) in all four stable families, with [batch 1 evidence](evidence/next-components-batch-1.md), then [Popover](components/popover.md), [Avatar](components/avatar.md), and [Separator](components/separator.md) with [batch 2 evidence](evidence/next-components-batch-2.md), then [Table](components/table.md) and [Accordion](components/accordion.md) with [batch 3 evidence](evidence/next-components-batch-3.md), and [Progress](components/progress.md) and [Skeleton](components/skeleton.md) with [batch 4 evidence](evidence/next-components-batch-4.md); Select, Radio Group, and Dropdown Menu use pinned Radix primitives for keyboard and screen-reader behavior.
 
 Target relevant WCAG 2.2 Level AA requirements for supported web experiences. Components and presets alone cannot certify an entire application. Component documentation must identify which checks were performed and what the consuming application must supply. Sources S10 and S11 explain the standards and primitive responsibilities.
 
@@ -208,11 +252,13 @@ Changing label text and example content can still create an inaccessible integra
 
 ## Liquid glass constraints
 
+The maintainer shipped liquid glass as a stable family without meeting the bar below for accessibility (mobile scrolling, human review, browsers), and text contrast depends on the background the application puts behind the glass. That is why the family carries the "accessibility not guaranteed" caveat. The constraints below remain the target for removing it.
+
 Translucency must be tested against declared background fixtures. A foreground over an arbitrary image cannot receive a universal contrast guarantee. Keep text-bearing surfaces sufficiently opaque or put text on an opaque inner surface. The stable default must remain readable without blur.
 
 Use `@supports` for backdrop-filter enhancement and an opaque fallback for unsupported environments. Supply reduced-motion rules, forced-colors handling, an explicit reduced-transparency option, and progressive use of a platform preference when available. Avoid continuous blur animation and nested large-area filters.
 
-Glass becomes stable only after contrast on declared backgrounds, keyboard focus, fallback rendering, and scrolling on an agreed mid-range mobile device meet the release budget. A style-specific failed gate keeps that entry experimental without blocking unrelated stable entries.
+Glass is awarded the full accessibility guarantee only after contrast on declared backgrounds, keyboard focus, fallback rendering, and scrolling on an agreed mid-range mobile device meet the release budget. A style-specific failed gate keeps that entry from being awarded the full accessibility guarantee without blocking unrelated stable entries.
 
 ## Native platform track
 
@@ -224,4 +270,4 @@ Begin native discovery with Button, Text Input, Card, and Switch on iOS and Andr
 
 ## Component definition of done
 
-Source and registry artifacts build in the supported fixtures; public props and examples are accurate; every stable style has light and dark fixtures; required states and keyboard tests pass; visual snapshots are reviewed; contrast failures are resolved or the status is restricted; all dependencies and licenses are recorded; code export and CLI output match; the docs show what the consumer remains responsible for; the catalog style lint in `pnpm build:packages` passes; and the [specimen audit](evidence/specimen-audit.md) passes in every stable family, edition and mode (experimental liquid glass findings are recorded, not blocking).
+Source and registry artifacts build in the supported fixtures; public props and examples are accurate; every stable style has light and dark fixtures; required states and keyboard tests pass; visual snapshots are reviewed; contrast failures are resolved or the status is restricted; all dependencies and licenses are recorded; code export and CLI output match; the docs show what the consumer remains responsible for; the catalog style lint in `pnpm build:packages` passes; and the [specimen audit](evidence/specimen-audit.md) passes in every stable family, edition and mode (for liquid glass, only the backdrop-dependent contrast findings are recorded without blocking).

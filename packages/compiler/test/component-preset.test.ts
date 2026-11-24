@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { getCatalog } from '@ombelle/catalog'
+import { fontById, getCatalog } from '@ombelle/catalog'
 import postcss from 'postcss'
 import { canonicalize, compileButtonPreset, sha256 } from '../src/index.js'
 import { transform } from 'esbuild'
@@ -307,7 +307,7 @@ it('rejects unsupported preset releases and unsafe dark selectors', async () => 
 describe('liquid-glass component presets', () => {
   const catalog = getCatalog('0.1.0')
 
-  it('compiles the experimental glass Button preset under its scope', async () => {
+  it('compiles the glass Button preset under its scope', async () => {
     const result = await compileButtonPreset({
       preset: catalog.presets['liquid-glass'],
     })
@@ -356,15 +356,23 @@ describe('component presets and fonts', () => {
     const preset = structuredClone(getCatalog('0.1.0').presets.ombelle)
     return { ...preset, schemaVersion: '1.1', design: { ...preset.design, ...design } }
   }
-  it.each([
-    [{ fontFamilyId: 'inter' }, '/design/fontFamilyId'],
-    [{ headingFontFamilyId: 'fraunces' }, '/design/headingFontFamilyId'],
-    [{ monoFontFamilyId: 'jetbrains-mono' }, '/design/monoFontFamilyId'],
-  ])('rejects registry fonts in a component preset %j', async (design, path) => {
-    await expect(compileButtonPreset({ preset: fonted(design) })).rejects.toMatchObject({
-      code: 'INVALID_DATA',
-      path,
+  // SITE-6: a scoped Button carries the preset's registry body font the way a Button recipe does.
+  it('imports the registry body font in the scoped stylesheet and installs its package', async () => {
+    const result = await compileButtonPreset({ preset: fonted({ fontFamilyId: 'inter' }) })
+    const css = result.artifacts.find((artifact) => artifact.logicalPath.endsWith('/button.css'))!.content
+    const inter = fontById('inter')!
+    expect(css.startsWith('@import')).toBe(true)
+    expect(css).toContain(inter.fontsource.package)
+    expect(result.dependencies.map(({ name }) => name)).toContain(inter.fontsource.package)
+  })
+  it('leaves out heading and mono fonts a Button never shows', async () => {
+    const plain = await compileButtonPreset({ preset: fonted({}) })
+    const result = await compileButtonPreset({
+      preset: fonted({ headingFontFamilyId: 'fraunces', monoFontFamilyId: 'jetbrains-mono' }),
     })
+    expect(result.dependencies).toEqual(plain.dependencies)
+    const css = result.artifacts.find((artifact) => artifact.logicalPath.endsWith('/button.css'))!.content
+    expect(css).not.toContain('@import')
   })
   it('still compiles a component preset that uses only system fonts', async () => {
     const result = await compileButtonPreset({ preset: fonted({ fontFamilyId: 'system-serif' }) })

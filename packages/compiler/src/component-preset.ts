@@ -4,6 +4,7 @@ import {
   styleSupport,
   usesExtendedTypography,
   validatePreset,
+  type StyleFamily,
   type Artifact,
   type ComponentPresetCompileResult,
 } from '@ombelle/contracts'
@@ -20,6 +21,8 @@ import {
   validateComponentPresetDarkSelector,
 } from './recipe-styles.js'
 import { renderScopedButton } from './recipe-source.js'
+import { componentRecipeFontRoles } from './component-recipe.js'
+import { resolveTypography } from './typography.js'
 
 export async function compileButtonPreset(input: {
   preset: unknown
@@ -27,15 +30,6 @@ export async function compileButtonPreset(input: {
   glassContrast?: 'enforce' | 'report'
 }): Promise<ComponentPresetCompileResult> {
   const raw = validatePreset(input.preset)
-  // A component preset installs one component and no packages, so it cannot carry a registry font:
-  // the Button would name a font that nothing installs. Fonts belong to the global preset.
-  for (const key of ['fontFamilyId', 'headingFontFamilyId', 'monoFontFamilyId'] as const)
-    if (usesExtendedTypography({ [key]: raw.design[key] }))
-      throw new FoundationError(
-        'INVALID_DATA',
-        'Component presets cannot use registry fonts; set them on the global preset',
-        '/design/' + key,
-      )
   const catalog = getCatalog(raw.catalogRelease)
   const preset = await resolvePreset(raw, catalog)
   const darkSelector = validateComponentPresetDarkSelector(
@@ -50,13 +44,33 @@ export async function compileButtonPreset(input: {
   )
   const template = getTemplate(catalog, 'button')
   const family = preset.data.styleFamily
-  // liquid-glass Button is experimental; unavailable family/component pairs stay rejected.
+  // every style family supports Button; unavailable family/component pairs stay rejected.
   if (!isStyleFamily(family) || styleSupport('button', family) === 'unavailable')
     throw new FoundationError(
       'INVALID_DATA',
       'Style family is not available in the foundation',
       '/styleFamily',
     )
+  // Fonts follow the Button recipe path: the scoped stylesheet imports the registry body font and its
+  // Fontsource package joins the install. A role the Button never shows (heading, mono) is left out, so
+  // nothing it does not render is imported or installed. Nothing reaches the project's global defaults.
+  const roles = componentRecipeFontRoles('button', family as StyleFamily, catalog.release)
+  const { headingFontFamilyId, monoFontFamilyId, ...design } = preset.data.design
+  const shown = {
+    ...preset,
+    data: {
+      ...preset.data,
+      design: {
+        ...design,
+        ...(roles.heading && headingFontFamilyId !== undefined ? { headingFontFamilyId } : {}),
+        ...(roles.mono && monoFontFamilyId !== undefined ? { monoFontFamilyId } : {}),
+      },
+    },
+  }
+  const bodyFont = usesExtendedTypography({ fontFamilyId: design.fontFamilyId })
+    ? { fontFamilyId: design.fontFamilyId }
+    : {}
+  const fonts = resolveTypography(shown.data.design).dependencies
   const base = 'scoped-presets/' + preset.data.id + '/r' + preset.data.revision
   const examplePath =
     'examples/scoped-presets/' +
@@ -89,8 +103,8 @@ export async function compileButtonPreset(input: {
             preset.data.styleFamily as keyof typeof catalog.styles
           ],
         glassLabCss: catalog.glassLabStyle,
-        preset,
-        overrides: {},
+        preset: shown,
+        overrides: bodyFont,
         scope,
         darkSelector,
         slot: 'scoped-button',
@@ -121,9 +135,12 @@ export async function compileButtonPreset(input: {
   }
   return {
     artifacts,
-    dependencies: template.dependencies.filter(
-      (dependency) => dependency.name !== '@radix-ui/react-slot',
-    ).sort((a, b) => (a.name < b.name ? -1 : 1)),
+    dependencies: [
+      ...template.dependencies.filter(
+        (dependency) => dependency.name !== '@radix-ui/react-slot',
+      ),
+      ...fonts.filter((font) => !template.dependencies.some(({ name }) => name === font.name)),
+    ].sort((a, b) => (a.name < b.name ? -1 : 1)),
     preset,
     scope,
     darkSelector,

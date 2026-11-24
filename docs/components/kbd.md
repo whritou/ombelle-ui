@@ -1,6 +1,6 @@
 # Kbd
 
-Kbd shows a keyboard key with the native `kbd` element, and KbdGroup keeps keys pressed together on one line. It is available in all five families in light and dark mode, in one template for both editions, with no client boundary.
+Kbd shows a keyboard key with the native `kbd` element, and KbdGroup keeps keys pressed together on one line. It is available in all eight families in light and dark mode, in one template for both editions, with no client boundary.
 
 This component requires CLI **0.7.3** or later: `npx @ombelle-ui/cli@0.7.3 add kbd`. For a built local checkout:
 
@@ -37,6 +37,6 @@ The recipe editor sets the keys (default "Ctrl K"); each space-separated key bec
 
 ## Liquid glass
 
-Liquid glass is experimental for Kbd, as for every glass component, and its findings do not block a release. See [liquid glass](liquid-glass.md).
+Liquid glass is supported for Kbd without an accessibility guarantee, as for every glass component; only its contrast findings, which depend on the backdrop, are advisory in the specimen audit. See [liquid glass](liquid-glass.md).
 
 See [display components evidence](../evidence/display-components.md) for the board comparison and the specimen audit.

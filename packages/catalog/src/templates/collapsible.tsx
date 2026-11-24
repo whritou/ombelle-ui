@@ -12,9 +12,9 @@ export function Collapsible({
 }: React.ComponentProps<typeof CollapsiblePrimitive.Root>) {
   return (
     <CollapsiblePrimitive.Root
-      data-slot="collapsible"
       className={cn(className)}
       {...props}
+      data-slot="collapsible"
     />
   )
 }
@@ -31,10 +31,10 @@ export function CollapsibleTrigger({
 }: React.ComponentProps<typeof CollapsiblePrimitive.Trigger>) {
   return (
     <CollapsiblePrimitive.Trigger
-      data-slot="collapsible-trigger"
       className={cn(className)}
       asChild={asChild}
       {...props}
+      data-slot="collapsible-trigger"
     >
       {asChild ? (
         children
@@ -56,7 +56,6 @@ export function CollapsibleContent({
 }: React.ComponentProps<typeof CollapsiblePrimitive.Content>) {
   return (
     <CollapsiblePrimitive.Content
-      data-slot="collapsible-content"
       className={cn(className)}
       // The shared stylesheet animates with one height variable.
       style={{
@@ -64,6 +63,7 @@ export function CollapsibleContent({
         ...(style as React.CSSProperties),
       } as React.CSSProperties}
       {...props}
+      data-slot="collapsible-content"
     />
   )
 }

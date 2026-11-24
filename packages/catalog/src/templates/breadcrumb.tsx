@@ -4,6 +4,19 @@ import * as DropdownMenuPrimitive from '@radix-ui/react-dropdown-menu'
 import { cn } from './utils.js'
 import './breadcrumb.css'
 
+/**
+ * The component an element renders. Parts written in a Server Component, such as a Next.js
+ * App Router page, reach this client file as lazy client references rather than as the
+ * components, so `element.type` is resolved before it is compared.
+ */
+function partType(element: React.ReactElement): unknown {
+  const type = element.type as unknown as { $$typeof?: symbol; _init?: (payload: unknown) => unknown; _payload?: unknown } | null
+  if (typeof type === 'object' && type !== null && type.$$typeof === Symbol.for('react.lazy') && typeof type._init === 'function') {
+    try { return type._init(type._payload) } catch { return undefined }
+  }
+  return element.type
+}
+
 export type BreadcrumbProps = React.ComponentProps<'nav'> & {
   /** `auto` folds middle items into a menu when the trail does not fit; the server renders the full trail. */
   collapse?: Collapse
@@ -148,7 +161,7 @@ function CollapsingList({ className, children, ...props }: React.ComponentProps<
   const [hidden, setHidden] = React.useState(0)
   const [ellipsis, setEllipsis] = React.useState(48)
   const nodes = flattenTrail(children)
-  const items = nodes.filter(node => React.isValidElement(node) && node.type === BreadcrumbItem)
+  const items = nodes.filter(node => React.isValidElement(node) && partType(node) === BreadcrumbItem)
   const fold = Math.min(hidden, Math.max(0, items.length - 2))
 
   const recompute = React.useCallback(() => {
@@ -221,14 +234,14 @@ function CollapsingList({ className, children, ...props }: React.ComponentProps<
   let hideNextSeparator = false
   const rendered: React.ReactNode[] = []
   for (const node of nodes) {
-    if (React.isValidElement<Record<string, unknown>>(node) && node.type === BreadcrumbItem) {
+    if (React.isValidElement<Record<string, unknown>>(node) && partType(node) === BreadcrumbItem) {
       itemIndex++
       const fold_ = itemIndex >= 1 && itemIndex <= fold
       hideNextSeparator = fold_
       rendered.push(fold_ ? React.cloneElement(node, { hidden: true, 'data-breadcrumb-hidden': '' }) : node)
       continue
     }
-    if (React.isValidElement<Record<string, unknown>>(node) && node.type === BreadcrumbSeparator) {
+    if (React.isValidElement<Record<string, unknown>>(node) && partType(node) === BreadcrumbSeparator) {
       rendered.push(hideNextSeparator ? React.cloneElement(node, { hidden: true, 'data-breadcrumb-hidden': '' }) : node)
       if (itemIndex === 0 && fold > 0) rendered.push(
         <BreadcrumbItem key="breadcrumb-overflow" data-breadcrumb-overflow="" ref={(element: HTMLLIElement | null) => {

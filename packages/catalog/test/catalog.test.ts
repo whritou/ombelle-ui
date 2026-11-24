@@ -3,10 +3,12 @@ import { createElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { getCatalog, getTemplate, offeredGlassPresetOrder, startingPresetOrder } from '../src/index.js'
 import { catalogData } from '../src/generated.js'
+import { catalogPresetData } from '../src/generated-presets.js'
 import { resolveRecipePreset } from '../src/recipe-preset.js'
 import {
   supportedComponentIds,
   supportedStyleFamilies,
+  styleSupport,
   validatePreset,
   type ComponentId,
 } from '@ombelle/contracts'
@@ -544,7 +546,18 @@ describe('catalog contract', () => {
       expect(getTemplate(c, id).id).toBe(id)
     expect(c.templates.dialog.content).toMatch(/^['"]use client['"]/)
   })
-  it('provides the experimental liquid-glass preset and component styles', () => {
+  it('ships glass rules for every component the support table makes available in liquid glass', () => {
+    // The table lists exclusions, so a new component is available in glass by default; this keeps it from
+    // installing there without rules. Button, Dialog and Input keep theirs in the family sheet.
+    const c = getCatalog('0.1.0')
+    const inFamilySheet = new Set(['button', 'dialog', 'input'])
+    const missing = supportedComponentIds.filter((id) =>
+      styleSupport(id, 'liquid-glass') !== 'unavailable' &&
+      c.templates[id].styles?.['liquid-glass'] === undefined &&
+      !(inFamilySheet.has(id) && c.styles['liquid-glass'].includes(`[data-slot="${id}`)))
+    expect(missing).toEqual([])
+  })
+  it('provides the liquid-glass preset and component styles', () => {
     const c = getCatalog('0.1.0')
     const preset = c.presets['liquid-glass']
     expect(validatePreset(preset)).toEqual(preset)
@@ -667,7 +680,9 @@ describe('catalog contract', () => {
     const dialog = c.templates.dialog.content
     expect(dialog).toContain("import { XIcon } from 'lucide-react'")
     expect(dialog).toContain('<XIcon aria-hidden="true" />')
-    expect(dialog).toContain('<span className="sr-only">Close</span>')
+    // The close button's name defaults to "Close" and comes from closeLabel (CAT-13).
+    expect(dialog).toContain('<span className="sr-only">{closeLabel}</span>')
+    expect(dialog).toContain("closeLabel = 'Close'")
     const norm = (css: string) => css.replace(/\s+/g, ' ')
     for (const family of supportedStyleFamilies) {
       const css = norm(c.styles[family])
@@ -804,7 +819,7 @@ describe('liquid glass starting presets', () => {
     }
   })
   it('lists exactly the starting preset files, each under its own id', () => {
-    expect(Object.keys(catalogData.startingPresets).sort()).toEqual([...startingPresetOrder].sort())
-    for (const [id, preset] of Object.entries(catalogData.startingPresets)) expect(preset.id).toBe(id)
+    expect(Object.keys(catalogPresetData.startingPresets).sort()).toEqual([...startingPresetOrder].sort())
+    for (const [id, preset] of Object.entries(catalogPresetData.startingPresets)) expect(preset.id).toBe(id)
   })
 })

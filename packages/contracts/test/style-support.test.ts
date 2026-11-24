@@ -7,10 +7,12 @@ import {
   styleSupport,
   componentsWithStyleSupport,
   assertStyleAvailable,
+  accessibilityCaveatLabel,
+  familyAccessibilityCaveat,
   FoundationError,
 } from '../src/index.js'
 
-const glassExperimental = ['accordion', 'alert', 'avatar', 'button', 'badge', 'card', 'checkbox', 'dialog', 'dropdown-menu', 'input', 'label', 'native-select', 'popover', 'progress', 'radio-group', 'select', 'separator', 'skeleton', 'switch', 'table', 'tabs', 'textarea', 'tooltip', 'input-group', 'sheet', 'alert-dialog', 'breadcrumb', 'pagination', 'toast', 'spinner', 'kbd', 'empty', 'field', 'meter', 'stepper', 'slider', 'toggle-group', 'chip', 'tag-input', 'input-otp', 'combobox', 'command', 'hover-card', 'context-menu', 'calendar', 'toggle', 'collapsible', 'scroll-area', 'button-group', 'item', 'number-input', 'color-picker', 'code-block', 'password-field', 'carousel', 'aspect-ratio', 'toolbar', 'prose', 'navigation-menu', 'sidebar', 'resizable', 'menubar', 'data-table']
+const glassComponents = ['accordion', 'alert', 'avatar', 'button', 'badge', 'card', 'checkbox', 'dialog', 'dropdown-menu', 'input', 'label', 'native-select', 'popover', 'progress', 'radio-group', 'select', 'separator', 'skeleton', 'switch', 'table', 'tabs', 'textarea', 'tooltip', 'input-group', 'sheet', 'alert-dialog', 'breadcrumb', 'pagination', 'toast', 'spinner', 'kbd', 'empty', 'field', 'meter', 'stepper', 'slider', 'toggle-group', 'chip', 'tag-input', 'input-otp', 'combobox', 'command', 'hover-card', 'context-menu', 'calendar', 'toggle', 'collapsible', 'scroll-area', 'button-group', 'item', 'number-input', 'color-picker', 'code-block', 'password-field', 'carousel', 'aspect-ratio', 'toolbar', 'prose', 'navigation-menu', 'sidebar', 'resizable', 'menubar', 'data-table']
 const glassUnavailable: string[] = []
 
 describe('style support table', () => {
@@ -45,6 +47,16 @@ describe('style support table', () => {
   it('accepts every component in liquid glass', () => {
     expect(() => assertStyleAvailable([...supportedComponentIds], 'liquid-glass')).not.toThrow()
   })
+  it('marks every liquid glass component stable, with nothing experimental or unavailable', () => {
+    expect([...glassComponents].sort()).toEqual([...supportedComponentIds].sort())
+    for (const id of supportedComponentIds) expect(styleSupport(id, 'liquid-glass'), id).toBe('stable')
+    expect(componentsWithStyleSupport('liquid-glass', ['experimental', 'unavailable'])).toEqual(glassUnavailable)
+  })
+  it('states the accessibility caveat for liquid glass and for no other family', () => {
+    expect(familyAccessibilityCaveat('liquid-glass')).toMatch(/^Accessibility not guaranteed: .*background.*"reduced"/)
+    expect(familyAccessibilityCaveat('liquid-glass')).toContain(accessibilityCaveatLabel)
+    for (const family of supportedStyleFamilies) expect(familyAccessibilityCaveat(family), family).toBeNull()
+  })
 })
 
 // No real family leaves a component unavailable now, so a synthetic one keeps the refusal covered.
@@ -66,12 +78,12 @@ describe('assertStyleAvailable with a synthetic family', () => {
       expect(() => support.assertStyleAvailable(['card', 'progress', 'skeleton'], 'liquid-glass')).toThrow(
         expect.objectContaining({
           code: 'STYLE_UNAVAILABLE',
-          message: expect.stringMatching(/^Progress is unavailable for liquid-glass\. Experimental liquid-glass components: alert, accordion, .*tooltip, input-group, sheet, alert-dialog, breadcrumb, pagination, toast, spinner, kbd, empty, field, meter, stepper, slider, toggle-group, chip, tag-input, input-otp, combobox, command, hover-card, context-menu, calendar, toggle, collapsible, scroll-area, button-group, item, number-input, color-picker, code-block, password-field, carousel, aspect-ratio, toolbar, prose, navigation-menu, sidebar, resizable, menubar, data-table.$/),
+          message: expect.stringMatching(/^Progress is unavailable for liquid-glass\. Available liquid-glass components: alert, accordion, .*tooltip, input-group, sheet, alert-dialog, breadcrumb, pagination, toast, spinner, kbd, empty, field, meter, stepper, slider, toggle-group, chip, tag-input, input-otp, combobox, command, hover-card, context-menu, calendar, toggle, collapsible, scroll-area, button-group, item, number-input, color-picker, code-block, password-field, carousel, aspect-ratio, toolbar, prose, navigation-menu, sidebar, resizable, menubar, data-table.$/),
           path: '/componentIds',
           nextAction: 'Choose a stable family for this component or remove it.',
         }),
       )
-      expect(support.componentsWithStyleSupport('liquid-glass', ['experimental'])).not.toContain('progress')
+      expect(support.componentsWithStyleSupport('liquid-glass', ['stable', 'experimental'])).not.toContain('progress')
       expect(() => support.assertStyleAvailable(['button', 'card'], 'liquid-glass')).not.toThrow()
       expect(() => support.assertStyleAvailable(['progress', 'skeleton'], 'flat')).not.toThrow()
     } finally {

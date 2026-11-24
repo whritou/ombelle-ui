@@ -1,6 +1,6 @@
-import { defaultGlassPresetId, getCatalog, resolveRecipePreset, styleFamilyFonts, type StartingPresetId } from '@ombelle/catalog'
+import { defaultGlassPresetId, getCatalogPresets, resolveRecipePreset, styleFamilyFonts, type StartingPresetId } from '@ombelle/catalog/presets'
 import {
-  recipeColorRoles, recipeColorTokens, styleSupport, validateRecipe,
+  familyAccessibilityCaveat, recipeColorRoles, recipeColorTokens, validateRecipe,
   type Preset, type Recipe, type RecipeButtonVariant, type RecipeColorKey, type RecipeColorMode, type RecipeColorRole, type RecipeIcon, type StyleFamily,
 } from '@ombelle/contracts'
 
@@ -24,12 +24,12 @@ function presetRef(preset: Preset): Recipe['presetRef'] {
 }
 
 function presetRefFor(family: StyleFamily): Recipe['presetRef'] {
-  const catalog = getCatalog('0.1.0')
+  const catalog = getCatalogPresets('0.1.0')
   return presetRef(family === 'liquid-glass' ? catalog.startingPresets[defaultGlassPresetId] : catalog.presets[family])
 }
 
 export function withGlassPreset(recipe: Recipe, id: StartingPresetId): Recipe {
-  return { ...recipe, presetRef: presetRef(getCatalog(recipe.presetRef.catalogRelease).startingPresets[id]) }
+  return { ...recipe, presetRef: presetRef(getCatalogPresets(recipe.presetRef.catalogRelease).startingPresets[id]) }
 }
 
 /**
@@ -173,9 +173,7 @@ export function withRecipeIcon(recipe: Recipe, icon: Partial<RecipeIcon> | undef
   return next
 }
 
-/** The experimental notice shown beside the Button export and CLI command. */
-export function experimentalNotice(family: StyleFamily): string | null {
-  return styleSupport('button', family) === 'experimental'
-    ? `${family} is experimental for button; see docs/components/liquid-glass.md for limitations`
-    : null
+/** The accessibility caveat shown beside the Button export and CLI command, for a family that has one. */
+export function accessibilityNotice(family: StyleFamily): string | null {
+  return familyAccessibilityCaveat(family)
 }

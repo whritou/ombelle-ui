@@ -7,6 +7,7 @@ import { execFile } from 'node:child_process'
 import { promisify } from 'node:util'
 import { canonicalize, verifyPresetSnapshot, verifyInstallableRecipeSnapshot } from '@ombelle/compiler'
 import {
+  FoundationError,
   validateSnapshotSource,
   validateRecipeSnapshotSource,
   type RecipeSnapshotSource,
@@ -81,25 +82,26 @@ export function assertCacheDirectoryPolicy(policy: DirectoryPolicy): void {
   }
 }
 
-function absolute(value: string): string {
+// Cache settings are user input: a bad value is INVALID_DATA (exit 2) naming the variable (PUB-08).
+function absolute(value: string, variable: string): string {
   if (!path.isAbsolute(value))
-    throw new Error('Snapshot cache directory must be absolute')
+    throw new FoundationError('INVALID_DATA', 'Snapshot cache directory must be absolute', variable, 'Set ' + variable + ' to an absolute path.')
   return path.resolve(value)
 }
 export function snapshotCacheDirectory(env: NodeJS.ProcessEnv): string {
   if (env.OMBELLE_SNAPSHOT_CACHE_DIR !== undefined)
-    return absolute(env.OMBELLE_SNAPSHOT_CACHE_DIR)
+    return absolute(env.OMBELLE_SNAPSHOT_CACHE_DIR, 'OMBELLE_SNAPSHOT_CACHE_DIR')
   const home = env.HOME || env.USERPROFILE || os.homedir()
   if (process.platform === 'win32') {
     if (!env.LOCALAPPDATA)
-      throw new Error('LOCALAPPDATA is required for the snapshot cache')
-    return path.join(absolute(env.LOCALAPPDATA), 'ombelle/cache/snapshots')
+      throw new FoundationError('INVALID_DATA', 'LOCALAPPDATA is required for the snapshot cache', 'LOCALAPPDATA', 'Set LOCALAPPDATA, or OMBELLE_SNAPSHOT_CACHE_DIR to an absolute path.')
+    return path.join(absolute(env.LOCALAPPDATA, 'LOCALAPPDATA'), 'ombelle/cache/snapshots')
   }
   if (process.platform === 'darwin')
-    return path.join(absolute(home), 'Library/Caches/ombelle/snapshots')
+    return path.join(absolute(home, 'HOME'), 'Library/Caches/ombelle/snapshots')
   const base = env.XDG_CACHE_HOME && path.isAbsolute(env.XDG_CACHE_HOME)
     ? env.XDG_CACHE_HOME
-    : path.join(absolute(home), '.cache')
+    : path.join(absolute(home, 'HOME'), '.cache')
   return path.join(base, 'ombelle/snapshots')
 }
 function filename(key: PublicationCacheKey): string {
@@ -242,7 +244,7 @@ async function readEntry(
 export async function readPublicationCache(
   root: string, key: PublicationCacheKey,
 ): Promise<PublicationSnapshot | null> {
-  root = absolute(root)
+  root = absolute(root, 'OMBELLE_SNAPSHOT_CACHE_DIR')
   const name = filename(key)
   try {
     const identity = await owned(root)
@@ -295,7 +297,7 @@ async function evict(root: string, identity: Stats, keep: string): Promise<void>
 export async function writePublicationCache(
   root: string, key: PublicationCacheKey, snapshot: PublicationSnapshot,
 ): Promise<void> {
-  root = absolute(root)
+  root = absolute(root, 'OMBELLE_SNAPSHOT_CACHE_DIR')
   const name = filename(key)
   const bytes = Buffer.from(canonicalize(await verifyEnvelope(snapshot, key)))
   if (bytes.length > maxBytes) throw new Error('Snapshot cache envelope exceeds 128 KiB')

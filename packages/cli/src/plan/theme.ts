@@ -1,4 +1,5 @@
 import path from 'node:path'
+import { planDependencies } from './dependencies.js'
 import postcss, { type Container, type Rule, type AtRule } from 'postcss'
 import { assertLockedEdition } from '../project/edition.js'
 import {
@@ -16,7 +17,7 @@ import { sha256, resolveTypography, fontRuleBlock } from '@ombelle/compiler'
 import { fontRegistry, getCatalog } from '@ombelle/catalog'
 import { readText } from '../project/inspect.js'
 import { portable } from '../project/paths.js'
-import { appendState, baseLock, fileChange } from './components.js'
+import { appendState, baseLock, fileChange, matchesRecord } from './components.js'
 const fontTokens = ['--font-heading', '--font-mono']
 /** Fontsource packages the last theme imported, read from the font tokens it recorded in the lock. */
 function previouslyImportedFonts(context: ProjectContext): Set<string> {
@@ -41,12 +42,13 @@ function installedComponents(context: ProjectContext): Map<ComponentId, string[]
 
 // A family switch rewrites tokens and ui-style.css only, so it must not strand
 // installed component source that the target family cannot style safely.
-function assertFamilySwitch(context: ProjectContext, result: CompileResult): void {
+function assertFamilySwitch(context: ProjectContext, result: CompileResult, refreshComponents: boolean): void {
   const installed = installedComponents(context)
   if (!installed.size) return
   const target = result.preset.data.styleFamily
   const ids = supportedComponentIds.filter((id) => installed.has(id))
   const previous = context.preset?.styleFamily
+  if (refreshComponents && target !== 'liquid-glass') return
   if (previous && previous !== target && previous !== 'liquid-glass' && target !== 'liquid-glass' && context.lock) {
     const templates = getCatalog(context.lock.catalogRelease).templates
     const stranded = ids.filter(id =>
@@ -63,8 +65,8 @@ function assertFamilySwitch(context: ProjectContext, result: CompileResult): voi
       throw new FoundationError(
         'STYLE_UNAVAILABLE',
         'Installed components are unavailable for liquid-glass: ' + blocked.join(', ') +
-          '. Experimental liquid-glass components: ' +
-          componentsWithStyleSupport('liquid-glass', ['experimental']).join(', ') + '.',
+          '. Available liquid-glass components: ' +
+          componentsWithStyleSupport('liquid-glass', ['stable', 'experimental']).join(', ') + '.',
         '/componentIds',
         'Keep a stable style family or remove ' + blocked.join(', ') + ' before switching to liquid-glass.',
       )
@@ -89,8 +91,10 @@ function assertFamilySwitch(context: ProjectContext, result: CompileResult): voi
 export async function planTheme(
   context: ProjectContext,
   result: CompileResult,
+  /** preset apply recompiles installed components in the same plan, so a family switch strands none. */
+  options: { refreshComponents?: boolean } = {},
 ): Promise<InstallPlan> {
-  assertFamilySwitch(context, result)
+  assertFamilySwitch(context, result, options.refreshComponents === true)
   const original = await readText(context.root, context.cssEntry)
   if (original === null)
     throw new FoundationError(
@@ -147,13 +151,26 @@ export async function planTheme(
         ? n.type === 'atrule' && n.name === 'theme' && n.params === 'inline'
         : n.type === 'rule' && n.selector === selector,
     ) as (Rule | AtRule)[]
-    if (matches.length > 1)
+    // Token blocks inside a top-level `@layer` (the Tailwind v3-era shadcn layout) are edited in place
+    // rather than shadowed by an appended unlayered copy (CLI-06).
+    const layered = selector === '@theme inline' ? [] : css.nodes.flatMap((n) =>
+      n.type === 'atrule' && n.name === 'layer'
+        ? ((n.nodes ?? []).filter((child) => child.type === 'rule' && child.selector === selector) as Rule[])
+        : [],
+    )
+    if (matches.length && layered.length)
+      throw new FoundationError(
+        'UNSUPPORTED_PROJECT',
+        'The managed selector is declared both inside and outside @layer; keep one block',
+        selector,
+      )
+    if (matches.length + layered.length > 1)
       throw new FoundationError(
         'UNSUPPORTED_PROJECT',
         'Multiple managed selector blocks are ambiguous',
         selector,
       )
-    let block: Container = matches[0]
+    let block: Container = matches[0] ?? layered[0]
     if (!block) {
       block =
         selector === '@theme inline'
@@ -241,7 +258,7 @@ export async function planTheme(
     const record = context.lock?.artifacts[context.styleFile]
     if (
       change.beforeHash !== null &&
-      (!record || record.sha256 !== change.beforeHash)
+      !matchesRecord(change, record?.sha256)
     ) {
       change.action = 'conflict'
       plan.diagnostics.push({
@@ -284,18 +301,19 @@ export async function planTheme(
   plan.changes.unshift(change)
   // A theme needs the packages its fonts import. Only presets that opt into
   // registry fonts have any; every other preset keeps an empty dependency plan.
-  const installedPackages =
-    context.manager === 'bun'
-      ? (context.packageJson.dependencies ?? {})
-      : { ...context.packageJson.devDependencies, ...context.packageJson.dependencies }
   // Only font packages: a theme never installs component dependencies, even when the caller
   // compiled the preset with components and the result lists theirs.
   const fontPackages = result.dependencies.filter((d) => d.name.startsWith('@fontsource'))
-  plan.dependencyPlan = fontPackages.filter(
-    (d) => installedPackages[d.name] !== d.version,
-  )
+  const dependencies = planDependencies(context, fontPackages)
+  plan.dependencyPlan = dependencies.plan
+  plan.notices.push(...dependencies.notices)
   const typography = resolveTypography(result.preset.data.design)
   const fontCss = [...typography.imports, fontRuleBlock(typography)].filter(Boolean).join('\n')
+  if (!fullStyle)
+    plan.notices.push(
+      'Palette only: components.json style ' + JSON.stringify(context.upstream?.style ?? '') +
+        ' is not one Ombelle styles, so only the palette and tokens are merged; components need radix-nova, new-york or a base-* style',
+    )
   if (!fullStyle && fontCss)
     plan.notices.push(
       'The style file is not managed here. Add this font CSS to your global CSS:\n' + fontCss,

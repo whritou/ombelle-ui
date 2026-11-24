@@ -29,7 +29,7 @@ export type ArtifactProof = {
   logicalPath: string
   sha256: string
 }
-// Experimental glass consumers install exactly these components and nothing else.
+// Liquid glass consumers install exactly these components and nothing else.
 export const glassConsumerComponents = [
   'badge',
   'button',

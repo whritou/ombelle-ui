@@ -1,6 +1,6 @@
 # Toolbar
 
-Toolbar groups buttons, links and toggles into one Tab stop. Arrow keys move between items, Home and End jump to the ends, and items that no longer fit move into a More menu, in the same order. It is available in all five families in light and dark mode, with Radix and Base UI editions; the template is a client component.
+Toolbar groups buttons, links and toggles into one Tab stop. Arrow keys move between items, Home and End jump to the ends, and items that no longer fit move into a More menu, in the same order. It is available in all eight families in light and dark mode, with Radix and Base UI editions; the template is a client component.
 
 Use Toolbar for a row of related actions that should cost one Tab stop. A Button Group adds no arrow-key navigation and each of its children is its own Tab stop.
 
@@ -54,4 +54,4 @@ The Base UI edition uses `Toolbar`, `ToggleGroup`, `Toggle` and `Menu` from `@ba
 
 ## Liquid glass
 
-Liquid glass support is experimental: the bar is translucent, and its blur stays inside the family's `@supports` fallback.
+Liquid glass is supported, without an accessibility guarantee: the bar is translucent, and its blur stays inside the family's `@supports` fallback.

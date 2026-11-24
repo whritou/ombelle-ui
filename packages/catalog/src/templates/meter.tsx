@@ -3,6 +3,19 @@ import * as React from 'react'
 import { cn } from './utils.js'
 import './meter.css'
 
+/**
+ * The component an element renders. Parts written in a Server Component, such as a Next.js
+ * App Router page, reach this client file as lazy client references rather than as the
+ * components, so `element.type` is resolved before it is compared.
+ */
+function partType(element: React.ReactElement): unknown {
+  const type = element.type as unknown as { $$typeof?: symbol; _init?: (payload: unknown) => unknown; _payload?: unknown } | null
+  if (typeof type === 'object' && type !== null && type.$$typeof === Symbol.for('react.lazy') && typeof type._init === 'function') {
+    try { return type._init(type._payload) } catch { return undefined }
+  }
+  return element.type
+}
+
 type Tone = 'primary' | 'info' | 'success' | 'warning'
 const MeterLabelId = React.createContext<string | undefined>(undefined)
 const MeterReading = React.createContext({ now: 0, max: 0 })
@@ -43,10 +56,10 @@ export function Meter({
   const labelId = React.useId() + '-label'
   const items = React.Children.toArray(children)
   const parts = items.filter((child): child is React.ReactElement<MeterSegmentProps> =>
-    React.isValidElement(child) && child.type === MeterSegment)
-  const legend = items.filter(child => React.isValidElement(child) && child.type === MeterLegend)
+    React.isValidElement(child) && partType(child) === MeterSegment)
+  const legend = items.filter(child => React.isValidElement(child) && partType(child) === MeterLegend)
   const rest = items.filter(child => !parts.includes(child as never) && !legend.includes(child))
-  const hasLabel = rest.some(child => React.isValidElement(child) && child.type === MeterLabel)
+  const hasLabel = rest.some(child => React.isValidElement(child) && partType(child) === MeterLabel)
   const total = parts.length ? parts.reduce((sum, part) => sum + part.props.value, 0) : value
   const now = clamp(total, min, max)
   // One name per drawing, so a style that frames the bar never also frames the ring or the labelled segments.

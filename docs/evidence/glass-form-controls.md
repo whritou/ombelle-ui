@@ -1,6 +1,6 @@
 # Liquid glass form controls
 
-5 November 2026. This records PR B of [liquid glass kit parity](../superpowers/specs/2026-11-05-liquid-glass-kit-parity-design.md): Label, Textarea, Native Select, Checkbox, Switch, Radio Group and Select join Input as experimental in liquid glass, on the kit's field and selection surfaces, and the built-in preset is tuned so their text pairs pass the contrast bound. Liquid glass stays experimental. This record does not run the full foundation gate, the browser e2e suite or the consumer matrix, and it is not a human visual or accessibility review.
+5 November 2026. This records PR B of [liquid glass kit parity](../internal/superpowers/specs/2026-11-05-liquid-glass-kit-parity-design.md): Label, Textarea, Native Select, Checkbox, Switch, Radio Group and Select join Input as experimental in liquid glass, on the kit's field and selection surfaces, and the built-in preset is tuned so their text pairs pass the contrast bound. Liquid glass stays experimental. This record does not run the full foundation gate, the browser e2e suite or the consumer matrix, and it is not a human visual or accessibility review.
 
 ## Source and environment
 
@@ -89,7 +89,7 @@ Differences judged acceptable or out of scope, each from a recorded ruling:
 
 ## Screenshots
 
-Images are in [images/glass-form-controls](images/glass-form-controls/), each in `-light` and `-dark`:
+Images are in [images/glass-form-controls](images/glass-form-controls), each in `-light` and `-dark`:
 
 - `input`: the gallery form's labels and Input, focused, invalid with its error message, placeholder and disabled;
 - `textarea`: focused, placeholder, disabled and invalid;

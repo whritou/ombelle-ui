@@ -1,15 +1,15 @@
 import { componentSlots } from './component-slots.js'
 import {
   FoundationError,
-  validatePreset,
+  isSupportedContractRelease,
   type ComponentId,
   type Edition,
   type Preset,
   type StyleFamily,
-  styleFamilies,
   supportedComponentIds,
 } from '@ombelle/contracts'
 import { catalogData } from './generated.js'
+import { getCatalogPresets, type StartingPresetId } from './presets.js'
 import { runtimeDependencies } from './manifest.js'
 export { expansionExamples, baseToastExample } from './expansion-examples.js'
 export { knownShadcnUtilityHashes, shadcnBaseStyles, shadcnRadixStyles } from './shadcn.js'
@@ -22,33 +22,14 @@ export const recipeIconDependency = {
   name: 'lucide-react',
   version: runtimeDependencies['lucide-react'],
 } as const
-export const defaultGlassPresetId = 'builtin-liquid-glass-cristal'
-/** The liquid glass starting points in picker order: Cristal first, the original family base last. */
-export const startingPresetOrder = [
+export {
   defaultGlassPresetId,
-  'builtin-liquid-glass-givre',
-  'builtin-liquid-glass-fume',
-  'builtin-liquid-glass-relief',
-  'builtin-liquid-glass-clear',
-  'builtin-liquid-glass-prism',
-  'builtin-liquid-glass-liquid',
-  'builtin-liquid-glass-voile',
-  'builtin-liquid-glass',
-] as const
-export type StartingPresetId = (typeof startingPresetOrder)[number]
-/**
- * The starting presets the editors and component pages offer, in picker order. Clear, Prism
- * and Liquid shipped in 0.5.0 and stay in the catalog, so recipes, snapshots and projects
- * pinned to them still resolve; they are no longer offered.
- */
-export const offeredGlassPresetOrder = [
-  defaultGlassPresetId,
-  'builtin-liquid-glass-givre',
-  'builtin-liquid-glass-fume',
-  'builtin-liquid-glass-relief',
-  'builtin-liquid-glass-voile',
-  'builtin-liquid-glass',
-] as const satisfies readonly StartingPresetId[]
+  getCatalogPresets,
+  offeredGlassPresetOrder,
+  startingPresetOrder,
+  type CatalogPresets,
+  type StartingPresetId,
+} from './presets.js'
 
 export type ComponentTemplate = {
   id: ComponentId
@@ -61,6 +42,8 @@ export type ComponentTemplate = {
 export type Catalog = {
   /** Liquid glass starting points, keyed by preset id; see startingPresetOrder. */
   startingPresets: Record<StartingPresetId, Preset>
+  /** Earlier revisions of built-in and starting presets, resolvable only by exact id@revision. */
+  retiredPresets: Preset[]
   release: string
   presets: Record<StyleFamily, Preset>
   templates: Record<ComponentId, ComponentTemplate>
@@ -96,7 +79,7 @@ const extraDependencies: Partial<Record<ComponentId, readonly string[]>> = {
   'password-field': ['lucide-react'],
   carousel: ['lucide-react'],
   'navigation-menu': ['@radix-ui/react-navigation-menu', 'lucide-react'],
-  sidebar: ['@radix-ui/react-dialog', '@radix-ui/react-tooltip', '@radix-ui/react-collapsible', 'lucide-react'],
+  sidebar: ['@radix-ui/react-dialog', '@radix-ui/react-tooltip', '@radix-ui/react-collapsible', '@radix-ui/react-slot', 'lucide-react'],
   resizable: ['react-resizable-panels'],
   menubar: ['@radix-ui/react-menubar', 'lucide-react'],
   'data-table': ['@radix-ui/react-dropdown-menu', '@radix-ui/react-popover', '@tanstack/react-table', 'lucide-react'],
@@ -133,7 +116,7 @@ const extraDependencies: Partial<Record<ComponentId, readonly string[]>> = {
 // editors read the catalog on every render. Callers only read it.
 const catalogs = new Map<string, Catalog>()
 export function getCatalog(release: string): Catalog {
-  if (release !== '0.1.0')
+  if (!isSupportedContractRelease(release))
     throw new FoundationError(
       'UNSUPPORTED_RELEASE',
       'Unsupported catalog release',
@@ -196,20 +179,12 @@ function buildCatalog(release: string): Catalog {
       },
     ]),
   ) as Record<ComponentId, ComponentTemplate>
+  const shared = getCatalogPresets(release)
   return {
     release,
-    presets: Object.fromEntries(
-      styleFamilies.map((family) => [
-        family,
-        validatePreset(catalogData.presets[family]),
-      ]),
-    ) as Record<StyleFamily, Preset>,
-    startingPresets: Object.fromEntries(
-      startingPresetOrder.map((id) => [
-        id,
-        validatePreset(catalogData.startingPresets[id as keyof typeof catalogData.startingPresets]),
-      ]),
-    ) as Record<StartingPresetId, Preset>,
+    presets: shared.presets,
+    startingPresets: shared.startingPresets,
+    retiredPresets: shared.retiredPresets,
     templates,
     baseTemplates,
     styles: { ...catalogData.styles },

@@ -21,7 +21,7 @@ export async function validateComponentPresetConsumers(
   value: unknown,
   fullMatrix: Record<string, ConsumerEvidence>,
 ): Promise<void> {
-  // Component presets are stable-family evidence; experimental glass consumers carry none.
+  // Component presets are stable-family evidence; liquid glass consumers carry none.
   const cases = stableConsumerCases(),
     ids = new Set(cases.map((c) => c.id)),
     matrix = Object.fromEntries(
@@ -52,10 +52,15 @@ export async function validateComponentPresetConsumers(
         'Component preset requires measured manager/runtime/audit/build ' +
           c.id,
       )
+    // A fonts consumer's global preset is its family's preset with registry fonts (checked against a
+    // canonical compile when the consumer is prepared), not the bare built-in: it must stay unchanged.
     const host = refs.find((r) => r.preset.data.styleFamily === c.family)!
+    const globalHash = c.fonts ? row.globalPresetHashBefore : host.preset.hash
     if (
-      row.globalPresetHashBefore !== host.preset.hash ||
-      row.globalPresetHashAfter !== host.preset.hash
+      typeof globalHash !== 'string' ||
+      !/^[a-f0-9]{64}$/.test(globalHash) ||
+      row.globalPresetHashBefore !== globalHash ||
+      row.globalPresetHashAfter !== globalHash
     )
       throw Error('Component preset changed global defaults ' + c.id)
     const before = object(row.protectedHashes),

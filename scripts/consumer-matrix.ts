@@ -9,7 +9,7 @@ export function consumerCases():readonly ConsumerCase[]{
   for(const id of ['classic-vite','modern-next','pnp-vite'] as const)rows.push({id:'yarn-'+id+suffix,family,framework:id==='modern-next'?'next':'vite',manager:'yarn',cliRuntime:'node',yarnFixtureId:id})
   for(const framework of ['vite','next'] as const)for(const format of ['text','binary'] as const)for(const runtime of ['node','bun'] as const)rows.push({id:'bun-'+format+'-'+framework+'-'+runtime+suffix,family,framework,manager:'bun',cliRuntime:runtime,bunFormat:format})
  }
- // Experimental rows are appended last so every existing consumer ID and port is unchanged.
+ // Liquid glass rows are appended last so every existing consumer ID and port is unchanged.
  for(const framework of ['vite','next'] as const)rows.push({id:framework+'-liquid-glass',family:'liquid-glass',framework,manager:'pnpm',cliRuntime:'node'})
  // Append font rows after the existing matrix so no established port changes.
  for(const framework of ['vite','next'] as const)rows.push({id:framework+'-fonts',family:'ombelle',framework,manager:'pnpm',cliRuntime:'node',fonts:true})

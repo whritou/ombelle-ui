@@ -1,6 +1,6 @@
 # Popover
 
-Popover is a non-modal panel anchored to a trigger, built on the reviewed Radix Popover primitive. Use it for short forms, share links and details that the user dismisses by clicking away. It is available in flat, minimalist, neo brutalism, ombelle, papier, organic, and retro futurism, in light and dark mode, and as an experimental liquid glass style. The template is a client component. Use [Dialog](../03-components-styles-accessibility.md) for anything that needs a decision or blocks the page.
+Popover is a non-modal panel anchored to a trigger, built on the reviewed Radix Popover primitive. Use it for short forms, share links and details that the user dismisses by clicking away. It is available in flat, minimalist, neo brutalism, ombelle, papier, organic, and retro futurism, in light and dark mode, and as a liquid glass style without an accessibility guarantee. The template is a client component. Use [Dialog](../03-components-styles-accessibility.md) for anything that needs a decision or blocks the page.
 
 ## Install and compose
 
@@ -63,7 +63,7 @@ Opening moves focus into the content, to its first focusable element or the cont
 - Flat: an elevated panel with no border.
 - Minimalist: a hairline panel with a soft shadow.
 - Neo brutalism: a bordered panel with an uppercase title and a 1.5× offset shadow.
-- Liquid glass (experimental): a translucent blurred panel. The blur drops under reduced transparency and in forced colors.
+- Liquid glass (accessibility not guaranteed): a translucent blurred panel. The blur drops under reduced transparency and in forced colors.
 
 Forced colors use `Canvas` with a `CanvasText` border, remove shadows, and use `Highlight` for focus. Reduced motion removes the fade.
 

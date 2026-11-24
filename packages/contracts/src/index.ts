@@ -13,7 +13,11 @@ export {
   styleFamilies,
   isStyleFamily,
   styleSupport,
+  accessibilityCaveatLabel,
+  familyAccessibilityCaveat,
 } from './style-families.js'
 export { componentsWithStyleSupport, assertStyleAvailable } from './style-support.js'
 export type { StableStyleFamily, StyleSupport } from './style-families.js'
 export * from './distribution.js'
+export * from './contract-release.js'
+export * from './minimum-cli.js'

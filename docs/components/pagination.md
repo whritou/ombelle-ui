@@ -82,6 +82,8 @@ All parts accept native props, React 19 refs, `className` and `style`.
 `isActive` adds `aria-current="page"` and `data-active`. `disabled` adds
 `aria-disabled="true"` and `data-disabled`, removes `href`, and sets
 `tabIndex={-1}` even when callers supply a destination or a different tab index.
+Without an `href` an anchor has no role, so a disabled link also takes `role="link"`:
+it keeps its name and is announced as a disabled link.
 The component also omits caller click and auxiliary-click handlers on disabled
 links. Applications should avoid attaching delegated navigation handlers to
 disabled controls.
@@ -115,7 +117,7 @@ These need CLI **0.7.3** or later, including in component recipes. Leaving a pro
 - Neo brutalism uses outlined page tiles, offset ink shadows and an accent
   current page.
 - Ombelle uses pill links and an ink-filled active page.
-- Liquid glass is experimental: one glass list surface surrounds opaque active
+- Liquid glass (accessibility not guaranteed): one glass list surface surrounds opaque active
   links. Missing backdrop-filter support and reduced transparency retain an
   opaque surface. Nested surfaces respect the shared glass filter variables.
 

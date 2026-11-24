@@ -1,6 +1,6 @@
 # Font import spike
 
-Date: 2026-11-14. Question: does a bare Fontsource `@import` inside `ui-tokens.css` build under each package manager in the Vite and Next fixtures? This is the gate for approach A in `docs/superpowers/specs/2026-11-14-font-pairs-design.md`.
+Date: 2026-11-14. Question: does a bare Fontsource `@import` inside `ui-tokens.css` build under each package manager in the Vite and Next fixtures? This is the gate for approach A in `docs/internal/superpowers/specs/2026-11-14-font-pairs-design.md`.
 
 ## Environment
 

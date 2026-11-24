@@ -3,7 +3,7 @@ import * as React from 'react'
 import { Menu as MenuPrimitive } from '@base-ui/react/menu'
 import { Popover as PopoverPrimitive } from '@base-ui/react/popover'
 import { columnFacetingFeature, columnFilteringFeature, columnVisibilityFeature, createColumnHelper, createFacetedRowModel, createFacetedUniqueValues, createFilteredRowModel, createPaginatedRowModel, createSortedRowModel, filterFns, rowPaginationFeature, rowSelectionFeature, rowSortingFeature, sortFns, tableFeatures, useTable } from '@tanstack/react-table'
-import type { Column, ColumnDef, ReactTable, Row, RowData, TableState } from '@tanstack/react-table'
+import type { Column, ColumnDef, OnChangeFn, ReactTable, Row, RowData, TableOptions, TableState } from '@tanstack/react-table'
 import { ArrowDownIcon, ArrowUpDownIcon, ArrowUpIcon, CheckIcon, ChevronLeftIcon, ChevronRightIcon, EllipsisIcon, ListFilterIcon, Settings2Icon } from 'lucide-react'
 import { cn } from './utils.js'
 import './data-table.css'
@@ -30,39 +30,104 @@ export type DataTableColumn<TData extends RowData> = ColumnDef<DataTableFeatures
 export type DataTableInstance<TData extends RowData> = ReactTable<DataTableFeatures, TData>
 export type DataTableState = Partial<TableState<DataTableFeatures>>
 
+/** Every string Data Table shows or announces; pass any of them to DataTable's labels prop. */
+export type DataTableLabels = {
+  selectAll: string
+  /** The name of a row's checkbox, from the row's first data cell. */
+  selectRow: (name: string) => string
+  actions: string
+  view: string
+  columns: string
+  filter: string
+  filterBy: (column: string) => string
+  clearFilter: string
+  selection: (selected: number, total: number) => string
+  page: (page: number, pages: number) => string
+  previousPage: string
+  nextPage: string
+  rowActions: string
+}
+export const dataTableLabels: DataTableLabels = {
+  selectAll: 'Select all rows on this page',
+  selectRow: name => `Select ${name}`,
+  actions: 'Actions',
+  view: 'View',
+  columns: 'Columns',
+  filter: 'Filter…',
+  filterBy: column => `Filter by ${column}`,
+  clearFilter: 'Clear filter',
+  selection: (selected, total) => `${selected} of ${total} row(s) selected.`,
+  page: (page, pages) => `Page ${page} of ${pages}`,
+  previousPage: 'Previous page',
+  nextPage: 'Next page',
+  rowActions: 'Row actions',
+}
+const LabelsContext = React.createContext<DataTableLabels>(dataTableLabels)
+const useLabels = () => React.useContext(LabelsContext)
+
+/** A name for a row: its first data cell's text, else its position. */
+function rowName<TData extends RowData>(row: Row<DataTableFeatures, TData>): string {
+  for (const cell of row.getVisibleCells()) {
+    if (cell.column.id === 'select' || cell.column.id === 'actions') continue
+    const value = cell.getValue()
+    if (typeof value === 'string' || typeof value === 'number') return String(value)
+  }
+  return `row ${row.index + 1}`
+}
+
+function SelectAllCheckbox<TData extends RowData>({ table }: { table: DataTableInstance<TData> }) {
+  const labels = useLabels()
+  return (
+    <input type="checkbox" data-data-table-select="" aria-label={labels.selectAll}
+      checked={table.getIsAllPageRowsSelected()}
+      ref={input => { if (input) input.indeterminate = !table.getIsAllPageRowsSelected() && table.getIsSomePageRowsSelected() }}
+      onChange={event => table.toggleAllPageRowsSelected(event.target.checked)} />
+  )
+}
+
+function SelectRowCheckbox<TData extends RowData>({ row, label }: { row: Row<DataTableFeatures, TData>; label?: (row: Row<DataTableFeatures, TData>) => string }) {
+  const labels = useLabels()
+  return (
+    <input type="checkbox" data-data-table-select="" aria-label={label ? label(row) : labels.selectRow(rowName(row))} checked={row.getIsSelected()}
+      disabled={!row.getCanSelect()} onChange={event => row.toggleSelected(event.target.checked)} />
+  )
+}
+
+function ActionsHeader() {
+  return <span data-data-table-sr="">{useLabels().actions}</span>
+}
+
 /** Typed column helpers for Data Table: `const columns = dataTableColumns<Preset>()`. */
 export function dataTableColumns<TData extends RowData>() {
   return createColumnHelper<DataTableFeatures, TData>()
 }
 
-/** A checkbox column: the header selects the rows on the current page, each cell selects its row. */
-export function selectColumn<TData extends RowData>(): DataTableColumn<TData> {
+/**
+ * A checkbox column: the header selects the rows on the current page, each cell selects its row.
+ * Each row checkbox is named from the row's first data cell ("Select Accordion"); pass `label` to name it yourself.
+ */
+export function selectColumn<TData extends RowData>({ label }: { label?: (row: Row<DataTableFeatures, TData>) => string } = {}): DataTableColumn<TData> {
   return {
     id: 'select',
     enableSorting: false,
     enableHiding: false,
-    header: ({ table }) => (
-      <input type="checkbox" data-data-table-select="" aria-label="Select all rows on this page"
-        checked={table.getIsAllPageRowsSelected()}
-        ref={input => { if (input) input.indeterminate = !table.getIsAllPageRowsSelected() && table.getIsSomePageRowsSelected() }}
-        onChange={event => table.toggleAllPageRowsSelected(event.target.checked)} />
-    ),
-    cell: ({ row }) => (
-      <input type="checkbox" data-data-table-select="" aria-label="Select row" checked={row.getIsSelected()}
-        disabled={!row.getCanSelect()} onChange={event => row.toggleSelected(event.target.checked)} />
-    ),
+    header: ({ table }) => <SelectAllCheckbox table={table as unknown as DataTableInstance<TData>} />,
+    cell: ({ row }) => <SelectRowCheckbox row={row} label={label} />,
   }
 }
 
 /** A narrow last column whose cells hold what `render` returns, usually a DataTableRowActions menu. */
 export function actionsColumn<TData extends RowData>(render: (row: Row<DataTableFeatures, TData>) => React.ReactNode): DataTableColumn<TData> {
-  return { id: 'actions', enableSorting: false, enableHiding: false, header: () => <span data-data-table-sr="">Actions</span>, cell: ({ row }) => render(row) }
+  return { id: 'actions', enableSorting: false, enableHiding: false, header: () => <ActionsHeader />, cell: ({ row }) => render(row) }
 }
 
 /** Keeps a row when its value is one of the checked facet values; an empty filter keeps every row. */
 export function facetFilter(row: { getValue(columnId: string): unknown }, columnId: string, value: unknown): boolean {
   return !Array.isArray(value) || value.length === 0 || value.includes(String(row.getValue(columnId)))
 }
+
+// One empty facet list, so the columns memo holds across renders.
+const NO_FACETS: NonNullable<DataTableProps<any>['facets']> = []
 
 const TableContext = React.createContext<DataTableInstance<any> | null>(null)
 
@@ -76,14 +141,21 @@ export function useDataTable<TData extends RowData>(): DataTableInstance<TData> 
 export type DataTableProps<TData extends RowData> = {
   columns: DataTableColumn<TData>[]
   data: TData[]
-  /** Controlled state; pass with the matching on…Change to move sorting, filters or pages to a server. */
+  /**
+   * Controlled state, with the matching on…Change. To sort, filter or page on a server, also pass
+   * tableOptions={{ manualSorting: true, manualFiltering: true, manualPagination: true, rowCount }}.
+   */
   state?: DataTableState
   initialState?: DataTableState
-  onSortingChange?: (updater: any) => void
-  onColumnFiltersChange?: (updater: any) => void
-  onRowSelectionChange?: (updater: any) => void
-  onColumnVisibilityChange?: (updater: any) => void
-  onPaginationChange?: (updater: any) => void
+  onSortingChange?: OnChangeFn<TableState<DataTableFeatures>['sorting']>
+  onColumnFiltersChange?: OnChangeFn<TableState<DataTableFeatures>['columnFilters']>
+  onRowSelectionChange?: OnChangeFn<TableState<DataTableFeatures>['rowSelection']>
+  onColumnVisibilityChange?: OnChangeFn<TableState<DataTableFeatures>['columnVisibility']>
+  onPaginationChange?: OnChangeFn<TableState<DataTableFeatures>['pagination']>
+  /** Further TanStack Table options, applied last, such as manualSorting, manualPagination and rowCount. */
+  tableOptions?: Partial<TableOptions<DataTableFeatures, TData>>
+  /** Replaces any of the strings the table shows or announces. */
+  labels?: Partial<DataTableLabels>
   /** Rendered above the table, with the table instance; replaces the toolbar the props below describe. */
   toolbar?: (table: DataTableInstance<TData>) => React.ReactNode
   /** Adds a checkbox column first, as selectColumn() does. */
@@ -108,8 +180,9 @@ export type DataTableProps<TData extends RowData> = {
 
 /** A sortable, filterable table with row selection, column visibility and pagination, drawn like Table. */
 export function DataTable<TData extends RowData>({ columns: columnsProp, data, state, initialState, toolbar, pageSize = 10, emptyLabel = 'No results.', caption, getRowId, className,
-  selectable = false, filterColumn, filterLabel, facets = [], columnVisibility = false, pagination = false,
-  onSortingChange, onColumnFiltersChange, onRowSelectionChange, onColumnVisibilityChange, onPaginationChange, ...props }: DataTableProps<TData>) {
+  selectable = false, filterColumn, filterLabel, facets = NO_FACETS, columnVisibility = false, pagination = false,
+  onSortingChange, onColumnFiltersChange, onRowSelectionChange, onColumnVisibilityChange, onPaginationChange, tableOptions, labels: labelsProp, ...props }: DataTableProps<TData>) {
+  const labels = React.useMemo(() => ({ ...dataTableLabels, ...labelsProp }), [labelsProp])
   // Facet columns match any checked value; plain data columns need no functions, so recipes can describe them.
   const columns = React.useMemo(() => {
     const faceted = new Set(facets.map(facet => facet.column))
@@ -134,15 +207,17 @@ export function DataTable<TData extends RowData>({ columns: columnsProp, data, s
     ...(onRowSelectionChange ? { onRowSelectionChange } : {}),
     ...(onColumnVisibilityChange ? { onColumnVisibilityChange } : {}),
     ...(onPaginationChange ? { onPaginationChange } : {}),
+    ...tableOptions,
   })
   const rows = table.getRowModel().rows
   const visible = table.getVisibleLeafColumns().length
   return (
+    <LabelsContext.Provider value={labels}>
     <TableContext.Provider value={table as unknown as DataTableInstance<any>}>
       <div data-slot="data-table" className={cn(className)}>
         {toolbar ? toolbar(table) : filterColumn || facets.length || columnVisibility ? (
           <DataTableToolbar>
-            {filterColumn && table.getColumn(filterColumn) ? <DataTableFilter column={table.getColumn(filterColumn)!} aria-label={filterLabel ?? `Filter by ${filterColumn}`} placeholder={filterLabel ?? 'Filter…'} /> : null}
+            {filterColumn && table.getColumn(filterColumn) ? <DataTableFilter column={table.getColumn(filterColumn)!} aria-label={filterLabel ?? labels.filterBy(filterColumn)} placeholder={filterLabel ?? labels.filter} /> : null}
             {facets.map(facet => table.getColumn(facet.column) ? <DataTableFacetedFilter key={facet.column} column={table.getColumn(facet.column)!} title={facet.title} options={facet.options} /> : null)}
             {columnVisibility ? <DataTableViewOptions table={table} /> : null}
           </DataTableToolbar>
@@ -190,6 +265,7 @@ export function DataTable<TData extends RowData>({ columns: columnsProp, data, s
         {paginate ? <DataTablePagination table={table} /> : selectable ? <DataTableSelection table={table} /> : null}
       </div>
     </TableContext.Provider>
+    </LabelsContext.Provider>
   )
 }
 
@@ -220,7 +296,9 @@ export function DataTableFilter<TData extends RowData>({ column, className, ...p
 }
 
 /** A menu of checkboxes that show and hide the columns that can be hidden. */
-export function DataTableViewOptions<TData extends RowData>({ table, label = 'View' }: { table: DataTableInstance<TData>; label?: string }) {
+export function DataTableViewOptions<TData extends RowData>({ table, label: labelProp }: { table: DataTableInstance<TData>; label?: string }) {
+  const labels = useLabels()
+  const label = labelProp ?? labels.view
   const columns = table.getAllLeafColumns().filter(column => column.getCanHide())
   return (
     <MenuPrimitive.Root>
@@ -231,7 +309,7 @@ export function DataTableViewOptions<TData extends RowData>({ table, label = 'Vi
         <MenuPrimitive.Positioner align="end" sideOffset={6}>
           <MenuPrimitive.Popup data-slot="data-table-menu">
             <MenuPrimitive.Group>
-              <MenuPrimitive.GroupLabel data-slot="data-table-menu-label">Columns</MenuPrimitive.GroupLabel>
+              <MenuPrimitive.GroupLabel data-slot="data-table-menu-label">{labels.columns}</MenuPrimitive.GroupLabel>
               {columns.map(column => (
                 <MenuPrimitive.CheckboxItem key={column.id} data-slot="data-table-menu-item" checked={column.getIsVisible()} closeOnClick={false}
                   onCheckedChange={value => column.toggleVisibility(value === true)}>
@@ -249,8 +327,11 @@ export function DataTableViewOptions<TData extends RowData>({ table, label = 'Vi
 
 /** A popover of checkboxes, one per value, that keeps the rows whose column has any checked value; counts come from the data, and so do the values when options is left out. */
 export function DataTableFacetedFilter<TData extends RowData>({ column, title, options: optionsProp }: { column: Column<DataTableFeatures, TData, any>; title: string; options?: readonly { label: string; value: string }[] }) {
+  const labels = useLabels()
   const selected = new Set((column.getFilterValue() as string[] | undefined) ?? [])
-  const counts = column.getFacetedUniqueValues()
+  // Options are strings; faceted values keep the cell's type, so count by their text.
+  const counts = new Map<string, number>()
+  for (const [key, count] of column.getFacetedUniqueValues()) counts.set(String(key), (counts.get(String(key)) ?? 0) + count)
   // Without options, every value in the column is one, in order.
   const options = optionsProp ?? [...counts.keys()].map(String).sort().map(value => ({ label: value, value }))
   const toggle = (value: string, on: boolean) => {
@@ -278,7 +359,7 @@ export function DataTableFacetedFilter<TData extends RowData>({ column, title, o
               </label>
             ))}
           </fieldset>
-          {selected.size ? <button type="button" data-slot="data-table-button" data-data-table-clear="" onClick={() => column.setFilterValue(undefined)}>Clear filter</button> : null}
+          {selected.size ? <button type="button" data-slot="data-table-button" data-data-table-clear="" onClick={() => column.setFilterValue(undefined)}>{labels.clearFilter}</button> : null}
         </PopoverPrimitive.Popup>
         </PopoverPrimitive.Positioner>
       </PopoverPrimitive.Portal>
@@ -288,21 +369,23 @@ export function DataTableFacetedFilter<TData extends RowData>({ column, title, o
 
 /** "2 of 40 row(s) selected.", announced politely; it counts selected rows a filter hides. */
 export function DataTableSelection<TData extends RowData>({ table }: { table: DataTableInstance<TData> }) {
+  const labels = useLabels()
   const selected = Object.values(table.state.rowSelection ?? {}).filter(Boolean).length
-  return <p data-slot="data-table-selection" aria-live="polite">{selected} of {table.getCoreRowModel().rows.length} row(s) selected.</p>
+  return <p data-slot="data-table-selection" aria-live="polite">{labels.selection(selected, table.getCoreRowModel().rows.length)}</p>
 }
 
 /** The selection count, then the page and page buttons. */
 export function DataTablePagination<TData extends RowData>({ table }: { table: DataTableInstance<TData> }) {
+  const labels = useLabels()
   const pages = Math.max(table.getPageCount(), 1)
   return (
     <div data-slot="data-table-pagination">
       <DataTableSelection table={table} />
-      <p data-data-table-page="">Page {table.state.pagination.pageIndex + 1} of {pages}</p>
-      <button type="button" data-slot="data-table-button" aria-label="Previous page" disabled={!table.getCanPreviousPage()} onClick={() => table.previousPage()}>
+      <p data-data-table-page="">{labels.page(table.state.pagination.pageIndex + 1, pages)}</p>
+      <button type="button" data-slot="data-table-button" aria-label={labels.previousPage} disabled={!table.getCanPreviousPage()} onClick={() => table.previousPage()}>
         <ChevronLeftIcon aria-hidden="true" />
       </button>
-      <button type="button" data-slot="data-table-button" aria-label="Next page" disabled={!table.getCanNextPage()} onClick={() => table.nextPage()}>
+      <button type="button" data-slot="data-table-button" aria-label={labels.nextPage} disabled={!table.getCanNextPage()} onClick={() => table.nextPage()}>
         <ChevronRightIcon aria-hidden="true" />
       </button>
     </div>
@@ -310,7 +393,9 @@ export function DataTablePagination<TData extends RowData>({ table }: { table: D
 }
 
 /** A ⋯ button named "Row actions" that opens a menu of DataTableRowAction items. */
-export function DataTableRowActions({ label = 'Row actions', children }: { label?: string; children: React.ReactNode }) {
+export function DataTableRowActions({ label: labelProp, children }: { label?: string; children: React.ReactNode }) {
+  const fallback = useLabels().rowActions
+  const label = labelProp ?? fallback
   return (
     <MenuPrimitive.Root>
       <MenuPrimitive.Trigger data-slot="data-table-row-actions" aria-label={label}>

@@ -4,6 +4,8 @@ export class FoundationError extends Error {
     unrestoredPaths: string[]
     transactionPath: string
     packageStateMayHaveChanged: boolean
+    restoredPaths?: string[]
+    interrupted?: boolean
   }
   constructor(
     public code: string,

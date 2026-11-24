@@ -220,6 +220,8 @@ const hidden: React.CSSProperties = {
 }
 
 export type ColorPickerProps = Omit<React.ComponentProps<'div'>, 'defaultValue' | 'onChange' | 'onInvalid'> & {
+  /** sm, default or lg on the shared size scale; default follows the density's control height. */
+  size?: 'sm' | 'default' | 'lg'
   /** A CSS colour: #rrggbb, rgb(r g b) or oklch(L C H). An empty string shows the placeholder. */
   value?: string
   defaultValue?: string
@@ -268,7 +270,7 @@ export type ColorPickerProps = Omit<React.ComponentProps<'div'>, 'defaultValue' 
 export function ColorPicker({
   value, defaultValue = '', onValueChange, onInvalid, label: ownLabel, placeholder, disabled, name, id,
   format: formatProp, defaultFormat = 'oklch', onFormatChange, swatches = [], contrastWith, contrastLabel,
-  eyeDropper = true, mode, className, children, 'aria-describedby': describedBy, 'aria-invalid': ariaInvalid,
+  eyeDropper = true, mode, size = 'default', className, children, 'aria-describedby': describedBy, 'aria-invalid': ariaInvalid,
   formats = allFormats, maxLength, container, ...props
 }: ColorPickerProps) {
   const pair = React.useContext(PairContext)
@@ -401,7 +403,7 @@ export function ColorPicker({
 
   return (
     <PickerContext.Provider value={context}>
-      <div {...props} ref={root} data-slot="color-picker" data-mode={mode} data-disabled={disabled ? '' : undefined} className={cn(className)}>
+      <div {...props} ref={root} data-slot="color-picker" data-size={size !== 'default' ? size : undefined} data-mode={mode} data-disabled={disabled ? '' : undefined} className={cn(className)}>
         <PickerRoot open={open} onOpenChange={setOpenState}>
           <PickerAnchor data-slot="color-picker-trigger" data-mode={mode} data-invalid={invalid ? '' : undefined}>
             <PickerTrigger data-slot="color-picker-preview" aria-label={`Open ${label} color picker`} disabled={disabled}

@@ -1,10 +1,10 @@
 # Select
 
-Select is a custom single-value listbox built on the reviewed Radix Select primitive. It is available in flat, minimalist, neo brutalism, ombelle, papier, organic, and retro futurism, in light and dark mode. Liquid glass is experimental; see [Liquid glass](#liquid-glass). The template is a client component. Use [Native Select](native-select.md) when you need the platform picker, native form autofill, or no JavaScript.
+Select is a custom single-value listbox built on the reviewed Radix Select primitive. It is available in flat, minimalist, neo brutalism, ombelle, papier, organic, and retro futurism, in light and dark mode. Liquid glass is supported, without an accessibility guarantee; see [Liquid glass](#liquid-glass). The template is a client component. Use [Native Select](native-select.md) when you need the platform picker, native form autofill, or no JavaScript.
 
 ## Install and compose
 
-Build packages and initialize the target project with a local preset, then use the private local CLI:
+Build packages and initialize the target project with a local preset, then use the CLI:
 
 ```powershell
 pnpm build:packages
@@ -41,7 +41,7 @@ Give the trigger an accessible name with `aria-labelledby` or `aria-label`. Radi
 ## API and keyboard
 
 - `Select` forwards the Radix Root props: `value`, `defaultValue`, `onValueChange`, `open`, `defaultOpen`, `onOpenChange`, `name`, `required`, `disabled`, `dir`.
-- `SelectTrigger` forwards trigger props and adds `size` (`default` or `sm`). It renders a chevron icon (`select-icon`) that turns while open. Set `aria-invalid` to show the invalid state.
+- `SelectTrigger` forwards trigger props and adds `size` (`sm`, `default` or `lg`, on the [shared size scale](../03-components-styles-accessibility.md#sizes); `lg` is new in 1.0). It renders a chevron icon (`select-icon`) that turns while open. Set `aria-invalid` to show the invalid state.
 - `SelectContent` renders in a portal. It defaults to `position="popper"` with a 6px `sideOffset`, opening below the trigger at least as wide as the trigger. Pass `position="item-aligned"` for the macOS-style overlay. It includes scroll buttons and a viewport.
 - `SelectItem` forwards item props (`value`, `disabled`, `textValue`). Its children become the selected value text. The optional `hint` renders after the label (for example why an option is disabled), stays out of the selected value, and is linked to the option with `aria-describedby`.
 - `SelectGroup`, `SelectLabel`, `SelectSeparator`, `SelectScrollUpButton` and `SelectScrollDownButton` forward their Radix parts.
@@ -57,6 +57,7 @@ These need CLI **0.7.3** or later, including in component recipes. Leaving a pro
   - The list stays open while you choose, and the trigger shows a chip for each choice, or the placeholder.
   - With `name`, a form submits one entry per value.
   - `required` stops a form from submitting with nothing chosen, and `disabled` submits nothing, as native controls do.
+  - A form reset returns it to `defaultValue`, as it does for the native fields beside it. In the Radix edition this needs `name` or `required` (they render the hidden native select that belongs to the form), and `onValueChange` is called when the value changes. In the Base UI edition an uncontrolled Select starts again from `defaultValue`, single or multiple; a controlled one follows its `value`.
   - **Base UI edition:** Base UI's own multiple Select.
   - **Radix edition:** a listbox in a Radix Popover, because Radix Select chooses one value only.
     - The trigger is a combobox that keeps focus and names the highlighted option.
@@ -64,6 +65,8 @@ These need CLI **0.7.3** or later, including in component recipes. Leaving a pro
     - Space or Enter chooses.
     - Escape closes, with focus on the trigger.
     - Opening by key or by click highlights the first chosen option, or the first, and the list scrolls to the highlighted option.
+    - The parts take the props they take in single mode: `className` and other props on `SelectValue`, `SelectGroup`, `SelectLabel` and `SelectSeparator`; `side`, `align`, `style`, `id` and the escape and outside-pointer handlers on `SelectContent` (`position` does not apply); `textValue` (for typing ahead), `id` (also used by `aria-activedescendant`) and handlers on `SelectItem`, whose `onClick`, `onPointerMove` and `onPointerDown` run before the item's own.
+    - The popover around the listbox has `role="presentation"`, so the listbox is not wrapped in an unnamed dialog.
     - The Select reads its `SelectItem`s from its children. Items rendered by a component of your own are not seen, so they show no chip; write the `SelectItem`s directly inside it.
   - **Base UI edition:** `items`, as a record of labels or an array of `{ value, label }`, names the chips of items built elsewhere.
   - Single selection is unchanged.

@@ -2,7 +2,6 @@ import { expect, it } from 'vitest'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { createCatalogDraft } from '../catalog-draft'
 import { CatalogProperties } from './catalog-properties'
-import { compareVersions, publishedInstaller, retroFuturismMinimumCli } from '../../snapshots/install-command'
 
 const noop = () => {}
 const panel = (component: Parameters<typeof createCatalogDraft>[0]) =>
@@ -59,10 +58,9 @@ it.each([['card', true, false], ['badge', false, false], ['code-block', false, t
   expect(html.includes('aria-label="Code font"')).toBe(mono)
 })
 
-// Final review: the component editors listed every family, so Retro futurism was selectable before its installer shipped.
-it('offers a family in the component editor only once the published installer can install it', () => {
+it('offers the site families in the component editor', () => {
   const html = panel('badge')
-  expect(html.includes('Retro futurism')).toBe(compareVersions(publishedInstaller.version, retroFuturismMinimumCli) >= 0)
+  expect(html).toContain('Retro futurism')
   expect(html).toContain('Organic')
 })
 

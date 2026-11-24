@@ -111,6 +111,15 @@
   margin-inline-start: auto;
   color: var(--muted-foreground);
 }
+/* Indicators and shortcuts drawn in primary or muted colours follow the highlighted item's text instead:
+   on a highlighted destructive item the muted shortcut fell to 1.2:1 on its red fill. */
+[data-slot='context-menu-item'][data-highlighted] > *,
+[data-slot='context-menu-checkbox-item'][data-highlighted] > *,
+[data-slot='context-menu-radio-item'][data-highlighted] > *,
+[data-slot='context-menu-sub-trigger'][data-highlighted] > * {
+  --primary: currentColor;
+  --muted-foreground: currentColor;
+}
 [data-slot='context-menu-shortcut'] {
   padding-inline-start: 1rem;
   font-family: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
@@ -182,10 +191,21 @@
   padding: 0.875rem;
   border: var(--border-width) dashed var(--border);
   border-radius: calc(var(--radius) + 4px);
-  background: rgb(255 255 255 / 0.06);
+  background: color-mix(in srgb, white 6%, var(--background));
   color: var(--foreground);
   font-family: var(--font-family);
   font-size: 0.875rem;
+}
+/* The faint glass wash of the drop zone is an enhancement; the fallback and reduced transparency stay opaque. */
+@supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  [data-slot='context-menu-trigger'][data-variant='zone'] {
+    background: rgb(255 255 255 / 0.06);
+  }
+  @media (prefers-reduced-transparency: reduce) {
+    [data-slot='context-menu-trigger'][data-variant='zone'] {
+      background: color-mix(in srgb, white 6%, var(--background));
+    }
+  }
 }
 [data-slot='context-menu-trigger']:focus-visible {
   outline: 2px solid var(--foreground);

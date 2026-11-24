@@ -22,8 +22,8 @@ export function validateRecipeDarkSelector(value: string): string {
   if (!/^\.[A-Za-z_][A-Za-z0-9_-]*$/.test(value))
     throw new FoundationError(
       'UNSUPPORTED_PROJECT',
-      'Recipe dark mode requires a single ASCII class selector',
-      value,
+      'Recipe dark mode requires a single ASCII class selector, not ' + JSON.stringify(value.slice(0, 80)),
+      '/darkSelector',
       'Configure a class such as .dark or .theme-dark.',
     )
   return value
@@ -32,8 +32,8 @@ export function validateComponentPresetDarkSelector(value: string): string {
   if (!/^\.[A-Za-z_][A-Za-z0-9_-]*$/.test(value))
     throw new FoundationError(
       'UNSUPPORTED_PROJECT',
-      'Component preset dark mode requires a single ASCII class selector',
-      value,
+      'Component preset dark mode requires a single ASCII class selector, not ' + JSON.stringify(value.slice(0, 80)),
+      '/darkSelector',
       'Configure a class such as .dark or .theme-dark.',
     )
   return value
@@ -256,10 +256,16 @@ export function compileScopedButtonStyles(input: {
     if (mapped) overrides[mapped[0]] = value + mapped[1]
   }
   const o = input.overrides
-  // Ombelle's authored pill shape does not read the radius token. An explicit
-  // recipe radius still wins, while recipes without one retain the family pill.
-  if (o.radiusRem !== undefined && data.styleFamily === 'ombelle')
+  // Ombelle's pill, organic's irregular blob and retro-futurism's shape do not read the radius
+  // token. An explicit recipe radius still wins, while recipes without one keep the family shape.
+  if (o.radiusRem !== undefined && ['ombelle', 'organic', 'retro-futurism'].includes(data.styleFamily))
     overrides['border-radius'] = 'var(--radius)'
+  // Organic draws no Button border and retro-futurism a fixed 2px one, so an explicit recipe
+  // border width has to restate the border for them.
+  if (o.borderWidthPx !== undefined && data.styleFamily === 'organic')
+    overrides.border = 'var(--border-width) solid var(--border)'
+  if (o.borderWidthPx !== undefined && data.styleFamily === 'retro-futurism')
+    overrides['border-width'] = 'var(--border-width)'
   if (o.gapPx !== undefined) overrides.gap = o.gapPx + 'px'
   if (o.fontWeight !== undefined) overrides['font-weight'] = String(o.fontWeight)
   if (o.fontSizePx !== undefined) overrides['font-size'] = o.fontSizePx + 'px'

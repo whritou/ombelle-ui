@@ -2,6 +2,7 @@ import {
   normalizeRecipe,
   validateRecipe,
   type NormalizedRecipe,
+  type Preset,
   type RecipeCompileResult,
   type Artifact,
 } from '@ombelle/contracts'
@@ -17,7 +18,7 @@ import estree from 'prettier/plugins/estree'
 import cssPlugin from 'prettier/plugins/postcss'
 import { canonicalize } from './canonicalize.js'
 import { sha256 } from './hash.js'
-import { resolvePreset } from './resolve.js'
+import { pinnedRecipePreset, resolvePreset, storedPresetIdentity } from './resolve.js'
 import {
   buttonRecipeDesign,
   compileRecipeStyles,
@@ -28,11 +29,17 @@ import { renderRecipeButton } from './recipe-source.js'
 export async function compileRecipe(input: {
   recipe: unknown
   darkSelector?: string
+  /** The resolved built-in preset a snapshot or lock stored; used instead of today's built-in (decision 0009). */
+  preset?: Preset
 }): Promise<RecipeCompileResult> {
   const raw = validateRecipe(input.recipe),
-    builtin = resolveRecipePreset(raw.presetRef),
+    builtin = input.preset
+      ? pinnedRecipePreset(input.preset, raw.presetRef)
+      : resolveRecipePreset(raw.presetRef),
     catalog = getCatalog(raw.presetRef.catalogRelease)
-  const preset = await resolvePreset(builtin, catalog)
+  // Compile with today's defaults merged in; identify a pinned preset by its stored bytes.
+  const resolved = await resolvePreset(builtin, catalog)
+  const preset = input.preset ? await storedPresetIdentity(builtin) : resolved
   const data: NormalizedRecipe = normalizeRecipe(
     raw,
     preset.data.componentDefaults?.button,
@@ -69,7 +76,7 @@ export async function compileRecipe(input: {
         familyCss:
           catalog.styles[builtin.styleFamily as keyof typeof catalog.styles],
         glassLabCss: catalog.glassLabStyle,
-        preset,
+        preset: resolved,
         overrides: data.overrides,
         scope,
         darkSelector,
@@ -113,7 +120,7 @@ export async function compileRecipe(input: {
       // The font the recipe names is imported by its stylesheet, so its package installs with it.
       ...(data.overrides.fontFamilyId === undefined
         ? []
-        : resolveTypography(buttonRecipeDesign(preset.data.design, data.overrides)).dependencies),
+        : resolveTypography(buttonRecipeDesign(resolved.data.design, data.overrides)).dependencies),
     ],
     recipe,
     preset,

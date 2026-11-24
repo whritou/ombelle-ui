@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { FoundationError, type Recipe, type StyleFamily } from '@ombelle/contracts'
 import { offeredStyleFamilies } from '../../snapshots/install-command'
-import { changeDraftFamily, draftFamily, experimentalNotice, resetDraftRecipe, type EditorDraft, type EditorView } from '../model'
+import { changeDraftFamily, draftFamily, accessibilityNotice, resetDraftRecipe, type EditorDraft, type EditorView } from '../model'
 import { recordDraft, redo, undo, type EditorHistory } from '../history'
 import { DRAFT_STORAGE_KEY, preserveRecovery, readRecoveries, recipeFilename, restoreDraft, serializeDraft, serializeRecipe } from '../storage'
 import { resultMatchesDraft } from '../result-match'
@@ -217,7 +217,7 @@ export function ButtonEditor() {
   const [inspectorCollapsed, setInspectorCollapsed] = useState(false)
   const inspectorViewport = useViewportClass()
   const foldInspector = inspectorCollapsed && inspectorViewport === 'desktop'
-  return <main className={styles.root} aria-label="Button editor" data-editor-root="">
+  return <main id="main" tabIndex={-1} className={styles.root} aria-label="Button editor" data-editor-root="">
     <EditorTopBar
       commands={[familyCommands(offeredStyleFamilies(draftFamily(draft.recipe)), draftFamily(draft.recipe), familyNames, chooseFamily)]}
       crumbs={[{ label: 'Components', href: '/editor/component' }, 'Button']}
@@ -305,7 +305,7 @@ export function ButtonEditor() {
           <div className={panes.code}>
             <ArtifactPanel result={compilation.result} recipeJson={recipeJson} stale={!exportReady || diagnostic !== null} onStatus={setStatus}
               reference={reference} showChanges={showChanges}
-              notice={experimentalNotice(draftFamily(draft.recipe))} />
+              notice={accessibilityNotice(draftFamily(draft.recipe))} />
           </div>
         </div>
       </EditorSplit>

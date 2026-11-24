@@ -1,6 +1,6 @@
 # Collapsible
 
-Collapsible shows or hides one region of content behind a trigger. For several related sections, use [Accordion](accordion.md). It is available in all five families in light and dark mode, with Radix and Base UI editions; the template is a client component.
+Collapsible shows or hides one region of content behind a trigger. For several related sections, use [Accordion](accordion.md). It is available in all eight families in light and dark mode, with Radix and Base UI editions; the template is a client component.
 
 This component requires CLI **0.7.5** or later: `npx @ombelle-ui/cli@0.7.5 add collapsible`. For a built local checkout:
 
@@ -43,6 +43,6 @@ The Base UI edition uses `Collapsible` from `@base-ui/react/collapsible` and add
 
 ## Liquid glass
 
-Liquid glass is experimental for Collapsible, as for every glass component, and its findings do not block a release. See [liquid glass](liquid-glass.md).
+Liquid glass is supported for Collapsible without an accessibility guarantee, as for every glass component; only its contrast findings, which depend on the backdrop, are advisory in the specimen audit. See [liquid glass](liquid-glass.md).
 
 See [primitives evidence](../evidence/primitives-075.md) for the specimen audit, the board comparison and the differences that remain.

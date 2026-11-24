@@ -7,10 +7,10 @@
 [data-slot="button"][data-variant="outline"]{background:var(--card);color:var(--card-foreground)}
 [data-slot="button"][data-variant="ghost"],[data-slot="button"][data-variant="link"]{background:transparent;border-color:transparent;color:var(--foreground)}
 [data-slot="button"][data-variant="link"]{color:var(--accent-foreground);text-decoration:underline;text-decoration-color:var(--primary);text-decoration-thickness:2px;text-underline-offset:4px}
-[data-slot="button"][data-size="sm"]{--ombelle-shadow-scale:calc(2 / 3);min-height:2rem;padding:0 0.875rem;font-size:0.8125rem}
-[data-slot="button"][data-size="lg"]{--ombelle-shadow-scale:calc(4 / 3);min-height:3rem;padding:0 1.625rem}
+[data-slot="button"][data-size="sm"]{--ombelle-shadow-scale:calc(2 / 3);min-height:calc(var(--control-height) - 0.5rem);padding:0 0.875rem;font-size:0.8125rem}
+[data-slot="button"][data-size="lg"]{--ombelle-shadow-scale:calc(4 / 3);min-height:calc(var(--control-height) + 0.5rem);padding:0 1.625rem}
 [data-slot="button"][data-size="icon"]{width:var(--control-height);padding:0}
-[data-slot="button"][data-size="icon-sm"]{--ombelle-shadow-scale:calc(2 / 3);width:2.125rem;min-height:2.125rem;padding:0}
+[data-slot="button"][data-size="icon-sm"]{--ombelle-shadow-scale:calc(2 / 3);width:calc(var(--control-height) - 0.5rem);min-height:calc(var(--control-height) - 0.5rem);padding:0}
 [data-slot="button"][data-variant="link"]:not([data-size="icon"]){padding-inline:0.25rem}
 [data-slot="button"]:disabled,[data-slot="input"]:disabled{opacity:0.45;cursor:not-allowed;border-style:dashed;box-shadow:none}
 [data-slot="input"]{background:var(--card);color:var(--foreground)}
@@ -60,13 +60,13 @@
 }
 /* 0.7.3 variants: input */
 [data-slot="input"][data-size="sm"] {
-  min-height: 2rem;
+  min-height: calc(var(--control-height) - 0.5rem);
   padding-block: 0.25rem;
   padding-inline: 0.625rem;
   font-size: 0.8125rem;
 }
 [data-slot="input"][data-size="lg"] {
-  min-height: 3rem;
+  min-height: calc(var(--control-height) + 0.5rem);
   padding-inline: 1rem;
   font-size: 1rem;
 }

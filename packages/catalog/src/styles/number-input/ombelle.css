@@ -168,3 +168,8 @@
     transition: none;
   }
 }
+/* 1.0 size scale (DES-12): sm and lg sit 0.5rem below and above the default, which follows --control-height */
+[data-slot='number-input-input'] { padding-block: 0; }
+[data-slot='number-input'][data-size='sm'] { min-block-size: calc(var(--control-height, 2.5rem) - 0.5rem); font-size: 0.8125rem; }
+[data-slot='number-input'][data-size='lg'] { min-block-size: calc(var(--control-height, 2.5rem) + 0.5rem); font-size: 1rem; }
+/* end 1.0 size scale */

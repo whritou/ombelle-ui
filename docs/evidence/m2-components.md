@@ -6,7 +6,7 @@ Checkbox, Switch, Tabs, and Tooltip complete the twelve-component catalog in fla
 
 The 25 October 2026 run uses Windows x64 (10.0.26100), pinned Node 24.19.0 and pnpm 11.25.0, npm 11.19.0, Yarn Classic 1.22.22, modern Yarn 4.18.1, Bun 1.4.3, Playwright 1.64.1, and Chromium 156.0.4314.42 through the installed Edge channel. `OMBELLE_INTEGRATION_WORKERS=1` and the default two consumer workers limit concurrent framework/manager work.
 
-The native Node executable is `.artifacts/toolchain/node-v24.19.0/node.exe`. Commands below use the pnpm entry `C:/Users/whrit/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/pnpm/bin/pnpm.mjs` through that executable. They name the current component-specific layout and are reproduction instructions, not a record of commands executed after the split. PATH exposes the pinned Node directory and npm's pinned `bin` directory; the CLI resolves `npm-cli.js` from PATH. The Node/Bun runtime overrides point to exact native binaries. `OMBELLE_NPM_ENTRY` below is a convenience for prerequisite commands, not a CLI resolver override. `npm_config_store_dir=D:/.pnpm-store` selects the existing authorized store. npm's error log level keeps the unrelated unknown `store-dir` environment warning out of strict version probes. All dependency operations retain lifecycle-script suppression.
+The native Node executable is `.artifacts/toolchain/node-v24.19.0/node.exe`. Commands below use the pnpm entry `<local-path>s/codex-primary-runtime/dependencies/node/node_modules/pnpm/bin/pnpm.mjs` through that executable. They name the current component-specific layout and are reproduction instructions, not a record of commands executed after the split. PATH exposes the pinned Node directory and npm's pinned `bin` directory; the CLI resolves `npm-cli.js` from PATH. The Node/Bun runtime overrides point to exact native binaries. `OMBELLE_NPM_ENTRY` below is a convenience for prerequisite commands, not a CLI resolver override. `npm_config_store_dir=D:/.pnpm-store` selects the existing authorized store. npm's error log level keeps the unrelated unknown `store-dir` environment warning out of strict version probes. All dependency operations retain lifecycle-script suppression.
 
 ```powershell
 $env:PATH = (Join-Path $PWD '.artifacts/toolchain/node-v24.19.0') + ';' + $env:PATH
@@ -22,7 +22,7 @@ $env:OMBELLE_INTEGRATION_WORKERS = '1'
 $env:npm_config_store_dir = 'D:/.pnpm-store'
 $env:npm_config_loglevel = 'error'
 function taskpnpm {
-  & $env:OMBELLE_NODE_EXECUTABLE C:/Users/whrit/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/pnpm/bin/pnpm.mjs @args
+  & $env:OMBELLE_NODE_EXECUTABLE <local-path>s/codex-primary-runtime/dependencies/node/node_modules/pnpm/bin/pnpm.mjs @args
 }
 taskpnpm build:packages
 taskpnpm exec vitest run --config vitest.integration.config.ts tests/integration/checkbox-cli.test.ts tests/integration/switch-cli.test.ts tests/integration/tabs-cli.test.ts tests/integration/tooltip-cli.test.ts tests/integration/scenario-fixture.test.ts
@@ -96,7 +96,7 @@ The new primitives retain the component reviews' MIT metadata; Lucide retains IS
 
 Before the component-specific split, focused verification passed package build, preview generation, typecheck, all 255 unit tests in 35 files, all seven combined CLI/fixture checks, preview build, preparation/audit/build of all 34 consumers, and all 30 combined browser cases. That browser reporter records 30 expected outcomes, zero unexpected, zero skipped, zero flaky, no reporter errors, and zero axe violations. Installed DOM, computed styles and canonical source matched preview in that earlier layout. Those results do not establish that the current four-file suites pass; no tests, builds, typechecks, or gates were rerun after the user's instruction.
 
-The initial standalone `pnpm test:integration` run completed with **274 passed and one failed** across 39 files (275 tests). The sole failed test was `tests/integration/component-preset-preservation.test.ts > records and preserves existing usage files across successful scoped preset installs`: `Test timed out in 60000ms`, followed by `EBUSY` while removing `C:\Users\whrit\AppData\Local\Temp\ombelle-gAgIos`. That run overlapped consumer preparation. After both jobs finished, the unchanged test passed alone:
+The initial standalone `pnpm test:integration` run completed with **274 passed and one failed** across 39 files (275 tests). The sole failed test was `tests/integration/component-preset-preservation.test.ts > records and preserves existing usage files across successful scoped preset installs`: `Test timed out in 60000ms`, followed by `EBUSY` while removing `<local-path>s`. That run overlapped consumer preparation. After both jobs finished, the unchanged test passed alone:
 
 ```powershell
 pnpm exec vitest run --config vitest.integration.config.ts tests/integration/component-preset-preservation.test.ts

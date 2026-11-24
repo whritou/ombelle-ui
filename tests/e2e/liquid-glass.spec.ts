@@ -12,7 +12,7 @@ import { publishedInstaller } from '../../apps/www/src/snapshots/install-command
 // These cases test the desktop review drawer; below 1200px it becomes a sheet (tests/e2e/editors-responsive.spec.ts).
 test.use({ viewport: { width: 1280, height: 800 } })
 
-// Experimental liquid-glass family: contrast bounds, fallbacks and editor flow.
+// Liquid glass family: contrast bounds, fallbacks and editor flow.
 // Accessible names repeat across the three backdrop copies, so every scenario
 // locator is scoped to its [data-backdrop] section.
 const previewUrl = 'http://127.0.0.1:4173/liquid-glass/'
@@ -643,7 +643,7 @@ for (const mode of modes) {
     // The picker button's name carries a Beta tag, so match the prefix.
     await page.getByRole('radiogroup', { name: 'Style family', exact: true }).getByRole('radio', { name: /^Liquid glass/ }).click()
     const confirm = page.getByRole('button', { name: 'Confirm change' })
-    const limitations = page.getByRole('heading', { name: 'Liquid glass limitations' })
+    const limitations = page.getByRole('heading', { name: 'Liquid glass accessibility' })
     await expect(confirm.or(limitations)).toBeVisible()
     if (await confirm.isVisible()) await confirm.click()
     await expect(limitations).toBeVisible()

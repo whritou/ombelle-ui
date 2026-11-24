@@ -25,7 +25,9 @@ export function spokenUnit(unit: string): string {
   return spokenUnits[unit] ?? unit
 }
 
-export type NumberInputProps = Omit<React.ComponentProps<'input'>, 'value' | 'defaultValue' | 'onChange' | 'type' | 'min' | 'max' | 'step'> & {
+export type NumberInputProps = Omit<React.ComponentProps<'input'>, 'value' | 'defaultValue' | 'onChange' | 'type' | 'min' | 'max' | 'step' | 'size'> & {
+  /** sm, default or lg on the shared size scale; default follows the density's control height. */
+  size?: 'sm' | 'default' | 'lg'
   /** The number, or null for an empty field. */
   value?: number | null
   defaultValue?: number | null
@@ -48,6 +50,16 @@ export type NumberInputProps = Omit<React.ComponentProps<'input'>, 'value' | 'de
   incrementLabel?: string
 }
 
+/** Sets every ref it is given. */
+function mergeRefs<T>(...refs: (React.Ref<T> | undefined)[]) {
+  return (element: T | null) => {
+    for (const ref of refs) {
+      if (typeof ref === 'function') ref(element)
+      else if (ref) (ref as React.RefObject<T | null>).current = element
+    }
+  }
+}
+
 const show = (value: number | null | undefined) => (value === null || value === undefined ? '' : String(value))
 
 /**
@@ -57,13 +69,15 @@ const show = (value: number | null | undefined) => (value === null || value === 
  */
 export function NumberInput({
   value, defaultValue = null, text: rawText, onValueChange, min, max, step = 1, largeStep = 10, unit,
-  decrementLabel, incrementLabel, className, disabled, onKeyDown, onBlur, onFocus, ...props
+  decrementLabel, incrementLabel, size = 'default', className, disabled, onKeyDown, onBlur, onFocus, ref, ...props
 }: NumberInputProps) {
   const controlled = value !== undefined
   const [text, setText] = React.useState(() => rawText ?? show(controlled ? value : defaultValue))
   const [blurredInvalid, setBlurredInvalid] = React.useState(false)
   const [labelText, setLabelText] = React.useState<string | null>(null)
   const input = React.useRef<HTMLInputElement>(null)
+  // The caller's ref (a form library focuses the first invalid field through it) and the field's own.
+  const setRef = React.useMemo(() => mergeRefs(input, ref), [ref])
   const focused = React.useRef(false)
   const textRef = React.useRef(text)
   textRef.current = text
@@ -95,6 +109,23 @@ export function NumberInput({
     setLabelText(named.trim() || null)
   }, [props['aria-label'], props['aria-labelledby']])
 
+  // A form reset returns to the default value, as it does for the native fields beside it.
+  const [initial] = React.useState(() => show(defaultValue))
+  const reset = React.useRef(() => {})
+  reset.current = () => {
+    setBlurredInvalid(false)
+    if (textRef.current === initial) return
+    if (!controlled && rawText === undefined) setText(initial)
+    onValueChange?.(parseNumberText(initial), { text: initial, valid: true })
+  }
+  React.useEffect(() => {
+    const form = input.current?.form
+    if (!form) return
+    const onReset = () => reset.current()
+    form.addEventListener('reset', onReset)
+    return () => form.removeEventListener('reset', onReset)
+  }, [])
+
   const parsed = parseNumberText(text)
   const inRange = (n: number) => (min === undefined || n >= min) && (max === undefined || n <= max)
   const validOf = (next: string) => {
@@ -122,14 +153,14 @@ export function NumberInput({
   }
 
   return (
-    <div data-slot="number-input" data-invalid={invalid ? '' : undefined} data-disabled={disabled ? '' : undefined} className={cn(className)}>
+    <div data-slot="number-input" data-size={size !== 'default' ? size : undefined} data-invalid={invalid ? '' : undefined} data-disabled={disabled ? '' : undefined} className={cn(className)}>
       <button type="button" data-slot="number-input-decrement" tabIndex={-1} aria-label={decrementLabel ?? `Decrease ${name}`}
         disabled={disabled || atMin} onPointerDown={keepFocus} onClick={() => move(-step)}>
         <MinusIcon aria-hidden="true" />
       </button>
       <input
         {...props}
-        ref={input}
+        ref={setRef}
         data-slot="number-input-input"
         type="text"
         inputMode="decimal"

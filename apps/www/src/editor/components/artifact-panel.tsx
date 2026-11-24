@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import type { InstallableRecipe, InstallableRecipeCompileResult } from '@ombelle/contracts'
-import { glassContrastWarning, withComponentRecipeGlass } from '@ombelle/compiler'
+import { glassContrastWarning, withComponentRecipeGlass } from '@ombelle/compiler/light'
 import { recipeFilename } from '../storage'
 import code from './code-view.module.css'
 import { installableRecipeInstallNotice, installerRunner, publishedInstaller } from '../../snapshots/install-command'
@@ -65,7 +65,7 @@ export function ArtifactPanel({ result, recipeJson, stale, onStatus, notice = nu
   recipeJson: string | null
   stale: boolean
   onStatus: (message: string) => void
-  /** Experimental-family notice shown beside the export and CLI command. */
+  /** Accessibility caveat shown beside the export and CLI command. */
   notice?: string | null
   componentName?: string
 }) {
@@ -92,7 +92,7 @@ export function ArtifactPanel({ result, recipeJson, stale, onStatus, notice = nu
       <div className="sectionTitle"><div><h2 id="artifacts-title">Generated output</h2><p>Compiled from this {componentName} recipe.</p></div>
         {stale && <span className="staleBadge">Output is out of date</span>}
       </div>
-      {notice && <p className="artifactNote" data-testid="experimental-notice">{notice}</p>}
+      {notice && <p className="artifactNote" data-testid="accessibility-notice">{notice}</p>}
       {contrast && <p className="artifactNote" role="status">{contrast}</p>}
       {result ? <>
         <ScrollArea className="www-scroll www-scroll-x artifactTabsScroll" aria-label="Artifact files">

@@ -1,27 +1,74 @@
-name: Clean up Neon preview branch
+name: Clean up Neon preview branches
+# The Vercel Neon integration creates a Neon branch "preview/<git branch>" for every preview deployment and never
+# deletes it; Neon Free allows 10 branches, so leaks break every pull request preview. Three triggers close the gaps:
+#   * pull_request_target closed: unlike pull_request, it runs with repository secrets for Dependabot's pull requests
+#     (Dependabot-triggered pull_request runs get none, which is how leaks happened). It is safe because the job checks
+#     out only the base branch's cleanup script, never the pull request's code, and the script validates the branch name.
+#   * delete: a branch removed without a pull request.
+#   * schedule: a daily sweep of whatever the other two missed (an API timeout, a branch that never had a pull request).
 on:
-  pull_request:
+  pull_request_target:
     types: [closed]
+  delete:
+  schedule:
+    - cron: '41 4 * * *'
   workflow_dispatch:
     inputs:
       branch:
-        description: Git branch whose preview database branch (preview/<branch>) to delete
-        required: true
+        description: Git branch whose preview database branch (preview/<branch>) to delete. Leave empty to run the sweep.
+        required: false
+      dry_run:
+        description: Sweep only; list what would be deleted without deleting
+        type: boolean
+        default: false
 permissions:
   contents: read
+  pull-requests: read
+concurrency:
+  group: cleanup-neon-preview
+  cancel-in-progress: false
 jobs:
   cleanup:
-    # Pull requests from forks get no secrets and no Neon preview branch.
-    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.head.repo.full_name == github.repository
+    # Pull requests from forks get no secrets and no Neon preview branch. A delete event for a tag is not a branch.
+    if: >-
+      github.event_name == 'workflow_dispatch' || github.event_name == 'schedule' ||
+      (github.event_name == 'pull_request_target' && github.event.pull_request.head.repo.full_name == github.repository) ||
+      (github.event_name == 'delete' && github.event.ref_type == 'branch')
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 10
+    env:
+      NEON_API_KEY: ${{ secrets.NEON_API_KEY }}
+      GH_TOKEN: ${{ github.token }}
+      # A branch name from an event is data: pass it through the environment, never into the script text.
+      EVENT_NAME: ${{ github.event_name }}
+      PR_HEAD_REF: ${{ github.event.pull_request.head.ref }}
+      DELETED_REF: ${{ github.event.ref }}
+      INPUT_BRANCH: ${{ inputs.branch }}
+      INPUT_DRY_RUN: ${{ inputs.dry_run }}
     steps:
+      # Default checkout of a pull_request_target run is the base branch; only the script is fetched.
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           sparse-checkout: scripts/cleanup-neon-preview.sh
           sparse-checkout-cone-mode: false
-      - name: Delete the preview database branch
-        env:
-          NEON_API_KEY: ${{ secrets.NEON_API_KEY }}
-          GIT_BRANCH: ${{ github.event_name == 'workflow_dispatch' && inputs.branch || github.head_ref }}
-        run: bash scripts/cleanup-neon-preview.sh "$GIT_BRANCH"
+      - name: Delete the preview database branch of a closed pull request or deleted branch
+        if: github.event_name == 'pull_request_target' || github.event_name == 'delete' || (github.event_name == 'workflow_dispatch' && inputs.branch != '')
+        run: |
+          case "$EVENT_NAME" in
+            pull_request_target) branch="$PR_HEAD_REF" ;;
+            delete) branch="$DELETED_REF" ;;
+            *) branch="$INPUT_BRANCH" ;;
+          esac
+          bash scripts/cleanup-neon-preview.sh "$branch"
+      - name: Sweep preview database branches whose git branch is gone
+        if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.branch == '')
+        run: |
+          # Live = every git branch plus the head branch of every open pull request. Any failed call stops the job
+          # before the sweep (set -e and pipefail), and the script refuses a list without the default branch.
+          set -euo pipefail
+          gh api --paginate "repos/$GITHUB_REPOSITORY/branches?per_page=100" --jq '.[].name' > "$RUNNER_TEMP/live.txt"
+          gh pr list --repo "$GITHUB_REPOSITORY" --state open --limit 500 --json headRefName --jq '.[].headRefName' >> "$RUNNER_TEMP/live.txt"
+          echo "$(wc -l < "$RUNNER_TEMP/live.txt") live branch names"
+          args=()
+          if [ "$INPUT_DRY_RUN" = true ]; then args+=(--dry-run); fi
+          bash scripts/cleanup-neon-preview.sh --sweep "$RUNNER_TEMP/live.txt" "${args[@]}"

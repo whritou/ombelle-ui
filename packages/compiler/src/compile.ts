@@ -6,6 +6,7 @@ import {
   type Artifact,
   assertStyleAvailable,
   isStyleFamily,
+  isSupportedContractRelease,
 } from '@ombelle/contracts'
 import { getCatalog, getTemplate, expansionExamples, baseToastExample } from '@ombelle/catalog'
 import { format } from 'prettier/standalone'
@@ -87,7 +88,7 @@ export async function compile(input: {
    */
   prefixedComponents?: readonly ComponentId[]
 }): Promise<CompileResult> {
-  if (input.compilerVersion !== '0.1.0')
+  if (!isSupportedContractRelease(input.compilerVersion))
     throw new FoundationError(
       'UNSUPPORTED_RELEASE',
       'Unsupported compiler version',
@@ -132,11 +133,12 @@ export async function compile(input: {
     let content = template.content.replaceAll("'./utils.js'", "'@/lib/utils'")
     if (id === 'button')
       content = content
-        .replace(
+        // Button and its buttonVariants helper share the preset's defaults.
+        .replaceAll(
           "variant = 'default'",
           "variant = '" + preset.data.componentDefaults!.button!.variant + "'",
         )
-        .replace(
+        .replaceAll(
           "size = 'default'",
           "size = '" + preset.data.componentDefaults!.button!.size + "'",
         )
@@ -151,6 +153,11 @@ export async function compile(input: {
     if(id==='button-group'&&input.edition==='base')usage=usage.replace(
       '<DropdownMenuTrigger asChild><Button size="icon" aria-label="More install options"><ChevronDownIcon aria-hidden="true" /></Button></DropdownMenuTrigger>',
       '<DropdownMenuTrigger render={<Button size="icon" aria-label="More install options"><ChevronDownIcon aria-hidden="true" /></Button>} />',
+    )
+    // The Base UI EmptyTitle takes its heading level through render too (the Base UI consumers' build failed on asChild).
+    if(id==='empty'&&input.edition==='base')usage=usage.replace(
+      '<EmptyTitle asChild><h2>No presets yet</h2></EmptyTitle>',
+      '<EmptyTitle render={<h2 />}>No presets yet</EmptyTitle>',
     )
     drafts.push({
       logicalPath: 'examples/' + id + '.tsx',

@@ -1,5 +1,5 @@
 import { compile } from '@ombelle/compiler'
-import { FoundationError, type CompileResult } from '@ombelle/contracts'
+import { FoundationError, validatePreset, type CompileResult } from '@ombelle/contracts'
 import {
   materializePreset,
   previewComponentIds,
@@ -18,13 +18,19 @@ export type PresetCompileRequest = {
   requestId: number
   draft: PresetEditorDraft
 }
+/** A published snapshot's preset, compiled for its page's gallery (glass only: stable families go as tokens). */
+export type SnapshotCompileRequest = {
+  type: 'compile-snapshot'
+  requestId: number
+  preset: unknown
+}
 export type PresetCompileResponse =
   | { type: 'preset-compiled'; requestId: number; result: CompileResult }
   | { type: 'preset-invalid'; requestId: number; diagnostic: PresetDiagnostic }
 export async function handlePresetCompileMessage(
   input: unknown,
 ): Promise<PresetCompileResponse> {
-  const data = input as Partial<PresetCompileRequest> | null
+  const data = input as Partial<PresetCompileRequest> | Partial<SnapshotCompileRequest> | null
   const requestId =
     Number.isSafeInteger(data?.requestId) && data!.requestId! > 0
       ? data!.requestId!
@@ -34,14 +40,16 @@ export async function handlePresetCompileMessage(
       !data ||
       typeof data !== 'object' ||
       Object.keys(data).length !== 3 ||
-      data.type !== 'compile-preset' ||
+      (data.type !== 'compile-preset' && data.type !== 'compile-snapshot') ||
       requestId === 0
     )
       throw new FoundationError(
         'INVALID_MESSAGE',
         'Expected a preset compile request.',
       )
-    const preset = materializePreset(validateDraftEnvelope(data.draft))
+    const preset = data.type === 'compile-snapshot'
+      ? validatePreset((data as Partial<SnapshotCompileRequest>).preset)
+      : materializePreset(validateDraftEnvelope((data as Partial<PresetCompileRequest>).draft))
     return {
       type: 'preset-compiled',
       requestId,

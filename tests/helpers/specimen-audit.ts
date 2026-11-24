@@ -4,7 +4,48 @@ import AxeBuilder from '@axe-core/playwright'
 import type { Locator, Page } from '@playwright/test'
 
 export type AuditCheck = 'overflow' | 'clipping' | 'spacing' | 'focus-visible' | 'target-size' | 'forced-colors' | 'axe'
-export type Finding = { check: AuditCheck; target: string; detail: string }
+/**
+ * `surface`: for a contrast finding, what the failing colours are painted on. `opaque`: a surface with an
+ * opaque background (a solid Badge, an Alert card, an opaque fallback). `translucent`: a backdrop filter or a
+ * partly transparent background comes first, so what shows through decides. `backdrop`: nothing is painted
+ * up to the page, so the page backdrop itself is behind it.
+ */
+export type Surface = 'opaque' | 'translucent' | 'backdrop'
+export type Finding = { check: AuditCheck; target: string; detail: string; surface?: Surface }
+
+/** Classify the surface an element's colours sit on, walking out from it (see Surface). */
+export const surfaceSource = `(element) => {
+  for (let node = element; node && node !== document.documentElement; node = node.parentElement) {
+    const style = getComputedStyle(node)
+    if (style.backdropFilter && style.backdropFilter !== 'none') return 'translucent'
+    const match = /rgba?\\(([^)]*)\\)/.exec(style.backgroundColor)
+    const parts = match ? match[1].split(/[\\s,\\/]+/).filter(Boolean) : []
+    const alpha = parts.length === 4 ? Number.parseFloat(parts[3]) * (parts[3].endsWith('%') ? 0.01 : 1) : 1
+    if (alpha >= 0.999) return 'opaque'
+    if (alpha > 0 || style.backgroundImage !== 'none') return 'translucent'
+  }
+  return 'backdrop'
+}`
+/**
+ * A focus ring drawn outside its control (outline offset 0 or more) lies on whatever is behind the control,
+ * so it is classified from the control's parent; an inset ring lies on the control itself.
+ */
+export const ringSurfaceSource = `(element) => {
+  const classify = ${surfaceSource}
+  const style = getComputedStyle(element)
+  const inset = style.outlineStyle !== 'none' && Number.parseFloat(style.outlineOffset) < 0
+  return classify(inset ? element : (element.parentElement ?? element))
+}`
+const evaluateSource = (source: string) => (node: Element, code: string) => (new Function('return ' + code)() as (e: Element) => Surface)(node)
+/** Mark each axe contrast finding of `findings` with the surface its text sits on. */
+export async function markSurfaces(page: Page, findings: Finding[]): Promise<Finding[]> {
+  for (const finding of findings) {
+    if (finding.check !== 'axe' || !finding.detail.startsWith('color-contrast:')) continue
+    const element = page.locator(finding.target).first()
+    finding.surface = await element.count() ? await element.evaluate(evaluateSource(surfaceSource), surfaceSource) : 'opaque'
+  }
+  return findings
+}
 
 /** Interactive elements that need a target size and a visible focus indicator. */
 export const interactiveSelector = [
@@ -292,8 +333,11 @@ export async function checkFocusVisible(page: Page, target: Locator, delegated =
   // 90% of a 1px perimeter: anti-aliased corners of a rounded 1px ring fall below 3:1.
   const needed = Math.round(0.9 * 2 * (box.width + box.height))
   if (!focused) return [{ check: 'focus-visible', target: description, detail: 'element could not take focus' }]
-  return strong >= needed ? [] : [{ check: 'focus-visible', target: description,
-    detail: `${strong} focus pixels at 3:1 (${changed} changed), ${needed} needed` }]
+  if (strong >= needed) return []
+  // The ring measured is the ring owner's when a wrapper draws it (Input Group, Tag Input): classify around that.
+  const surface = await (ringOwner ? page.locator('[data-audit-ring-owner]') : target)
+    .evaluate((node, code) => (new Function('return ' + code)() as (e: Element) => Surface)(node), ringSurfaceSource)
+  return [{ check: 'focus-visible', target: description, detail: `${strong} focus pixels at 3:1 (${changed} changed), ${needed} needed`, surface }]
 }
 
 // Items reached with arrow keys: primitives give all but the current one tabindex -1.

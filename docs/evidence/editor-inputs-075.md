@@ -1,6 +1,6 @@
 # Evidence: Number Input and Color Picker (0.7.5)
 
-Sub-project 2 of the 0.7.5 work. Spec: `docs/superpowers/specs/2026-11-12-editor-inputs-075-design.md`. Plan: `docs/superpowers/plans/2026-11-12-editor-inputs-075.md`.
+Sub-project 2 of the 0.7.5 work. Spec: `docs/internal/superpowers/specs/2026-11-12-editor-inputs-075-design.md`. Plan: `docs/internal/superpowers/plans/2026-11-12-editor-inputs-075.md`.
 
 ## Website size, before
 

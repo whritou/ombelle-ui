@@ -52,7 +52,7 @@ const documentedPublishedVersion = (contracts: string) =>
 const current = (JSON.parse(readFileSync(path.join(repo, 'packages/cli/package.json'), 'utf8')) as { version: string }).version
 const published = /version: '(\d+\.\d+\.\d+)'/.exec(readFileSync(path.join(repo, 'apps/www/src/snapshots/install-command.ts'), 'utf8'))![1]
 const next = current.replace(/^(\d+)\.(\d+)\.\d+$/, (_, major, minor) => major + '.' + (Number(minor) + 1) + '.0')
-const workspaceFiles = ['package.json', 'packages/*/package.json', 'apps/*/package.json', 'README.md', 'CHANGELOG.md', 'docs/cli-release.md', 'docs/04-presets-and-contracts.md']
+const workspaceFiles = ['package.json', 'packages/*/package.json', 'apps/*/package.json', 'README.md', 'CHANGELOG.md', 'docs/cli-release.md', 'docs/cli-release-history.md', 'docs/04-presets-and-contracts.md']
 const publishedFiles = [
   'apps/www/src/snapshots/install-command.ts',
   'README.md',
@@ -80,12 +80,13 @@ it('sets a workspace release in a temp copy without touching history', async () 
   expect(changelog).toMatch(new RegExp('## Unreleased\\r?\\n\\r?\\n## ' + next.replaceAll('.', '\\.') + ' — 20 November 2026\\r?\\n\\r?\\n- A pending change\\.'))
   expect(changelog.split(/^## 0\.3\.0/m)[1]).toBe(history)
   const release = await read(dir, 'docs/cli-release.md')
-  expect(release).toContain('was published on 2026-11-04 from `a9e56fc`')
+  const releaseHistory = await read(dir, 'docs/cli-release-history.md')
+  expect(releaseHistory).toContain('was published on 2026-11-04 from `a9e56fc`')
+  expect(releaseHistory).toContain('`@ombelle-ui/cli@' + published + '` was published')
   expect(release).toContain('ombelle-ui-cli-' + next + '.tgz')
   expect(release).toContain('All six workspace packages use software version ' + next)
-  expect(release).toContain('`@ombelle-ui/cli@' + published + '` was published')
   expect(await read(dir, 'README.md')).toContain('The six workspace packages are version **' + next + '**')
-  expect(await read(dir, 'README.md')).toContain('`npx @ombelle-ui/cli@' + published + '`')
+  expect(await read(dir, 'README.md')).toContain('is published as `@ombelle-ui/cli@' + published + '`')
   expect(await read(dir, 'docs/04-presets-and-contracts.md')).toContain('Workspace packages are version ' + next + '.')
   expect(documentedPublishedVersion(await read(dir, 'docs/04-presets-and-contracts.md'))).toBe(published)
   expect((await run(['--check', '--root', dir])).code).toBe(0)

@@ -319,7 +319,7 @@ export function CodeBlock({ code, language, title, lineNumbers, maxHeight, copyL
         lineNumbers={lineNumbers}
         maxHeight={maxHeight}
         diff={shown}
-        label={title ? `${title} source` : 'Code'}
+        label={shown ? (title ? `${title} changes` : 'Changes') : title ? `${title} source` : 'Code'}
       >
         {children}
       </CodeBlockCode>

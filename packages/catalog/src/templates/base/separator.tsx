@@ -27,7 +27,6 @@ export function Separator({
 }: SeparatorProps) {
   return (
     <SeparatorPrimitive
-      data-slot="separator"
       data-labelled={children ? '' : undefined}
       orientation={orientation}
       // Base UI always renders role="separator"; a decorative line has no role,
@@ -35,6 +34,7 @@ export function Separator({
       {...(decorative ? { role: 'none', 'aria-orientation': undefined } : {})}
       className={cn(className)}
       {...props}
+      data-slot="separator"
     >
       {children ? <span data-slot="separator-label">{children}</span> : null}
     </SeparatorPrimitive>

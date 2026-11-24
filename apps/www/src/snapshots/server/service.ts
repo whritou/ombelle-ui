@@ -1,18 +1,16 @@
-import { FoundationError, isStyleFamily, type PresetSnapshot, type SnapshotReference } from '@ombelle/contracts'
+import { isStyleFamily, isSupportedContractRelease, type PresetSnapshot, type SnapshotReference } from '@ombelle/contracts'
 import { normalizePublishedPreset, verifyPresetSnapshot } from '@ombelle/compiler'
 import { assertPublishOrigin, readSnapshotConfig, type SnapshotConfig } from './config'
 import { readPublishBody } from './body'
-import { clientRateKey } from './client-key'
+import { clientRateKeys } from './client-key'
 import { SnapshotServiceError } from './errors'
+import { invalidPublication, normalizationFailure } from './publication-errors'
 import { openConfiguredSnapshotStore } from './store-factory'
 import type { SnapshotStore } from './store'
 
 export interface SnapshotService {
   publish(request: Request): Promise<{ snapshot: PresetSnapshot; replayed: boolean }>
   read(ref: SnapshotReference): Promise<PresetSnapshot>
-}
-function invalidData(): SnapshotServiceError {
-  return new SnapshotServiceError({ status: 400, code: 'INVALID_DATA', issues: [{ path: '/preset', message: 'Provide a valid supported preset.' }] })
 }
 
 async function verified(snapshot: PresetSnapshot): Promise<PresetSnapshot> {
@@ -25,7 +23,7 @@ export function createSnapshotService(config: SnapshotConfig, store: SnapshotSto
     async publish(request) {
       assertPublishOrigin(request.headers, config)
       const body = await readPublishBody(request)
-      const clientKey = clientRateKey(request.headers, config)
+      const { clientKey, networkKey } = clientRateKeys(request.headers, config)
       // The minute budget includes retries and validation failures. Body/media/
       // origin checks run first; normalization never runs after quota exhaustion.
       const now = Date.now()
@@ -34,31 +32,21 @@ export function createSnapshotService(config: SnapshotConfig, store: SnapshotSto
       if (!idempotencyKey || !/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(idempotencyKey))
         throw new SnapshotServiceError({ status: 400, code: 'INVALID_IDEMPOTENCY_KEY' })
       if (!body || typeof body !== 'object' || Array.isArray(body) || Object.keys(body).length !== 1 || !Object.hasOwn(body, 'preset'))
-        throw invalidData()
+        throw invalidPublication('preset')
       const input: unknown = (body as { preset: unknown }).preset
       if (input && typeof input === 'object' && !Array.isArray(input)) {
         const fields = input as Record<string, unknown>
-        const releases = { catalogRelease: '0.1.0', compilerVersion: '0.1.0' }
         // 1.1 is a preset that uses font pairs; the preset validator checks that the version and the fields agree.
         const schemaVersions = ['1.0', '1.1']
-        if (Object.entries(releases).some(([key, value]) => typeof fields[key] === 'string' && fields[key] !== value) ||
+        if (['catalogRelease', 'compilerVersion'].some(key => typeof fields[key] === 'string' && !isSupportedContractRelease(fields[key])) ||
             (typeof fields.schemaVersion === 'string' && !schemaVersions.includes(fields.schemaVersion)) ||
             (typeof fields.styleFamily === 'string' && !isStyleFamily(fields.styleFamily)))
           throw new SnapshotServiceError({ status: 422, code: 'UNSUPPORTED_RELEASE' })
       }
       let preset
       try { preset = await normalizePublishedPreset(input) }
-      catch (error) {
-        if (error instanceof FoundationError) {
-          if (error.code === 'UNSUPPORTED_RELEASE')
-            throw new SnapshotServiceError({ status: 422, code: 'UNSUPPORTED_RELEASE' })
-          if (error.message === 'Preset exceeds the 65,536-byte UTF-8 limit')
-            throw new SnapshotServiceError({ status: 413, code: 'PAYLOAD_TOO_LARGE' })
-          throw invalidData()
-        }
-        throw error
-      }
-      const result = await store.publish({ preset, idempotencyKey: idempotencyKey.toLowerCase(), clientKey, now })
+      catch (error) { throw normalizationFailure(error, 'preset') }
+      const result = await store.publish({ preset, idempotencyKey: idempotencyKey.toLowerCase(), clientKey, networkKey, now })
       return { snapshot: await verified(result.snapshot), replayed: result.replayed }
     },
     async read(ref) { return verified(await store.lookup(ref)) },

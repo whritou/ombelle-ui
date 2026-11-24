@@ -1,10 +1,10 @@
 # Textarea
 
-Textarea is a native multi-line text control. It keeps shadcn's `Textarea` name and `data-slot="textarea"` marker and has no client boundary. It supports `flat`, `minimalist`, `neo-brutalism`, and `ombelle` in light and dark modes. Liquid glass is experimental for Textarea; see [Liquid glass](#liquid-glass).
+Textarea is a native multi-line text control. It keeps shadcn's `Textarea` name and `data-slot="textarea"` marker and has no client boundary. It supports `flat`, `minimalist`, `neo-brutalism`, and `ombelle` in light and dark modes. Liquid glass is supported for Textarea, without an accessibility guarantee; see [Liquid glass](#liquid-glass).
 
 ## Install and compose
 
-Build the packages and initialize the target project with a local preset before using the private local CLI:
+Build the packages and initialize the target project with a local preset before using the CLI:
 
 ```powershell
 pnpm build:packages

@@ -53,8 +53,9 @@ it('does not create or migrate storage during an ordinary open', async () => {
   expect((await raw.query('SELECT schema_name FROM information_schema.schemata WHERE schema_name=$1', [schema])).rowCount).toBe(0)
   await initializePostgresSnapshotStore(direct!, schema)
   await initializePostgresSnapshotStore(direct!, schema)
+  // A newer schema is still served (a rollback after a migration must work) but never downgraded or re-initialized.
   await raw.query(`UPDATE "${schema}".schema_version SET version=999`)
-  await expect(openPostgresSnapshotStore(connection!, { schema })).rejects.toMatchObject({ status: 503 })
+  await expect(openPostgresSnapshotStore(connection!, { schema })).resolves.toBeDefined()
   await expect(initializePostgresSnapshotStore(direct!, schema)).rejects.toMatchObject({ status: 503 })
 })
 it('refuses migrations over the pooled endpoint', async () => {

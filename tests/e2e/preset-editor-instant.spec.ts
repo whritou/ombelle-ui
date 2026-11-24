@@ -111,6 +111,10 @@ test('applies a radius edit within 200 ms while the compiler worker is blocked',
   // The compiler never answers, so only the token message can render the preview.
   await expect(frame(page).getByTestId('preset-button')).toBeVisible({ timeout: 30000 })
   await expect.poll(blocked).toBeGreaterThan(0)
+  // Time the edit, not the end of the page load: the gallery's fonts can still be arriving when the button
+  // first shows, and their swap re-lays out the whole gallery (seen in CI 150-300 ms before the edit).
+  await page.evaluate(() => document.fonts.ready.then(() => undefined))
+  await frame(page).locator('html').evaluate(() => document.fonts.ready.then(() => undefined))
   const before = await buttonRadius(page)
   const elapsed = await editRadiusAndTime(page, '1.5')
   expect(elapsed).toBeGreaterThanOrEqual(0)

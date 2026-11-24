@@ -34,6 +34,35 @@ These variants need CLI **0.7.3** or later, including in component recipes. Leav
 </Tooltip>
 ```
 
+## Size (1.0)
+
+`size` follows the [shared size scale](../03-components-styles-accessibility.md#sizes): `sm` is one 0.5rem step below the density's control height, `default` is the control height and `lg` one step above it. `icon-sm` and `icon` are `sm` and `default` squares. In neo-brutalism the button adds 0.25rem at every size, and in organic and retro futurism 0.375rem, so `default` looks as it did before 1.0. In 1.0, `sm`, `lg` and `icon-sm` in neo-brutalism and retro futurism, and `icon-sm` in minimalist, ombelle and papier, moved by 2px to sit exactly one step from `default`. All sizes now follow compact density.
+
+## Style another element as a button
+
+`buttonVariants({ variant, size, className })` returns what an element needs to look like the matching Button: `data-slot="button"`, `data-variant`, `data-size` and the `className`. Spread it onto the element. Every style family selects those attributes, not a class, so a link styled this way matches the Button in every family, edition and mode. Both editions export it, and its defaults follow the saved preset's `componentDefaults.button`, as Button's do.
+
+```tsx
+import Link from 'next/link'
+import { buttonVariants } from '@/components/ui/button'
+
+export function DocsLink() {
+  return (
+    <Link href="/docs" {...buttonVariants({ variant: 'outline', size: 'sm' })}>
+      Read the docs
+    </Link>
+  )
+}
+```
+
+A link keeps link semantics: it is announced as a link and follows `href` on Enter. Use it for navigation and Button for actions. Without `href` it is not focusable, so give a link-as-button an `href`.
+
+### Differences from shadcn
+
+- shadcn's `buttonVariants()` returns a class string for `className`. Ombelle's returns an object of attributes and `className`, because the family stylesheets select `data-slot`, `data-variant` and `data-size`. Replace `className={buttonVariants({ variant: 'ghost' })}` with `{...buttonVariants({ variant: 'ghost' })}`, and `className={cn(buttonVariants(), 'w-full')}` with `{...buttonVariants({ className: 'w-full' })}`.
+- Passing only the class string to `className` keeps the layout utilities but none of the family's look.
+- `ButtonVariantsOptions` is the helper's argument type. `VariantProps<typeof buttonVariants>` also works and gives `variant` and `size`.
+
 ## Radix edition
 
 Projects whose `components.json` uses `radix-nova` or `new-york`, and projects without `components.json`, receive the Radix Button. It renders a native `button` and supports `asChild` through `@radix-ui/react-slot` 1.5.0 to render another element, such as a link, with Button styling. `loading` is ignored with `asChild`.

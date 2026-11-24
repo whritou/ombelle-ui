@@ -26,7 +26,7 @@ for (const family of ['ombelle', 'liquid-glass'] as const)
         props, content, appearance: { parts } })
       const result = await compileComponentRecipe({ recipe })
       await page.goto(`/editions/${family}/radix/?mode=light`)
-      await expect(page.locator('main')).toHaveAttribute('data-ready', 'true')
+      await expect(page.locator('main[data-ready]')).toHaveAttribute('data-ready', 'true')
       let target: Locator
       if (component === 'card') target = page.locator(`[data-expansion="surfaces"] [data-appearance="${scenario.slice(5)}"]`)
       else if (component === 'tabs') target = page.getByRole('tablist', { name: 'Expansion vertical tabs' }).locator('..')

@@ -1,6 +1,6 @@
 # Color Picker
 
-Color Picker is a colour field: a swatch button and a text field. The button opens a popover with a saturation and brightness area, a hue slider, a format row with an eyedropper, swatches and a contrast readout. `ColorPickerPair` groups a light and a dark picker for one design token. It is available in all five families in light and dark mode, with Radix and Base UI editions. The template is a client component.
+Color Picker is a colour field: a swatch button and a text field. The button opens a popover with a saturation and brightness area, a hue slider, a format row with an eyedropper, swatches and a contrast readout. `ColorPickerPair` groups a light and a dark picker for one design token. It is available in all eight families in light and dark mode, with Radix and Base UI editions. The template is a client component.
 
 This component requires CLI **0.7.5** or later: `npx @ombelle-ui/cli@0.7.5 add color-picker`. For a built local checkout:
 
@@ -73,6 +73,10 @@ The eyedropper is a button named "Pick a color from the screen". It renders only
 | Firefox | Not shown: no EyeDropper API |
 | Safari | Not shown: no EyeDropper API |
 
+## Size (1.0)
+
+`ColorPicker` takes `size`; it sizes the trigger, and at `sm` the swatch shrinks to 1.5rem. `sm` is one 0.5rem step below the density's control height, `default` is the control height (2.5rem, or 2.25rem with compact density) and `lg` is one step above it, as on every control on the [shared size scale](../03-components-styles-accessibility.md#sizes). `sm` text is 0.8125rem and `lg` text 1rem. Leaving `size` out renders what earlier releases render; only `sm` and `lg` set `data-size`.
+
 ## Recipe
 
 The recipe editor sets `format`, `paired`, `contrast`, `swatches` (0 to 8) and `eyeDropper`, and the label, value and dark value. The defaults follow the 0.7.5 board: a paired Primary token, `oklch(0.55 0.22 6)` in light and `oklch(0.7 0.18 6)` in dark, with five swatches. With `contrast`, the readout measures against the Ombelle primary foreground of each mode.
@@ -87,6 +91,6 @@ The Base UI edition uses `Popover` and `Slider` from `@base-ui/react` and adds n
 
 ## Liquid glass
 
-Liquid glass is experimental for Color Picker, as for every glass component, and its findings do not block a release. See [liquid glass](liquid-glass.md).
+Liquid glass is supported for Color Picker without an accessibility guarantee, as for every glass component; only its contrast findings, which depend on the backdrop, are advisory in the specimen audit. See [liquid glass](liquid-glass.md).
 
 See [editor inputs evidence](../evidence/editor-inputs-075.md) for the tests, the specimen audit and the board comparison.

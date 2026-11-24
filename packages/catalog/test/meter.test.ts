@@ -18,7 +18,7 @@ describe('Meter', () => {
     expectComponentContract('meter', { client: true, parts: ['Meter', 'MeterLabel', 'MeterValue', 'MeterSegment', 'MeterLegend', 'MeterLegendItem'],
       slots: ['meter', 'meter-label', 'meter-value', 'meter-track', 'meter-cell', 'meter-segment', 'meter-legend', 'meter-legend-item', 'meter-ring', 'meter-ring-track', 'meter-ring-indicator', 'meter-ring-value'],
       dependencies: [{ name: 'react', version: '19.3.1' }, { name: 'clsx', version: '2.1.1' }, { name: 'tailwind-merge', version: '3.7.0' }],
-      selectors: ["[data-slot='meter']", "[data-slot='meter-track']", "[data-slot='meter-cell']", "[data-slot='meter-segment']"], glass: 'experimental' })
+      selectors: ["[data-slot='meter']", "[data-slot='meter-track']", "[data-slot='meter-cell']", "[data-slot='meter-segment']"], glass: 'stable' })
     expect(getTemplate(getCatalog('0.1.0'), 'meter', 'base').dependencies.map(d => d.name)).toContain('@base-ui/react')
   })
 

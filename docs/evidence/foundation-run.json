@@ -1,0 +1,74 @@
+{
+  "schemaVersion": 1,
+  "run": {
+    "id": 45396679510,
+    "url": "https://github.com/whritou/ombelle-ui/actions/runs/45396679510",
+    "event": "workflow_dispatch",
+    "branch": "chore/release-1-0-integration",
+    "startedAt": "2026-11-24T12:45:56Z",
+    "completedAt": "2026-11-24T15:58:25Z"
+  },
+  "sourceCommit": "b96ceee5992ec79762d645207ee5923bf592301e",
+  "counts": {
+    "unit": {
+      "passed": 6823,
+      "failed": 0,
+      "skipped": 0
+    },
+    "integration": {
+      "passed": 797,
+      "failed": 0,
+      "skipped": 0
+    },
+    "browser": {
+      "startTime": "2026-11-24T13:17:53.488Z",
+      "duration": 2447128.399,
+      "expected": 1185,
+      "skipped": 0,
+      "unexpected": 0,
+      "flaky": 0,
+      "knownFailures": []
+    },
+    "specimen": {
+      "expected": 431,
+      "knownFailures": [
+        {
+          "title": "variants-more.spec.ts/the side sheet widens as its handle is dragged with a pointer in a right-to-left page (CAT-04)",
+          "finding": "CAT-04: RTL pointer drag on the inline-end Sheet not verified; hit target or sign unknown"
+        },
+        {
+          "title": "variants-more.spec.ts/the side sheet widens as its handle is dragged with a pointer in a right-to-left page (CAT-04)",
+          "finding": "CAT-04: RTL pointer drag on the inline-end Sheet not verified; hit target or sign unknown"
+        }
+      ]
+    }
+  },
+  "specimenAudit": {
+    "configurations": 36,
+    "specimens": 2268
+  },
+  "contrastAdvisoryFindings": {
+    "liquid-glass/radix/light": 56,
+    "liquid-glass/base/light": 54,
+    "liquid-glass/radix/light/reduced": 53,
+    "liquid-glass/base/light/reduced": 52
+  },
+  "consumers": 54,
+  "browser": {
+    "engine": "chromium",
+    "version": "158.0.8127.18",
+    "channel": "bundled Chromium"
+  },
+  "jobMinutes": {
+    "consumers (3)": 85.8,
+    "consumers (1)": 69,
+    "specimen (3)": 27.5,
+    "specimen (2)": 19.5,
+    "quality": 41.1,
+    "catalog-consumers": 2.3,
+    "consumers (2)": 86.7,
+    "specimen (4)": 18.8,
+    "specimen (1)": 30.9,
+    "verify": 5.5
+  }
+}

@@ -1,10 +1,10 @@
 # Tabs
 
-Tabs wraps reviewed Radix Tabs primitives, with flat, minimalist, neo-brutalism, ombelle, papier, organic, and retro futurism styles in light and dark modes. Liquid glass is experimental; see [liquid glass](liquid-glass.md). The template is a client component.
+Tabs wraps reviewed Radix Tabs primitives, with flat, minimalist, neo-brutalism, ombelle, papier, organic, and retro futurism styles in light and dark modes. Liquid glass is supported, without an accessibility guarantee; see [liquid glass](liquid-glass.md). The template is a client component.
 
 ## Install and compose
 
-Build packages and initialize the target project with a local preset before using the private local CLI:
+Build packages and initialize the target project with a local preset before using the CLI:
 
 ```powershell
 pnpm build:packages
@@ -49,6 +49,10 @@ These need CLI **0.7.3** or later, including in component recipes. Leaving a pro
   - It is part of the trigger's accessible name ("Review 3").
   - In a selected pill, it is drawn on the primary foreground at 25 %.
 - **Vertical tabs**: `orientation="vertical"` keeps each family's existing vertical style, and moves with Arrow Up and Arrow Down.
+
+## Size (1.0)
+
+`TabsList` takes `size`, new in 1.0, which sizes its triggers on the [shared size scale](../03-components-styles-accessibility.md#sizes). A `default` trigger is the density's control height plus 0.25rem (44px), and pill triggers are 0.5rem less than the control height (32px). `sm` and `lg` are one 0.5rem step below and above, and an `sm` pill never drops below 24px under compact density. Leaving `size` out renders what earlier releases render.
 
 ## Styles and artifacts
 

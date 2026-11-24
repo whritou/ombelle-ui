@@ -19,7 +19,7 @@ describe('Password Field', () => {
     expectComponentContract('password-field', { client: true,
       parts: ['PasswordField', 'PasswordFieldControl', 'PasswordFieldInput', 'PasswordFieldToggle', 'PasswordFieldCapsLock', 'PasswordFieldStrength'], slots,
       dependencies: [{ name: 'react', version: '19.3.1' }, { name: 'clsx', version: '2.1.1' }, { name: 'tailwind-merge', version: '3.7.0' }, { name: 'lucide-react', version: '1.55.0' }],
-      selectors: slots.map(slot => `[data-slot='${slot}']`), glass: 'experimental' })
+      selectors: slots.map(slot => `[data-slot='${slot}']`), glass: 'stable' })
     const catalog = getCatalog('0.1.0')
     expect(getTemplate(catalog, 'password-field', 'base').content).toBe(getTemplate(catalog, 'password-field', 'radix').content)
   })

@@ -2,6 +2,12 @@ import { notFound } from 'next/navigation'
 import { CatalogComponentEditor } from '../../../../editor/components/catalog-component-editor'
 import { editableComponents } from '../../../../editor/editable-components'
 
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
+  const component = editableComponents.find(entry => entry.id === id)
+  return component ? { title: `${component.label} editor · Ombelle UI` } : {}
+}
+
 export default async function ComponentEditorPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   const component = editableComponents.find(entry => entry.id === id)

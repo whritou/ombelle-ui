@@ -4,33 +4,35 @@
 
 Support npm, pnpm, Yarn and Bun from alpha. Offer two clear website paths: initialize a new setup, or add styling to a project where shadcn is already initialized. The existing-project path merges palette and token values into the configured global stylesheet without rerunning shadcn initialization or reinstalling component source.
 
-Implementation status for this foundation: npm, pnpm, Yarn Classic 1.22.22, modern Yarn 4.18.1, and Bun 1.4.3 have consumer coverage. Modern Yarn covers both linkers. Bun covers Vite/Next.js with text/binary lockfiles and the built CLI under Node/Bun; framework builds remain on Node. These are local private CLI routes; the illustrative published package commands below remain proposed.
+Implementation status: npm, pnpm, Yarn Classic 1.22.22, modern Yarn 4.18.1, and Bun 1.4.3 have consumer coverage. Modern Yarn covers both linkers. Bun covers Vite/Next.js with text/binary lockfiles and the built CLI under Node/Bun; framework builds remain on Node. The supported ranges (React 19, Node 24.19.0 to below 27, Bun 1.4.3 to below 2) are in the [CLI specification](05-cli-specification.md#supported-projects).
 
 Website copy: “If you already initialized shadcn, add the styling to the project instead. This command merges the palette and tokens into your globals.css.”
 
-The examples below are proposed product commands. The namespace, package, preset ID and version are placeholders. Pin a tested CLI version and an immutable preset revision in generated production commands.
+The commands below use the published package `@ombelle-ui/cli`, whose single binary is `ombelle`. Replace `<version>` with a tested CLI version and `ps_<code>@1` with the preset code the site shows, or a local preset file.
 
 ## Commands for an existing shadcn project
 
 | Package runner | Command |
 | --- | --- |
-| npm | `npx @your-ui/cli@0.1.0 theme add ps_brand@3` |
-| pnpm | `pnpm dlx @your-ui/cli@0.1.0 theme add ps_brand@3` |
-| Yarn modern | `yarn dlx --package @your-ui/cli@0.1.0 your-ui theme add ps_brand@3` |
-| Bun | `bunx --bun --package @your-ui/cli@0.1.0 your-ui theme add ps_brand@3` |
+| npm | `npx @ombelle-ui/cli@<version> theme add ps_<code>@1` |
+| pnpm | `pnpm dlx @ombelle-ui/cli@<version> theme add ps_<code>@1` |
+| Yarn modern | `yarn dlx @ombelle-ui/cli@<version> theme add ps_<code>@1` |
+| Bun | `bunx @ombelle-ui/cli@<version> theme add ps_<code>@1` |
 
-The package exposes a single binary named `your-ui`. Explicit package selection in the Yarn and Bun examples avoids relying on the binary being named `cli`. Bun's `--bun` flag deliberately exercises its runtime; the CLI must be tested under both Node and Bun.
+The package has one binary, so runners need no binary selection. `pnpm dlx` and `yarn dlx` work without a pnpm or Yarn launcher on `PATH`: the CLI finds the manager release they name in corepack's cache, or a native `pnpm` binary.
 
-Yarn Classic does not supply the modern dlx workflow. Use a local development dependency (`yarn add --dev @your-ui/cli@0.1.0`, then `yarn your-ui theme add ps_brand@3`) or another runner with `--package-manager yarn`. These package names are illustrative; the published installer is `@ombelle-ui/cli` with the `ombelle` binary (see [CLI release](cli-release.md) for verified runner commands). A runner choice must not switch the consumer project's dependency manager.
+Yarn Classic does not supply the modern dlx workflow. Use `npx @ombelle-ui/cli@<version>` in the Yarn 1 project, or a local development dependency (`yarn add --dev @ombelle-ui/cli@<version>`, then `yarn ombelle theme add ps_<code>@1`). A runner choice never switches the project's package manager.
 
 ## Commands for new setup and component addition
 
 | Runner | New setup | Add a component later |
 | --- | --- | --- |
-| npm | `npx @your-ui/cli@0.1.0 init --preset ps_brand@3` | `npx @your-ui/cli@0.1.0 add button` |
-| pnpm | `pnpm dlx @your-ui/cli@0.1.0 init --preset ps_brand@3` | `pnpm dlx @your-ui/cli@0.1.0 add button` |
-| Yarn modern | `yarn dlx -p @your-ui/cli@0.1.0 your-ui init --preset ps_brand@3` | `yarn dlx -p @your-ui/cli@0.1.0 your-ui add button` |
-| Bun | `bunx --bun -p @your-ui/cli@0.1.0 your-ui init --preset ps_brand@3` | `bunx --bun -p @your-ui/cli@0.1.0 your-ui add button` |
+| npm | `npx @ombelle-ui/cli@<version> init --preset ps_<code>@1` | `npx @ombelle-ui/cli@<version> add button` |
+| pnpm | `pnpm dlx @ombelle-ui/cli@<version> init --preset ps_<code>@1` | `pnpm dlx @ombelle-ui/cli@<version> add button` |
+| Yarn modern | `yarn dlx @ombelle-ui/cli@<version> init --preset ps_<code>@1` | `yarn dlx @ombelle-ui/cli@<version> add button` |
+| Bun | `bunx @ombelle-ui/cli@<version> init --preset ps_<code>@1` | `bunx @ombelle-ui/cli@<version> add button` |
+
+Later, `update` refreshes installed components the catalog changed, and `preset apply <file|code>` switches the project preset and restyles installed components. See [Upgrading to 1.0](upgrading-to-1.0.md).
 
 `init` targets an existing supported app and initializes the UI setup, not a whole application. If `components.json` already exists, detect that before writes and use the theme plan instead of resetting the setup. An incompatible or incomplete configuration receives an actionable diagnostic.
 
@@ -45,11 +47,33 @@ pnpm exec node packages/cli/dist/main.js add button --preset ./examples/preset.e
 
 This adds a separate scoped Button and usage example. It preserves the saved project preset, global theme, ordinary Button, other installed components, existing usages, and manager/lockfile ownership. Later ordinary additions continue using project defaults. `theme add` remains the global theme path; the scoped command does not merge component tokens into global CSS. `add --recipe <local.json>` remains the separate path for a Button with saved props, text, and local overrides.
 
-The input must be a regular UTF-8 JSON file no larger than 256 KiB and match the strict preset schema plus the pinned catalog/compiler release. This command accepts local files only; remote and saved preset codes are not resolved. The supported styles are flat, minimalist, and neo-brutalism. It generates scoped reviewed CSS from schema fields, not arbitrary CSS overrides. Button renders in normal DOM flow; portal-aware styling for Dialog and other portal components is outside this slice. The supported project baseline is Tailwind v4 React TSX in Vite or Next.js App Router, with the supported Radix nova/new-york component editions. This component-preset path remains Radix-only; ordinary components and themes also support shadcn's Base UI styles ([decision 0005](decisions/0005-base-ui-edition.md)).
+The input must be a regular UTF-8 JSON file no larger than 256 KiB and match the strict preset schema plus the pinned catalog/compiler release. It also accepts an exact hosted preset code (`ps_<32 lowercase hex>@1`), resolved and verified like `init --preset` codes and recorded under `componentPresetSources` in the lock. It supports every style family whose Button support is not unavailable: the seven families that carry an accessibility guarantee, and liquid glass, which is stable without that guarantee. It generates scoped reviewed CSS from schema fields, not arbitrary CSS overrides. Button renders in normal DOM flow; portal-aware styling for Dialog and other portal components is outside this slice. The supported project baseline is Tailwind v4 React TSX in Vite or Next.js App Router, with the supported Radix nova/new-york component editions. This component-preset path remains Radix-only; ordinary components and themes also support shadcn's Base UI styles ([decision 0005](decisions/0005-base-ui-edition.md)).
 
-The command preserves the target project's selected manager and lockfile. Manager selection follows an explicit `--package-manager`, then `package.json.packageManager`, then one recognized lockfile (`package-lock.json`, `pnpm-lock.yaml`, `yarn.lock`, `bun.lock`, or `bun.lockb`); conflicting evidence requires an explicit selection. npm, pnpm, Yarn and Bun consumer installation paths are covered. The component-preset browser matrix covers preview, npm, and pnpm targets; it does not claim Yarn or Bun browser coverage. Workspaces and npm-shrinkwrap remain unsupported.
+The command preserves the target project's selected manager and lockfile. Manager selection follows the strict rule in the [CLI specification](05-cli-specification.md): `--package-manager`, `package.json.packageManager` and one recognized lockfile must agree. npm, pnpm, Yarn and Bun consumer installation paths are covered. The component-preset browser matrix covers preview, npm, and pnpm targets; it does not claim Yarn or Bun browser coverage. Workspaces and npm-shrinkwrap remain unsupported.
 
 Unowned existing target files, locally edited generated source, incompatible shared utilities, or changed content under the same ID/revision or a changed dark selector produce a conflict. Reconcile manually or use a new preset revision. `--yes` cannot override conflicts. Repeating an identical install is a no-op; new revisions coexist. See the [scope contract](04-presets-and-contracts.md#component-scoped-preset-selection) and [component-scoped Button evidence](evidence/component-scoped-button-presets.md).
+
+## Right-to-left layouts
+
+The family styles use logical properties, so `dir="rtl"` on the page mirrors the layout. Arrow keys are a separate step: Radix UI and Base UI read the direction from a provider (or a `dir` prop on each composite), not from the DOM, so without one ArrowLeft still means "previous" in Tabs, Toggle Group, Toolbar and Menubar and "decrease" in Slider and Resizable. Wrap a right-to-left app once, at its root:
+
+```tsx
+// Radix edition (installed with the Radix components)
+import { DirectionProvider } from '@radix-ui/react-direction'
+export function Providers({ children }: { children: React.ReactNode }) {
+  return <DirectionProvider dir="rtl">{children}</DirectionProvider>
+}
+```
+
+```tsx
+// Base UI edition
+import { DirectionProvider } from '@base-ui/react/direction-provider'
+export function Providers({ children }: { children: React.ReactNode }) {
+  return <DirectionProvider direction="rtl">{children}</DirectionProvider>
+}
+```
+
+Carousel and the resizable Sheet handle read the computed direction themselves and need no provider. `@radix-ui/react-direction` is a dependency of the Radix primitives rather than of your project: add it to `package.json` if you import it directly.
 
 ## Package manager selection
 
@@ -57,9 +81,9 @@ Use an explicit `--package-manager` selection when present. Otherwise inspect `p
 
 Bun 1.4.3 runs as a native executable, with exact dependency saving and lifecycle scripts disabled for the project and trusted packages. Override discovery with an absolute `OMBELLE_BUN_EXECUTABLE` path. Incompatible inherited settings for simulated/frozen installation, lockfile saving/output, or format conversion receive preflight diagnostics. Existing development/optional/peer-only dependencies required by a component must first be moved into dependencies; this Bun release cannot safely promote their group. The CLI preserves user configuration and rejects workspace ownership. The built CLI can run under Bun while npm/pnpm/Yarn scripts use verified Node; set `OMBELLE_NODE_EXECUTABLE` if Node is not on PATH. No-op additions, dry-runs, and actual theme-only operations avoid dependency-manager invocation.
 
-Conflicting project evidence requires an explicit choice. The runner user agent is only a fallback when no project evidence exists. In a workspace, inspect the target package and governing workspace root without writing outside the explicitly selected project boundary. Retain the manager's workspace behavior and lockfile ownership.
+Conflicting or missing project evidence is refused; the runner user agent is not used as a fallback ([CLI specification](05-cli-specification.md)). In a workspace, inspect the target package and governing workspace root without writing outside the explicitly selected project boundary. Retain the manager's workspace behavior and lockfile ownership.
 
-Use npm install, pnpm add, or yarn add only when the planned component installation needs dependency changes. Yarn dependency installs disable lifecycle scripts and use exact versions. A theme-only command must not run an unnecessary dependency installation. Never create another manager's lockfile or assume node_modules exists in a Yarn Plug'n'Play project. The current Yarn consumer gate checks preserved CSS, a fresh-process preset reuse, lockfile ownership, and production builds in all three verified Yarn layouts.
+Use npm install, pnpm add, or yarn add only when the planned component installation needs dependency changes. A dependency the project already declares is left alone when its declared version or range starts at or above the catalog version (or at a newer major), and when its specifier is not a plain version or `^`, `~`, `>=` range; the plan then carries a notice instead. Only an older declaration is raised to the catalog version, and both the human and JSON plans show the declaration it replaces (`current` in `dependencyPlan`). The CLI never downgrades a dependency. Yarn dependency installs disable lifecycle scripts and use exact versions. A theme-only command must not run an unnecessary dependency installation. Never create another manager's lockfile or assume node_modules exists in a Yarn Plug'n'Play project. The current Yarn consumer gate checks preserved CSS, a fresh-process preset reuse, lockfile ownership, and production builds in all three verified Yarn layouts.
 
 ## Theme merge contract
 

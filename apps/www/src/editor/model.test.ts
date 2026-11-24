@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest'
-import { getCatalog, styleFamilyFonts } from '@ombelle/catalog'
-import { styleFamilies, validateRecipe } from '@ombelle/contracts'
+import { getCatalogPresets, styleFamilyFonts } from '@ombelle/catalog/presets'
+import { familyAccessibilityCaveat, styleFamilies, validateRecipe } from '@ombelle/contracts'
 import {
-  baseColorRole, changeDraftFamily, createEditorDraft, draftFamily, experimentalNotice, recipeColor, resetDraftRecipe, updateDraftRecipe, withRecipeColor,
+  baseColorRole, changeDraftFamily, createEditorDraft, draftFamily, accessibilityNotice, recipeColor, resetDraftRecipe, updateDraftRecipe, withRecipeColor,
   withRecipeIcon, withRecipeOverride,
   type EditorView,
 } from './model.js'
@@ -11,7 +11,7 @@ import { serializeRecipe } from './storage.js'
 describe('Button editor model', () => {
   it.each(styleFamilies)('creates a valid %s draft with the exact built-in preset', (family) => {
     const draft = createEditorDraft(family)
-    const catalog = getCatalog('0.1.0')
+    const catalog = getCatalogPresets('0.1.0')
     const preset = family === 'liquid-glass' ? catalog.startingPresets['builtin-liquid-glass-cristal'] : catalog.presets[family]
     expect(draft).toEqual({
       storageVersion: 1,
@@ -35,15 +35,14 @@ describe('Button editor model', () => {
     expect(original.recipe.presetRef.id).toBe('builtin-flat')
   })
 
-  it('validates a liquid-glass draft and labels it experimental', () => {
+  it('validates a liquid-glass draft and states its accessibility caveat', () => {
     const draft = changeDraftFamily(createEditorDraft('flat'), 'liquid-glass')
     expect(draft.recipe.presetRef.id).toBe('builtin-liquid-glass-cristal')
     expect(validateRecipe(draft.recipe)).toEqual(draft.recipe)
     expect(draftFamily(draft.recipe)).toBe('liquid-glass')
-    expect(experimentalNotice('liquid-glass')).toBe(
-      'liquid-glass is experimental for button; see docs/components/liquid-glass.md for limitations',
-    )
-    expect(experimentalNotice('flat')).toBeNull()
+    expect(accessibilityNotice('liquid-glass')).toBe(familyAccessibilityCaveat('liquid-glass'))
+    expect(accessibilityNotice('liquid-glass')).toMatch(/^Accessibility not guaranteed: /)
+    expect(accessibilityNotice('flat')).toBeNull()
     expect(draftFamily(createEditorDraft('minimalist').recipe)).toBe('minimalist')
   })
 
@@ -91,7 +90,7 @@ describe('Button editor model', () => {
   })
   it('reads color overrides with the variant preset token as fallback', () => {
     const draft = createEditorDraft('flat')
-    const preset = getCatalog('0.1.0').presets.flat
+    const preset = getCatalogPresets('0.1.0').presets.flat
     expect(recipeColor(draft.recipe, 'light', 'background')).toEqual({ value: preset.modes.light.primary, overridden: false })
     const outline = { ...draft.recipe, props: { ...draft.recipe.props, variant: 'outline' as const } }
     expect(recipeColor(outline, 'dark', 'foreground')).toEqual({ value: preset.modes.dark.foreground, overridden: false })
@@ -102,7 +101,7 @@ describe('Button editor model', () => {
   })
   it('reads glass fallbacks from what one-ink glass renders', () => {
     const draft = createEditorDraft('liquid-glass')
-    const preset = getCatalog('0.1.0').startingPresets['builtin-liquid-glass-cristal']
+    const preset = getCatalogPresets('0.1.0').startingPresets['builtin-liquid-glass-cristal']
     const as = (variant: 'default' | 'secondary' | 'destructive' | 'outline') => ({ ...draft.recipe, props: { ...draft.recipe.props, variant } })
     for (const variant of ['default', 'secondary', 'destructive', 'outline'] as const)
       for (const mode of ['light', 'dark'] as const)
@@ -141,7 +140,7 @@ describe('Button editor model', () => {
   })
   it('reads hover and pressed colors with the base role as fallback', () => {
     const draft = createEditorDraft('flat')
-    const preset = getCatalog('0.1.0').presets.flat
+    const preset = getCatalogPresets('0.1.0').presets.flat
     expect(baseColorRole('hoverBackground')).toBe('background')
     expect(baseColorRole('pressedForeground')).toBe('foreground')
     expect(baseColorRole('border')).toBe('border')

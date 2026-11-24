@@ -2,7 +2,7 @@ import { expect, it } from 'vitest'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { styleFamilies } from '@ombelle/contracts'
 import { FamilyPicker } from './family-picker'
-import { offeredStyleFamilies, ombelleMinimumCli, publishedInstaller } from '../../snapshots/install-command'
+import { offeredStyleFamilies } from '../../snapshots/install-command'
 
 const noop = () => {}
 
@@ -14,21 +14,14 @@ it('shows the families as a labelled group with the current one pressed', () => 
   expect(html).toContain('role="radiogroup"')
 })
 
-it('offers every family and marks liquid glass experimental', () => {
+it('offers every family and marks liquid glass with its accessibility caveat', () => {
   const html = renderToStaticMarkup(<FamilyPicker value="liquid-glass" onChange={noop} families={styleFamilies} />)
   for (const name of ['Flat', 'Minimalist', 'Neo-brutalism', 'Ombelle', 'Liquid glass']) expect(html).toContain(name)
   expect(html.match(/aria-checked="true"/g)).toHaveLength(1)
-  expect(html).toContain('Experimental')
+  expect(html).toContain('Accessibility not guaranteed')
 })
 
-it('offers ombelle only once the published installer supports it, keeping a selected ombelle visible', () => {
+it('offers every site family in site order', () => {
   const families = (html: string) => [...html.matchAll(/<button[^>]*data-family="([^"]+)"[^>]*class="be-family"/g)].map((match) => match[1])
-  const render = (value: 'flat' | 'ombelle', version: string) =>
-    families(renderToStaticMarkup(<FamilyPicker value={value} onChange={noop} families={offeredStyleFamilies(value, { version })} />))
-  expect(render('flat', '0.3.0')).toEqual(['minimalist', 'neo-brutalism', 'flat', 'liquid-glass'])
-  expect(render('flat', ombelleMinimumCli)).toEqual(['ombelle', 'minimalist', 'neo-brutalism', 'flat', 'liquid-glass'])
-  expect(render('ombelle', '0.3.0')).toEqual(['ombelle', 'minimalist', 'neo-brutalism', 'flat', 'liquid-glass'])
-  expect(families(renderToStaticMarkup(<FamilyPicker value="flat" onChange={noop} />))).toEqual([
-    ...offeredStyleFamilies('flat', publishedInstaller),
-  ])
+  expect(families(renderToStaticMarkup(<FamilyPicker value="flat" onChange={noop} />))).toEqual([...offeredStyleFamilies()])
 })

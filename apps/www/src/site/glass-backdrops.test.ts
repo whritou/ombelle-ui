@@ -1,10 +1,11 @@
 import { expect, it } from 'vitest'
-import { getCatalog, startingPresetOrder, type StartingPresetId } from '@ombelle/catalog'
+import { getCatalogPresets, startingPresetOrder, type StartingPresetId } from '@ombelle/catalog/presets'
 import type { Preset } from '@ombelle/contracts'
 import { glassBackdropOptions, glassPresetBackdrop } from './glass-presets'
 import { glassBackdropMenu, glassSceneRatios, labInkFor, pickGlassScene } from './glass-backdrops'
+import { applyStartingPreset, createPresetDraft, materializePreset } from '../preset-editor/model'
 
-const preset = (id: StartingPresetId): Preset => structuredClone(getCatalog('0.1.0').startingPresets[id])
+const preset = (id: StartingPresetId): Preset => structuredClone(getCatalogPresets('0.1.0').startingPresets[id])
 const modes = ['light', 'dark'] as const
 
 it('built-in presets keep their scene', () => {
@@ -49,6 +50,12 @@ it('lights the lab ink for an unedited lab preset on its own scene, in both mode
   expect(labInkFor(preset('builtin-liquid-glass-relief'), 'light', 'peach')).toBe('light')
 })
 
+it('lights the lab ink for a lab preset opened in the editor, which takes the style fonts', () => {
+  const opened = materializePreset(applyStartingPreset(createPresetDraft('liquid-glass'), 'builtin-liquid-glass-givre'))
+  expect(opened.design.fontFamilyId).not.toBe(preset('builtin-liquid-glass-givre').design.fontFamilyId)
+  expect(labInkFor(opened, 'dark', 'night')).toBe('dark')
+})
+
 it('keeps the plate on other scenes, edited presets, other presets and reduced transparency', () => {
   expect(labInkFor(preset('builtin-liquid-glass-givre'), 'light', 'night')).toBeNull()
   const edited = preset('builtin-liquid-glass-givre')
@@ -68,10 +75,15 @@ it('menu labels carry the ratio and the automatic choice', () => {
   expect(menu.filter((option) => option.label.includes('(auto)'))).toHaveLength(1)
 })
 
+// Every current starting preset clears 4.5:1 on its scenes, so the below-4.5 wording is checked on the
+// retired revision-1 presets, whose scene ratios are unchanged.
+const retired = (id: StartingPresetId): Preset =>
+  structuredClone(getCatalogPresets('0.1.0').retiredPresets.find((p) => p.id === id && p.revision === 1)!)
+
 it('a scene below 4.5:1 says so in words', () => {
-  const menu = glassBackdropMenu(preset('builtin-liquid-glass-cristal'), 'light', 'mist', false)
+  const menu = glassBackdropMenu(retired('builtin-liquid-glass-cristal'), 'light', 'mist', false)
   const night = menu.find((option) => option.value === 'night')!
-  expect(glassSceneRatios(preset('builtin-liquid-glass-cristal'), 'light').night).toBeLessThan(4.5)
+  expect(glassSceneRatios(retired('builtin-liquid-glass-cristal'), 'light').night).toBeLessThan(4.5)
   expect(night.label).toMatch(/^Nuit, \d+\.\d:1, below 4\.5:1$/)
 })
 
@@ -81,7 +93,7 @@ it('reduced transparency shows one shared ratio', () => {
 })
 
 it('never rounds a ratio up past 4.5:1 in a label', () => {
-  const relief = preset('builtin-liquid-glass-relief')
+  const relief = retired('builtin-liquid-glass-relief')
   expect(glassSceneRatios(relief, 'light').peach).toBe(4.47)
   const peach = glassBackdropMenu(relief, 'light', 'peach', false).find((option) => option.value === 'peach')!
   expect(peach.label).toBe('Pêche, 4.4:1 (auto), below 4.5:1')

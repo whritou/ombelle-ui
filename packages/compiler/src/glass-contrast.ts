@@ -288,12 +288,11 @@ function bound(
   low: number,
   high: number,
   sheen: number,
-  plate = 0,
 ) {
-  // The glow plate lies over the painted glass: an affine mix, so the extremes stay at the same backdrops.
-  const onPlate = (painted: Rgb) => painted.map((c, i) => plate * surface.rgb[i]! + (1 - plate) * c) as unknown as Rgb
-  const darkest = luminanceOf(onPlate(paint(surface.rgb, alpha, low, 0)))
-  const brightest = luminanceOf(onPlate(paint(surface.rgb, alpha, high, sheen)))
+  // The text outline the material draws is part of the glyph, not its background, so it
+  // never enters the bound: the text is rated against the painted glass alone.
+  const darkest = luminanceOf(paint(surface.rgb, alpha, low, 0))
+  const brightest = luminanceOf(paint(surface.rgb, alpha, high, sheen))
   const overDarkest = ratio(darkest, textLum)
   const overBrightest = ratio(brightest, textLum)
   const inside = textLum > darkest && textLum < brightest
@@ -333,8 +332,6 @@ type Resolved = {
   textColor: Color
   textLum: number
   backdrop: GlassBackdrop
-  /** Share of the text outline plate, 0 without the material. */
-  plate: number
   /** A checked mark painted opaque because the material is on. */
   solid: boolean
 }
@@ -366,12 +363,6 @@ const withPointerShine = (backdrop: GlassBackdrop, design: Preset['design'] | un
 export const glassEffectiveSheen = (design: Preset['design'] | undefined, mode: 'light' | 'dark') =>
   withPointerShine(glassBackdrop(design, mode), design).sheen
 
-/**
- * The model uses the plate colour next to the glyph when the material is on.
- * This is the plate's opacity multiplier. The CSS sets the width of the stroke under the fill.
- */
-export const glassTextPlate = 1
-
 function resolve(
   data: Preset,
   specs: readonly GlassPairSpec[],
@@ -402,7 +393,6 @@ function resolve(
         textColor,
         textLum: luminanceOf(textColor.rgb),
         backdrop,
-        plate: glassMaterialActive(data.design) && !solid ? glassTextPlate : 0,
         solid: Boolean(solid) && glassMaterialActive(data.design),
       })
     }
@@ -421,7 +411,6 @@ const filtered = (r: Resolved, opacity: number) =>
     r.backdrop.high,
     // A solid mark paints one colour: no sheen gradient and no pointer shine reach it.
     r.solid ? 0 : r.backdrop.sheen,
-    r.plate * r.surfaceColor.alpha,
   )
 // Nested glass drops its own filter and sees the raw backdrop: any 0..1 pixel.
 // A covered surface nested in glass paints at the full nested opacity (its CSS
@@ -429,7 +418,7 @@ const filtered = (r: Resolved, opacity: number) =>
 // some coverage also passes the opaque fallback, whose painted luminance lies
 // inside the same interval.
 const raw = (r: Resolved, opacity: number) =>
-  bound(r.surfaceColor, r.textLum, r.solid ? r.surfaceColor.alpha : opacity * r.surfaceColor.alpha, 0, 1, r.solid ? 0 : r.backdrop.sheen, r.plate * r.surfaceColor.alpha)
+  bound(r.surfaceColor, r.textLum, r.solid ? r.surfaceColor.alpha : opacity * r.surfaceColor.alpha, 0, 1, r.solid ? 0 : r.backdrop.sheen)
 // Translucent text takes on the backdrop too; it is never bounded.
 const opaqueText = (r: Resolved) => r.textColor.alpha >= 1
 
@@ -456,8 +445,7 @@ export type GlassSceneRange = { low: number; high: number }
 /**
  * The worst ratio of the preset's glass text pairs in one mode, over a scene whose
  * channels stay inside range. The scene enters the backdrop filter in place of the
- * 0 to 1 range glassBackdrop assumes. The text is rated without its outline plate,
- * which reads on any scene. Translucent text and text whose luminance falls
+ * 0 to 1 range glassBackdrop assumes. Translucent text and text whose luminance falls
  * inside the painted surface's range rate 1, since some pixel of the scene matches them.
  */
 export function glassContrastOnScene(
@@ -470,9 +458,7 @@ export function glassContrastOnScene(
   const ratios = resolve(data, glassContrastPairs, range)
     .filter((r) => r.mode === mode)
     .map((r) => {
-      // Rated without the outline plate: the plate reads on any scene, so with it
-      // every scene would rate the same.
-      const painted = filtered({ ...r, plate: 0 }, opacity)
+      const painted = filtered(r, opacity)
       return !opaqueText(r) || painted.inside ? 1 : Math.min(painted.overDarkest, painted.overBrightest)
     })
   return round(Math.min(...ratios))

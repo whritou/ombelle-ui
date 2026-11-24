@@ -1,6 +1,6 @@
 # Spinner
 
-Spinner is a busy indicator: an SVG ring with a turning arc. It is available in all five families in light and dark mode, in one template for both editions, with no client boundary.
+Spinner is a busy indicator: an SVG ring with a turning arc. It is available in all eight families in light and dark mode, in one template for both editions, with no client boundary.
 
 This component requires CLI **0.7.3** or later: `npx @ombelle-ui/cli@0.7.3 add spinner`. For a built local checkout:
 
@@ -42,6 +42,6 @@ The recipe editor sets `size` and the accessible label (default "Loading"). Comp
 
 ## Liquid glass
 
-Liquid glass is experimental for Spinner, as for every glass component, and its findings do not block a release. See [liquid glass](liquid-glass.md).
+Liquid glass is supported for Spinner without an accessibility guarantee, as for every glass component; only its contrast findings, which depend on the backdrop, are advisory in the specimen audit. See [liquid glass](liquid-glass.md).
 
 See [display components evidence](../evidence/display-components.md) for the board comparison and the specimen audit.

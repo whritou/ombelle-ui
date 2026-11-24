@@ -1,6 +1,7 @@
 'use client'
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 import { Table, TableCaption, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table'
 import { useGate } from './shared'
 
@@ -9,6 +10,9 @@ export function Specimen() {
   return (
     <section aria-label="Projects table" data-component="table">
       <h2>Projects table</h2>
+      {/* The table is wider than a narrow gallery frame. In a Scroll Area the frame scrolls it sideways,
+          and the area is a keyboard stop only while it overflows; the Table's own container is not one. */}
+      <ScrollArea aria-label="Projects">
       <Table>
         <TableCaption>4 of 12 projects · 1 selected</TableCaption>
         <TableHeader>
@@ -60,6 +64,8 @@ export function Specimen() {
           ))}
         </TableBody>
       </Table>
+      <ScrollBar orientation="horizontal" />
+      </ScrollArea>
       <div className="preset-variant"><Table density="compact" striped><TableCaption>Compact project list</TableCaption><TableHeader><TableRow><TableHead>Project</TableHead><TableHead>Status</TableHead></TableRow></TableHeader><TableBody><TableRow><TableCell>Website</TableCell><TableCell>Active</TableCell></TableRow><TableRow><TableCell>Mobile</TableCell><TableCell>Review</TableCell></TableRow><TableRow selected><TableCell>Billing</TableCell><TableCell>Selected</TableCell></TableRow></TableBody></Table></div>
     </section>
   )

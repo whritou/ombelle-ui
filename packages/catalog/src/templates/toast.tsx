@@ -4,6 +4,19 @@ import * as ToastPrimitive from '@radix-ui/react-toast'
 import { cn } from './utils.js'
 import './toast.css'
 
+/**
+ * The component an element renders. Parts written in a Server Component, such as a Next.js
+ * App Router page, reach this client file as lazy client references rather than as the
+ * components, so `element.type` is resolved before it is compared.
+ */
+function partType(element: React.ReactElement): unknown {
+  const type = element.type as unknown as { $$typeof?: symbol; _init?: (payload: unknown) => unknown; _payload?: unknown } | null
+  if (typeof type === 'object' && type !== null && type.$$typeof === Symbol.for('react.lazy') && typeof type._init === 'function') {
+    try { return type._init(type._payload) } catch { return undefined }
+  }
+  return element.type
+}
+
 export type ToastVariant = 'default' | 'success' | 'warning' | 'info' | 'destructive'
 
 /**
@@ -31,7 +44,7 @@ export type ToastViewportProps = React.ComponentProps<typeof ToastPrimitive.View
   stack?: boolean
 }
 export function ToastViewport({ className, stack, ...props }: ToastViewportProps) {
-  return <ToastPrimitive.Viewport data-slot="toast-viewport" data-stack={stack ? '' : undefined} label="Notifications ({hotkey})" className={cn(className)} {...props} />
+  return <ToastPrimitive.Viewport data-stack={stack ? '' : undefined} label="Notifications ({hotkey})" className={cn(className)} {...props} data-slot="toast-viewport" />
 }
 
 const textOf = (node: React.ReactNode): string =>
@@ -43,9 +56,9 @@ function readContent(children: React.ReactNode) {
   const content = { title: '', description: '', action: false }
   React.Children.forEach(children, child => {
     if (!React.isValidElement<{ children?: React.ReactNode }>(child)) return
-    if (child.type === ToastTitle) content.title += textOf(child.props.children)
-    else if (child.type === ToastDescription) content.description += textOf(child.props.children)
-    else if (child.type === ToastAction) content.action = true
+    if (partType(child) === ToastTitle) content.title += textOf(child.props.children)
+    else if (partType(child) === ToastDescription) content.description += textOf(child.props.children)
+    else if (partType(child) === ToastAction) content.action = true
   })
   return content
 }
@@ -53,23 +66,24 @@ function readContent(children: React.ReactNode) {
 export type ToastProps = React.ComponentProps<typeof ToastPrimitive.Root> & { variant?: ToastVariant }
 export function Toast({ className, children, variant = 'default', duration, ...props }: ToastProps) {
   const provided = React.useContext(ProviderDuration)
-  return <ToastPrimitive.Root data-slot="toast" data-variant={variant} className={cn(className)}
-    duration={toastDuration(readContent(children), duration ?? provided)} {...props}>
+  return <ToastPrimitive.Root data-variant={variant} className={cn(className)}
+    duration={toastDuration(readContent(children), duration ?? provided)} {...props}
+ data-slot="toast">
     <div data-slot="toast-content">{children}</div>
   </ToastPrimitive.Root>
 }
 export function ToastTitle({ className, ...props }: React.ComponentProps<typeof ToastPrimitive.Title>) {
-  return <ToastPrimitive.Title data-slot="toast-title" className={cn(className)} {...props} />
+  return <ToastPrimitive.Title className={cn(className)} {...props} data-slot="toast-title" />
 }
 export function ToastDescription({ className, ...props }: React.ComponentProps<typeof ToastPrimitive.Description>) {
-  return <ToastPrimitive.Description data-slot="toast-description" className={cn(className)} {...props} />
+  return <ToastPrimitive.Description className={cn(className)} {...props} data-slot="toast-description" />
 }
 /** altText explains the action in the screen reader announcement. */
 export function ToastAction({ className, ...props }: React.ComponentProps<typeof ToastPrimitive.Action>) {
-  return <ToastPrimitive.Action data-slot="toast-action" className={cn(className)} {...props} />
+  return <ToastPrimitive.Action className={cn(className)} {...props} data-slot="toast-action" />
 }
 export function ToastClose({ className, children, ...props }: React.ComponentProps<typeof ToastPrimitive.Close>) {
-  return <ToastPrimitive.Close data-slot="toast-close" aria-label="Dismiss notification" className={cn(className)} {...props}>
+  return <ToastPrimitive.Close aria-label="Dismiss notification" className={cn(className)} {...props} data-slot="toast-close">
     {children ?? <span aria-hidden="true">×</span>}
   </ToastPrimitive.Close>
 }

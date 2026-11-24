@@ -17,7 +17,7 @@
 - Run `pnpm typecheck` for TypeScript checks, `pnpm test:unit` for package tests, and `pnpm test:integration` for CLI, manager, and consumer integration tests.
 - For focused tests, use `pnpm exec vitest run <test-file>`. When a test imports package `dist` output, build packages first.
 - `pnpm test:specimen-audit` measures every catalog specimen in all families, editions and modes (focus, clipping, overflow, label spacing, target size, forced colors, axe). Run `pnpm build:packages` and `pnpm generate:preview` first. `pnpm build:packages` also fails on catalog style rules that name no slot or marker.
-- `pnpm check:foundation` is the complete evidence gate. It needs registry access and the documented npm, Yarn, Bun, and browser toolchain, and it builds 40 standalone consumers. Consult the README before running it; CI uses bundled Chromium.
+- `pnpm check:foundation` is the complete evidence gate. It needs registry access and the documented npm, Yarn, Bun, and browser toolchain, and it builds 54 standalone consumers. Consult the README before running it; CI uses bundled Chromium.
 - For preview work, run `pnpm build:packages`, `pnpm generate:preview`, then `pnpm dev:preview`.
 
 ## Source and generated files
@@ -33,7 +33,7 @@
 - Keep planning separate from applying file changes. Preserve dry-run behavior and the transaction safeguards for conflicts, stale plans, and recovery.
 - `--yes` accepts a safe plan; it does not bypass schema, compatibility, or modified-file conflicts. Dependency installs disable lifecycle scripts.
 - Keep component-scoped recipes and styles isolated from saved global project defaults and existing component source unless the documented contract explicitly says otherwise.
-- The private local CLI supports `init`, `add`, `theme add`, and local Button `add --recipe`. Check current documentation before assuming proposed public flags or remote registry behavior are implemented.
+- The CLI implements exactly the commands, flags and outputs in `docs/05-cli-specification.md` (`init`, `add`, `update`, `preset apply`, `theme add`, `preset show`, `info`, `doctor`, `diff`). Keep that document and the code in step when either changes.
 - Keep verification claims tied to the recorded environment and evidence. The consumer matrix separates browser-tested npm/pnpm apps from Yarn/Bun build and audit checks.
 
 ## Git naming

@@ -1,4 +1,4 @@
-import { defaultGlassPresetId, getCatalog, resolveRecipePreset, styleFamilyFonts, type StartingPresetId } from '@ombelle/catalog'
+import { defaultGlassPresetId, getCatalogPresets, resolveRecipePreset, styleFamilyFonts, type StartingPresetId } from '@ombelle/catalog/presets'
 import { componentRecipeFields, defaultRecipeFields, validateComponentRecipe, type ComponentRecipe, type StyleFamily } from '@ombelle/contracts'
 import { defaultSiteFamily } from '../snapshots/install-command'
 
@@ -9,7 +9,7 @@ export function catalogDraftKey(component: ComponentRecipe['component']): string
 }
 
 export function catalogPresetRef(family: StyleFamily, presetId: StartingPresetId = defaultGlassPresetId): ComponentRecipe['presetRef'] {
-  const catalog = getCatalog('0.1.0')
+  const catalog = getCatalogPresets('0.1.0')
   const { id, revision, catalogRelease, compilerVersion } = family === 'liquid-glass'
     ? catalog.startingPresets[presetId] : catalog.presets[family]
   return { id, revision, catalogRelease, compilerVersion }

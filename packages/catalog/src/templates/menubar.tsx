@@ -8,7 +8,7 @@ import './menubar.css'
 
 /** A row of menus such as File, Edit and View: one Tab stop, arrow keys between menus, and Left or Right open the next menu while one is open. */
 export function Menubar({ className, ...props }: React.ComponentProps<typeof MenubarPrimitive.Root>) {
-  return <MenubarPrimitive.Root data-slot="menubar" className={cn(className)} {...props} />
+  return <MenubarPrimitive.Root className={cn(className)} {...props} data-slot="menubar" />
 }
 
 export type MenubarMenuProps = React.ComponentProps<
@@ -16,14 +16,14 @@ export type MenubarMenuProps = React.ComponentProps<
 >
 
 export function MenubarMenu({ ...props }: MenubarMenuProps) {
-  return <MenubarPrimitive.Menu data-slot="menubar-menu" {...props} />
+  return <MenubarPrimitive.Menu {...props} data-slot="menubar-menu" />
 }
 
 export function MenubarPortal({
   ...props
 }: React.ComponentProps<typeof MenubarPrimitive.Portal>) {
   return (
-    <MenubarPrimitive.Portal data-slot="menubar-portal" {...props} />
+    <MenubarPrimitive.Portal {...props} data-slot="menubar-portal" />
   )
 }
 
@@ -32,8 +32,8 @@ export function MenubarTrigger({
 }: React.ComponentProps<typeof MenubarPrimitive.Trigger>) {
   return (
     <MenubarPrimitive.Trigger
-      data-slot="menubar-trigger"
       {...props}
+      data-slot="menubar-trigger"
     />
   )
 }
@@ -47,11 +47,11 @@ export function MenubarContent({
   return (
     <MenubarPrimitive.Portal>
       <MenubarPrimitive.Content
-        data-slot="menubar-content"
         sideOffset={sideOffset}
         align={align}
         className={cn(className)}
         {...props}
+        data-slot="menubar-content"
       />
     </MenubarPrimitive.Portal>
   )
@@ -61,7 +61,7 @@ export function MenubarGroup({
   ...props
 }: React.ComponentProps<typeof MenubarPrimitive.Group>) {
   return (
-    <MenubarPrimitive.Group data-slot="menubar-group" {...props} />
+    <MenubarPrimitive.Group {...props} data-slot="menubar-group" />
   )
 }
 
@@ -74,10 +74,10 @@ export function MenubarLabel({
 }) {
   return (
     <MenubarPrimitive.Label
-      data-slot="menubar-label"
       data-inset={inset ? '' : undefined}
       className={cn(className)}
       {...props}
+      data-slot="menubar-label"
     />
   )
 }
@@ -93,11 +93,11 @@ export function MenubarItem({
 }) {
   return (
     <MenubarPrimitive.Item
-      data-slot="menubar-item"
       data-inset={inset ? '' : undefined}
       data-variant={variant}
       className={cn(className)}
       {...props}
+      data-slot="menubar-item"
     />
   )
 }
@@ -109,9 +109,9 @@ export function MenubarCheckboxItem({
 }: React.ComponentProps<typeof MenubarPrimitive.CheckboxItem>) {
   return (
     <MenubarPrimitive.CheckboxItem
-      data-slot="menubar-checkbox-item"
       className={cn(className)}
       {...props}
+      data-slot="menubar-checkbox-item"
     >
       <span data-slot="menubar-item-indicator">
         <MenubarPrimitive.ItemIndicator>
@@ -128,8 +128,8 @@ export function MenubarRadioGroup({
 }: React.ComponentProps<typeof MenubarPrimitive.RadioGroup>) {
   return (
     <MenubarPrimitive.RadioGroup
-      data-slot="menubar-radio-group"
       {...props}
+      data-slot="menubar-radio-group"
     />
   )
 }
@@ -141,9 +141,9 @@ export function MenubarRadioItem({
 }: React.ComponentProps<typeof MenubarPrimitive.RadioItem>) {
   return (
     <MenubarPrimitive.RadioItem
-      data-slot="menubar-radio-item"
       className={cn(className)}
       {...props}
+      data-slot="menubar-radio-item"
     >
       <span data-slot="menubar-item-indicator">
         <MenubarPrimitive.ItemIndicator>
@@ -161,9 +161,9 @@ export function MenubarSeparator({
 }: React.ComponentProps<typeof MenubarPrimitive.Separator>) {
   return (
     <MenubarPrimitive.Separator
-      data-slot="menubar-separator"
       className={cn(className)}
       {...props}
+      data-slot="menubar-separator"
     />
   )
 }
@@ -174,9 +174,9 @@ export function MenubarShortcut({
 }: React.ComponentProps<'span'>) {
   return (
     <span
-      data-slot="menubar-shortcut"
       className={cn(className)}
       {...props}
+      data-slot="menubar-shortcut"
     />
   )
 }
@@ -184,7 +184,7 @@ export function MenubarShortcut({
 export function MenubarSub({
   ...props
 }: React.ComponentProps<typeof MenubarPrimitive.Sub>) {
-  return <MenubarPrimitive.Sub data-slot="menubar-sub" {...props} />
+  return <MenubarPrimitive.Sub {...props} data-slot="menubar-sub" />
 }
 
 export function MenubarSubTrigger({
@@ -197,10 +197,10 @@ export function MenubarSubTrigger({
 }) {
   return (
     <MenubarPrimitive.SubTrigger
-      data-slot="menubar-sub-trigger"
       data-inset={inset ? '' : undefined}
       className={cn(className)}
       {...props}
+      data-slot="menubar-sub-trigger"
     >
       {children}
       <ChevronRightIcon data-slot="menubar-sub-icon" aria-hidden="true" />
@@ -215,9 +215,9 @@ export function MenubarSubContent({
   return (
     <MenubarPrimitive.Portal>
       <MenubarPrimitive.SubContent
-        data-slot="menubar-sub-content"
         className={cn(className)}
         {...props}
+        data-slot="menubar-sub-content"
       />
     </MenubarPrimitive.Portal>
   )

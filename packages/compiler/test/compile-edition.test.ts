@@ -97,3 +97,23 @@ it('compiles the Base UI Button with project imports and Base UI dependencies', 
   expect(names).toContain('@base-ui/react')
   expect(names.filter((n) => n.startsWith('@radix-ui/'))).toEqual([])
 })
+
+it.each(['radix', 'base'] as const)('gives the %s buttonVariants helper the preset Button defaults and the beside slot', async (edition) => {
+  const preset = structuredClone(catalog.presets.flat)
+  preset.componentDefaults = { ...preset.componentDefaults, button: { variant: 'outline', size: 'sm' } }
+  const compileButton = (prefixed: boolean) =>
+    compile({
+      preset,
+      componentIds: ['button'],
+      catalogRelease: '0.1.0',
+      compilerVersion: '0.1.0',
+      edition,
+      ...(prefixed ? { prefixedComponents: ['button' as const] } : {}),
+    }).then((result) => result.artifacts.find((a) => a.logicalPath === 'components/ui/button.tsx')!.content)
+  const button = await compileButton(false)
+  expect(button).toMatch(/export function buttonVariants\(\{\s*variant = 'outline',\s*size = 'sm',/)
+  expect(button).not.toContain("= 'default'")
+  const beside = await compileButton(true)
+  expect(beside).toContain('<span data-slot="ombelle-button" />')
+  expect(beside).toMatch(/'data-slot': buttonSlot/)
+})

@@ -24,7 +24,7 @@ describe('Color Picker', () => {
       dependencies: [{ name: 'react', version: '19.3.1' }, { name: '@radix-ui/react-popover', version: '1.3.1' }, { name: '@radix-ui/react-slider', version: '1.6.1' },
         { name: 'clsx', version: '2.1.1' }, { name: 'tailwind-merge', version: '3.7.0' }, { name: 'lucide-react', version: '1.55.0' }],
       selectors: ["[data-slot='color-picker-trigger']", "[data-slot='color-picker-content']", "[data-slot='color-picker-area-thumb']", "[data-slot='color-picker-hue-thumb']"],
-      glass: 'experimental' })
+      glass: 'stable' })
     expect(getTemplate(getCatalog('0.1.0'), 'color-picker', 'base').dependencies.map(d => d.name).sort())
       .toEqual(['@base-ui/react', 'clsx', 'lucide-react', 'react', 'tailwind-merge'])
   })

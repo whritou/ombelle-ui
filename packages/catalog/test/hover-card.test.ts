@@ -13,7 +13,7 @@ describe('Hover Card', () => {
     expectComponentContract('hover-card', { client: true, parts: ['HoverCard', 'HoverCardTrigger', 'HoverCardContent', 'HoverCardArrow'],
       slots: ['hover-card', 'hover-card-trigger', 'hover-card-content', 'hover-card-arrow'],
       dependencies: [{ name: 'react', version: '19.3.1' }, { name: '@radix-ui/react-hover-card', version: '1.2.1' }, { name: 'clsx', version: '2.1.1' }, { name: 'tailwind-merge', version: '3.7.0' }],
-      selectors: ["[data-slot='hover-card-trigger']", "[data-slot='hover-card-content']", "[data-slot='hover-card-arrow']"], glass: 'experimental' })
+      selectors: ["[data-slot='hover-card-trigger']", "[data-slot='hover-card-content']", "[data-slot='hover-card-arrow']"], glass: 'stable' })
     const baseDependencies = getTemplate(getCatalog('0.1.0'), 'hover-card', 'base').dependencies.map(d => d.name)
     expect(baseDependencies).toContain('@base-ui/react')
     expect(baseDependencies.some(name => name.startsWith('@radix-ui/'))).toBe(false)

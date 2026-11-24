@@ -7,7 +7,7 @@ import {
   type PackageManager,
   type BunLockfile,
 } from '@ombelle/contracts'
-import { resolveBunExecutable, resolveNodeExecutable } from './executable.js'
+import { resolveBunExecutable, resolveNodeExecutable, resolveRuntime, runtimeNotice } from './executable.js'
 import { prepareBun, bunAddArgs, assertBunOwnership, assertBunInstalled } from './bun.js'
 
 export type PreparedManager = {
@@ -16,12 +16,25 @@ export type PreparedManager = {
   version?: string
 }
 
+/**
+ * The optional dependency-install limit, from OMBELLE_DEPENDENCY_TIMEOUT_SECONDS. Unset or 0 means no
+ * limit. Invalid values are refused rather than silently replaced.
+ */
+export function dependencyTimeoutMs(env: Record<string, string | undefined>): number {
+  const value = env.OMBELLE_DEPENDENCY_TIMEOUT_SECONDS
+  if (value === undefined || value === '') return 0
+  if (!/^\d{1,6}$/.test(value))
+    throw new FoundationError('INVALID_DATA', 'OMBELLE_DEPENDENCY_TIMEOUT_SECONDS must be a whole number of seconds', 'OMBELLE_DEPENDENCY_TIMEOUT_SECONDS')
+  return Number(value) * 1000
+}
+
 export async function runDependencies(
   root: string,
   deps: Dependency[],
   manager: PackageManager = 'pnpm',
   prepared?: PreparedManager,
   bunLockfile?: BunLockfile,
+  signal?: AbortSignal,
 ): Promise<void> {
   if (!deps.length) return
   for (const d of deps)
@@ -68,7 +81,9 @@ export async function runDependencies(
             : []),
           ...deps.map((d) => d.name + '@' + d.version),
         ]
+  const timeoutMs = dependencyTimeoutMs(process.env)
   await new Promise<void>((resolve, reject) => {
+    let timedOut = false
     const child = spawn(
       script,
       [...resolved.prefixArgs, ...args],
@@ -77,30 +92,45 @@ export async function runDependencies(
         shell: false,
         windowsHide: true,
         stdio: ['ignore', 'pipe', 'pipe'],
-        timeout: 120000,
+        ...(signal ? { signal } : {}),
         env: { ...process.env, CI: 'true' },
       },
     )
-    let tail = ''
+    // No fixed limit by default (CLI-08): a slow cold install is not a failure, and Ctrl-C rolls back.
+    const timer = timeoutMs
+      ? setTimeout(() => { timedOut = true; child.kill() }, timeoutMs)
+      : undefined
+    // Peer-dependency reports start well before the end of the output; keep enough to read them.
+    let output = ''
     const collect = (chunk: Buffer) => {
-      tail = (tail + chunk.toString()).slice(-2000)
+      output = (output + chunk.toString()).slice(-64000)
     }
     child.stdout.on('data', collect)
     child.stderr.on('data', collect)
-    child.once('error', (e) =>
-      reject(new FoundationError('DEPENDENCY_FAILURE', e.message, root)),
-    )
-    child.once('exit', (code) =>
-      code === 0
-        ? resolve()
-        : reject(
-            new FoundationError(
-              'DEPENDENCY_FAILURE',
-              manager + ' installation failed: ' + tail,
-              root,
-            ),
+    child.once('error', (e) => {
+      // An abort also kills the child; report it once the child has exited.
+      if (signal?.aborted) return
+      clearTimeout(timer)
+      reject(new FoundationError('DEPENDENCY_FAILURE', e.message, root))
+    })
+    child.once('exit', async (code) => {
+      clearTimeout(timer)
+      if (code === 0) return resolve()
+      const tail = output.slice(-2000)
+      const peer = signal?.aborted || timedOut ? undefined : peerConflict(output)
+      if (peer) return reject(await peerConflictError(root, manager, peer))
+      reject(
+          new FoundationError(
+            'DEPENDENCY_FAILURE',
+            signal?.aborted
+              ? manager + ' installation was interrupted'
+              : timedOut
+              ? `${manager} installation did not finish within ${timeoutMs / 1000} s (OMBELLE_DEPENDENCY_TIMEOUT_SECONDS)`
+              : manager + ' installation failed: ' + tail,
+            root,
           ),
-    )
+        )
+    })
   })
   if (manager === 'bun') {
     await assertBunOwnership(root,bunLockfile ?? 'bun.lock')
@@ -116,8 +146,11 @@ export async function prepareManager(
 ): Promise<PreparedManager> {
   if (manager === 'bun') return prepareBun(root,await resolveBunExecutable(),bunLockfile ?? 'bun.lock',deps)
   const launcher = await resolveManager(manager)
-  const executable = await resolveNodeExecutable()
-  const prepared = { executable, prefixArgs: [launcher.entry, ...launcher.prefixArgs] }
+  // pnpm's standalone installer ships a native binary, which runs without Node (INS-04).
+  const executable = launcher.native ? launcher.entry : await resolveNodeExecutable()
+  const prepared = launcher.native
+    ? { executable, prefixArgs: launcher.prefixArgs }
+    : { executable, prefixArgs: [launcher.entry, ...launcher.prefixArgs] }
   if (manager !== 'yarn') return prepared
   const result = await executeScript(
     executable,
@@ -165,7 +198,22 @@ function executeScript(
   })
 }
 
-type ManagerLauncher = { entry: string; prefixArgs: string[] }
+/**
+ * Resolves the manager launcher and the runtime an install would use, running nothing but the runtime's
+ * `--version`. A dry run calls it to report an install that could not start.
+ */
+export async function checkInstallRuntime(manager: PackageManager): Promise<string[]> {
+  if (manager === 'bun') {
+    const bun = await resolveRuntime('bun')
+    return [runtimeNotice('bun', bun.version)].filter((notice): notice is string => notice !== undefined)
+  }
+  const launcher = await resolveManager(manager)
+  if (launcher.native) return []
+  const node = await resolveRuntime('node')
+  return [runtimeNotice('node', node.version)].filter((notice): notice is string => notice !== undefined)
+}
+
+type ManagerLauncher = { entry: string; prefixArgs: string[]; native?: boolean }
 
 export async function managerEntry(manager: PackageManager): Promise<string> {
   if (manager === 'bun') return resolveBunExecutable()
@@ -189,6 +237,10 @@ async function resolveManager(manager: PackageManager): Promise<ManagerLauncher>
     await fs.access(inherited)
     return { entry: inherited, prefixArgs: [] }
   }
+  // `pnpm dlx` and `yarn dlx` set no npm_execpath, but name themselves in the user agent. When corepack
+  // launched them, the matching release sits in corepack's cache (INS-04).
+  const cached = await corepackEntry(manager, process.env)
+  if (cached) return { entry: cached, prefixArgs: [] }
   for (const directory of (process.env.PATH ?? process.env.Path ?? '').split(
     path.delimiter,
   )) {
@@ -196,13 +248,15 @@ async function resolveManager(manager: PackageManager): Promise<ManagerLauncher>
       manager === 'npm'
         ? ['npm-cli.js', 'npm.cmd', 'npm']
         : manager === 'pnpm'
-          ? ['pnpm.cjs', 'pnpm.mjs', 'pnpm.js', 'pnpm.cmd', 'pnpm']
+          ? ['pnpm.cjs', 'pnpm.mjs', 'pnpm.js', 'pnpm.cmd', 'pnpm', ...(process.platform === 'win32' ? ['pnpm.exe'] : [])]
           : ['yarn.cjs', 'yarn.mjs', 'yarn.js', 'yarn.cmd', 'yarn']
     for (const name of names) {
       try {
         const real = await fs.realpath(path.join(directory, name))
         if (entryPattern.test(path.basename(real)))
           return { entry: real, prefixArgs: [] }
+        if (manager === 'pnpm' && (name === 'pnpm' || name === 'pnpm.exe') && (await isNativeExecutable(real)))
+          return { entry: real, prefixArgs: [], native: true }
         if (manager === 'npm' && name === 'npm.cmd') {
           const target = path.join(
             path.dirname(real),
@@ -252,6 +306,20 @@ async function resolveManager(manager: PackageManager): Promise<ManagerLauncher>
           }
         } else if (source.startsWith('#!/usr/bin/env node'))
           return { entry: real, prefixArgs: [] }
+        else if (source.startsWith('#!/bin/sh')) {
+          // pnpm 11 `self-update` and `pnpm setup` write POSIX cmd-shims that
+          // record their target on a trailing comment; read it, never run it.
+          const match = /^# cmd-shim-target=(.+)$/m.exec(source)
+          const target = match?.[1].trim()
+          if (
+            target &&
+            path.isAbsolute(target) &&
+            entryPattern.test(path.basename(target))
+          ) {
+            await fs.access(target)
+            return { entry: target, prefixArgs: [] }
+          }
+        }
       } catch (e) {
         if (
           !['ENOENT', 'ENOTDIR', 'EISDIR'].includes(
@@ -266,8 +334,55 @@ async function resolveManager(manager: PackageManager): Promise<ManagerLauncher>
     'UNSUPPORTED_PROJECT',
     'Cannot locate a ' + manager + ' JavaScript entry without shell evaluation',
     undefined,
-    'Install ' + manager + ' and add its launcher to PATH.',
+    'Install ' + manager + ' and add its launcher to PATH' +
+      (manager === 'yarn' ? ', or set OMBELLE_YARN_ENTRY to its JavaScript launcher.' : '.'),
   )
+}
+
+/** The corepack cache root: COREPACK_HOME, else corepack's per-platform default. */
+export function corepackHome(env: NodeJS.ProcessEnv): string | undefined {
+  if (env.COREPACK_HOME) return env.COREPACK_HOME
+  if (process.platform === 'win32')
+    return env.LOCALAPPDATA ? path.join(env.LOCALAPPDATA, 'node', 'corepack') : undefined
+  const cache = env.XDG_CACHE_HOME || (env.HOME ? path.join(env.HOME, '.cache') : undefined)
+  return cache ? path.join(cache, 'node', 'corepack') : undefined
+}
+
+/** The JavaScript entry of the manager release the user agent names, from corepack's cache. */
+export async function corepackEntry(
+  manager: PackageManager,
+  env: NodeJS.ProcessEnv,
+): Promise<string | undefined> {
+  if (manager !== 'pnpm' && manager !== 'yarn') return undefined
+  const agent = /^(pnpm|yarn)\/(\d+\.\d+\.\d+(?:-[\w.]+)?)(?:\s|$)/.exec(env.npm_config_user_agent ?? '')
+  const home = corepackHome(env)
+  if (!agent || agent[1] !== manager || !home) return undefined
+  const release = path.join(home, 'v1', manager, agent[2])
+  const candidates = manager === 'pnpm'
+    ? ['bin/pnpm.cjs', 'bin/pnpm.mjs']
+    : ['yarn.js', 'bin/yarn.js']
+  for (const candidate of candidates) {
+    const file = path.join(release, candidate)
+    try {
+      if ((await fs.stat(file)).isFile()) return file
+    } catch (e) {
+      if (!['ENOENT', 'ENOTDIR'].includes((e as NodeJS.ErrnoException).code ?? '')) throw e
+    }
+  }
+  return undefined
+}
+
+async function isNativeExecutable(file: string): Promise<boolean> {
+  const handle = await fs.open(file, 'r')
+  try {
+    const bytes = Buffer.alloc(4)
+    await handle.read(bytes, 0, 4, 0)
+    const magic = bytes.toString('hex')
+    return (bytes[0] === 0x4d && bytes[1] === 0x5a) || magic === '7f454c46' ||
+      ['cffaedfe', 'cefaedfe', 'feedfacf', 'feedface', 'cafebabe'].includes(magic)
+  } finally {
+    await handle.close()
+  }
 }
 
 function fromWindowsShim(directory: string, relative: string): string {
@@ -275,4 +390,46 @@ function fromWindowsShim(directory: string, relative: string): string {
     .replace(/^[/\\]+/, '')
     .replace(/[\\/]/g, path.sep)
   return path.resolve(directory, portable)
+}
+
+export type PeerConflict = { from?: string; peer: string; range?: string }
+/**
+ * A package manager that refused an install because of a peer dependency (npm ERESOLVE, pnpm
+ * ERR_PNPM_PEER_DEP_ISSUES, Yarn and Bun peer errors when they fail rather than warn): the package that
+ * declares the peer, the peer and its range, read from the manager's output.
+ */
+export function peerConflict(output: string): PeerConflict | undefined {
+  const text = output.replace(/\u001b\[[0-9;]*m/g, '')
+  if (!/ERESOLVE|ERR_PNPM_PEER_DEP_ISSUES|unmet peer|incorrect peer dependency|peer dependenc(?:y|ies)/i.test(text)) return undefined
+  // npm: peer react@"^18.0.0" from @radix-ui/react-dialog@1.2.3
+  const npm = /peer (@?[^@\s"]+)@"([^"]+)" from (@?[^@\s]+)@/.exec(text)
+  if (npm) return { peer: npm[1]!, range: npm[2]!, from: npm[3]! }
+  // pnpm: ┬ @radix-ui/react-dialog 1.2.3 … ✕ unmet peer react@"^18.0.0": found 20.0.0
+  const pnpm = /(@?[a-z0-9][\w./-]*) \d+\.\d+\.\d+\S*[\s\S]{0,200}?unmet peer (@?[^@\s"]+)@(?:"([^"]+)"|([^\s:]+))/i.exec(text)
+  if (pnpm) return { from: pnpm[1]!, peer: pnpm[2]!, range: (pnpm[3] ?? pnpm[4])! }
+  // Yarn and Bun: "<pkg> has (an) unmet/incorrect peer dependency <peer>@<range>"
+  const other = /(@?[a-z0-9][\w./-]*)(?:@\S+)? (?:has|provides) (?:an? )?(?:unmet|incorrect) peer dependency "?(@?[^@\s"]+)@([^"\s]+)/i.exec(text)
+  if (other) return { from: other[1]!, peer: other[2]!, range: other[3]! }
+  return /ERESOLVE|ERR_PNPM_PEER_DEP_ISSUES/.test(text) ? { peer: 'react' } : undefined
+}
+async function peerConflictError(root: string, manager: PackageManager, conflict: PeerConflict): Promise<FoundationError> {
+  let declared: string | undefined
+  try {
+    const pkg = JSON.parse(await fs.readFile(path.join(root, 'package.json'), 'utf8'))
+    declared = pkg.dependencies?.[conflict.peer] ?? pkg.devDependencies?.[conflict.peer]
+  } catch { declared = undefined }
+  const error = new FoundationError(
+    'DEPENDENCY_FAILURE',
+    manager + ' refused the install because of a peer dependency: ' +
+      (conflict.from ? conflict.from + ' declares ' : 'a component dependency declares ') +
+      'peer ' + conflict.peer + (conflict.range ? '@"' + conflict.range + '"' : '') +
+      ', and the project declares ' + conflict.peer + ' ' + (declared === undefined ? '(none)' : '"' + declared + '"') +
+      '. The source files of this plan were restored.',
+    root,
+    'Use React 19, which this release was tested with, or wait for ' + (conflict.from ?? 'the package') +
+      ' to declare support; to install anyway, allow the conflict in ' + manager +
+      (manager === 'npm' ? ' (legacy-peer-deps=true in .npmrc)' : manager === 'pnpm' ? ' (strict-peer-dependencies=false)' : '') +
+      ' and run the command again.',
+  )
+  return Object.assign(error, { peerConflict: conflict })
 }

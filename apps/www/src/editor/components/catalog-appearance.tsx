@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { RotateCcw } from 'lucide-react'
-import { resolveRecipePreset } from '@ombelle/catalog'
+import { resolveRecipePreset } from '@ombelle/catalog/presets'
 import {
   componentRecipePartFields, componentRecipeParts,
   type ComponentRecipe, type ComponentRecipeAppearance, type ComponentRecipePart,

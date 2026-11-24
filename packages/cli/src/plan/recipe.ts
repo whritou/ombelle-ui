@@ -6,10 +6,12 @@ import {
   type InstalledArtifact,
   type InstalledRecipe,
 } from '@ombelle/contracts'
+import { planDependencies } from './dependencies.js'
 import { canonicalize, resolvePreset, sha256 } from '@ombelle/compiler'
 import { assertEdition } from '../project/edition.js'
 import { getCatalog } from '@ombelle/catalog'
-import { fileChange } from './components.js'
+import { editedConflict, fileChange, managedOutcome, matchesRecord, refreshNotice } from './components.js'
+import { caseMismatch, caseMismatchMessage } from '../project/paths.js'
 import { transformRecipeArtifact } from '../project/recipe-transform.js'
 export async function planRecipe(
   context: ProjectContext,
@@ -103,20 +105,29 @@ export async function planRecipe(
         artifact.kind,
       ),
       record = lock.artifacts[target.path]
-    if (
-      change.beforeHash !== null &&
-      (!record ||
-        record.sha256 !== change.beforeHash ||
-        change.action === 'update')
-    ) {
+    const mismatch = change.action === 'create' ? await caseMismatch(context.root, target.path) : undefined
+    if (mismatch) {
+      change.action = 'conflict'
+      conflict(caseMismatchMessage(mismatch), target.path)
+    } else if (change.beforeHash !== null && !record) {
       change.action = 'conflict'
       conflict(
-        'Recipe or shared utility source requires an explicit migration',
+        target.path + ' exists and is not managed by Ombelle; move or rename it, then run the command again',
         target.path,
       )
+    } else if (record && change.beforeHash !== null && (!matchesRecord(change, record.sha256) || change.action === 'update')) {
+      // The same rule as ordinary components (PUB-01): refresh an unedited file, conflict on an edited one.
+      // A changed identity under the same revision is never refreshed; its own conflict explains why.
+      const unedited = managedOutcome(change, record.sha256) === 'refresh'
+      if (plan.diagnostics.some((d) => d.path === key)) change.action = 'conflict'
+      else if (unedited) plan.notices.push(refreshNotice(target.path))
+      else {
+        change.action = 'conflict'
+        plan.diagnostics.push(editedConflict(target.path, 'update'))
+      }
     }
     plan.changes.push(change)
-    const entry = {
+    const entry: InstalledArtifact = {
       logicalPath: artifact.logicalPath,
       kind: artifact.kind,
       sha256: await sha256(target.content),
@@ -141,16 +152,8 @@ export async function planRecipe(
       state.path,
     )
   plan.changes.push(state)
-  // Preserve the adapters' production-group rules, especially Bun's explicit group promotion requirement.
-  const installed =
-    context.manager === 'bun'
-      ? (context.packageJson.dependencies ?? {})
-      : {
-          ...context.packageJson.devDependencies,
-          ...context.packageJson.dependencies,
-        }
-  plan.dependencyPlan = result.dependencies.filter(
-    (d) => installed[d.name] !== d.version,
-  )
+  const dependencies = planDependencies(context, result.dependencies)
+  plan.dependencyPlan = dependencies.plan
+  plan.notices.push(...dependencies.notices)
   return plan
 }

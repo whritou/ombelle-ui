@@ -4,6 +4,19 @@ import { Popover as PopoverPrimitive } from '@base-ui/react/popover'
 import { cn } from './utils.js'
 import './popover.css'
 
+/**
+ * The component an element renders. Parts written in a Server Component, such as a Next.js
+ * App Router page, reach this client file as lazy client references rather than as the
+ * components, so `element.type` is resolved before it is compared.
+ */
+function partType(element: React.ReactElement): unknown {
+  const type = element.type as unknown as { $$typeof?: symbol; _init?: (payload: unknown) => unknown; _payload?: unknown } | null
+  if (typeof type === 'object' && type !== null && type.$$typeof === Symbol.for('react.lazy') && typeof type._init === 'function') {
+    try { return type._init(type._payload) } catch { return undefined }
+  }
+  return element.type
+}
+
 /** Base UI parts accept a className function; these components take a string. */
 type Part<T extends React.ElementType> = Omit<React.ComponentProps<T>, 'className'> & {
   className?: string
@@ -24,7 +37,7 @@ export function Popover({ ...props }: PopoverProps) {
   const [anchor, setAnchor] = React.useState<HTMLElement | null>(null)
   return (
     <AnchorContext.Provider value={{ anchor, setAnchor }}>
-      <PopoverPrimitive.Root data-slot="popover" {...props} />
+      <PopoverPrimitive.Root {...props} data-slot="popover" />
     </AnchorContext.Provider>
   )
 }
@@ -35,12 +48,12 @@ export function PopoverTrigger({
 }: Part<typeof PopoverPrimitive.Trigger>) {
   return (
     <PopoverPrimitive.Trigger
-      data-slot="popover-trigger"
       className={cn(className)}
       render={(triggerProps, state) => (
         <button {...triggerProps} data-state={openState(state.open)} />
       )}
       {...props}
+      data-slot="popover-trigger"
     />
   )
 }
@@ -48,7 +61,7 @@ export function PopoverTrigger({
 /** Positions the content against this element instead of the trigger. */
 export function PopoverAnchor({ ...props }: React.ComponentProps<'div'>) {
   const context = React.useContext(AnchorContext)
-  return <div data-slot="popover-anchor" ref={context?.setAnchor} {...props} />
+  return <div ref={context?.setAnchor} {...props} data-slot="popover-anchor" />
 }
 
 type PositionerProps = React.ComponentProps<typeof PopoverPrimitive.Positioner>
@@ -82,7 +95,6 @@ export function PopoverContent({
         {...(anchor ? { anchor } : {})}
       >
         <PopoverPrimitive.Popup
-          data-slot="popover-content"
           className={cn(className)}
           // The shared stylesheet reads Radix's available-size variables.
           style={{
@@ -99,6 +111,7 @@ export function PopoverContent({
             />
           )}
           {...props}
+          data-slot="popover-content"
         />
       </PopoverPrimitive.Positioner>
     </PopoverPrimitive.Portal>
@@ -134,7 +147,7 @@ export function PopoverDescription({
 const ARROW_WIDTH = 20
 const ARROW_HEIGHT = 10
 const hasArrow = (children: React.ReactNode): boolean =>
-  React.Children.toArray(children).some(child => React.isValidElement<{ children?: React.ReactNode }>(child) && (child.type === PopoverArrow || (child.type === React.Fragment && hasArrow(child.props.children))))
+  React.Children.toArray(children).some(child => React.isValidElement<{ children?: React.ReactNode }>(child) && (partType(child) === PopoverArrow || (child.type === React.Fragment && hasArrow(child.props.children))))
 // Base UI places the arrow along the edge; its distance from the content and its turn come from the side.
 // The shape points down, and its base overlaps the content's border.
 const overlap = 'calc(var(--border-width, 1px) - ' + ARROW_HEIGHT + 'px)'
@@ -150,7 +163,6 @@ const arrowPlacement: Record<string, React.CSSProperties> = {
 export function PopoverArrow({ className, ...props }: Omit<Part<typeof PopoverPrimitive.Arrow>, 'children'>) {
   return (
     <PopoverPrimitive.Arrow
-      data-slot="popover-arrow"
       aria-hidden="true"
       className={cn(className)}
       render={(arrowProps, state) => (
@@ -167,6 +179,7 @@ export function PopoverArrow({ className, ...props }: Omit<Part<typeof PopoverPr
         </svg>
       )}
       {...props}
+      data-slot="popover-arrow"
     />
   )
 }

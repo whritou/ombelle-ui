@@ -18,14 +18,14 @@ export const DialogClose = DialogPrimitive.Close
 
 /** Groups the title and description at the top of the dialog; families style it as one block. */
 export function DialogHeader({ className, ...props }: React.ComponentProps<'div'>) {
-  return <div data-slot="dialog-header" className={cn(className)} {...props} />
+  return <div className={cn(className)} {...props} data-slot="dialog-header" />
 }
 
 export function DialogTitle({
   className,
   ...props
 }: Part<typeof DialogPrimitive.Title>) {
-  return <DialogPrimitive.Title data-slot="dialog-title" className={cn(className)} {...props} />
+  return <DialogPrimitive.Title className={cn(className)} {...props} data-slot="dialog-title" />
 }
 
 export function DialogDescription({
@@ -33,7 +33,7 @@ export function DialogDescription({
   ...props
 }: Part<typeof DialogPrimitive.Description>) {
   return (
-    <DialogPrimitive.Description data-slot="dialog-description" className={cn(className)} {...props} />
+    <DialogPrimitive.Description className={cn(className)} {...props} data-slot="dialog-description" />
   )
 }
 
@@ -41,10 +41,13 @@ export function DialogContent({
   className,
   children,
   size,
+  closeLabel = 'Close',
   ...props
 }: Part<typeof DialogPrimitive.Popup> & {
   /** `sm` 24rem, `lg` 48rem, `fullscreen` the viewport less 1rem on each side; below 640px `lg` and `fullscreen` fill the screen. */
   size?: DialogSize
+  /** Names the built-in close button; default "Close". */
+  closeLabel?: string
 }) {
   return (
     <DialogPrimitive.Portal>
@@ -56,18 +59,18 @@ export function DialogContent({
         )}
       />
       <DialogPrimitive.Popup
-        data-slot="dialog-content"
         data-size={size === 'default' ? undefined : size}
         className={cn('fixed', className)}
         render={(popupProps, state) => (
           <div {...popupProps} data-state={openState(state.open)} />
         )}
         {...props}
+        data-slot="dialog-content"
       >
         {children}
         <DialogPrimitive.Close data-slot="dialog-close" type="button">
           <XIcon aria-hidden="true" />
-          <span className="sr-only">Close</span>
+          <span className="sr-only">{closeLabel}</span>
         </DialogPrimitive.Close>
       </DialogPrimitive.Popup>
     </DialogPrimitive.Portal>
@@ -129,5 +132,5 @@ export function DialogBody({ className, ref, ...props }: React.ComponentProps<'d
 
 /** A row of actions at the end of the dialog; it stays visible while the body scrolls. */
 export function DialogFooter({ className, ...props }: React.ComponentProps<'div'>) {
-  return <div data-slot="dialog-footer" className={cn(className)} {...props} />
+  return <div className={cn(className)} {...props} data-slot="dialog-footer" />
 }

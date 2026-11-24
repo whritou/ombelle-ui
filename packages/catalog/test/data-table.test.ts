@@ -30,7 +30,7 @@ describe('Data Table', () => {
       dependencies: [{ name: 'react', version: '19.3.1' }, { name: '@radix-ui/react-dropdown-menu', version: '2.2.1' }, { name: '@radix-ui/react-popover', version: '1.3.1' },
         { name: '@tanstack/react-table', version: '9.3.1' }, { name: 'clsx', version: '2.1.1' }, { name: 'tailwind-merge', version: '3.7.0' }, { name: 'lucide-react', version: '1.55.0' }],
       selectors: ["[data-slot='data-table-container']", "[data-slot='data-table-head']", "[data-slot='data-table-cell']", "[data-slot='data-table-menu']", "[data-slot='data-table-pagination']"],
-      glass: 'experimental' })
+      glass: 'stable' })
     // The parts generic over the row type.
     for (const part of ['DataTable', 'DataTableColumnHeader', 'DataTableFilter', 'DataTableViewOptions', 'DataTableFacetedFilter', 'DataTablePagination', 'selectColumn', 'actionsColumn', 'dataTableColumns'])
       expect(getTemplate(getCatalog('0.1.0'), 'data-table').content).toContain(`export function ${part}<TData extends RowData>(`)

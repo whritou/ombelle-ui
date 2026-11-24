@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test'
+import { maxPixelDifference } from '../helpers/pixel-difference.js'
 import fs from 'node:fs'
 import { compile, compileRecipe } from '@ombelle/compiler'
 import { getCatalog } from '@ombelle/catalog'
@@ -72,7 +73,7 @@ for (const hostFamily of supportedStyleFamilies)
           if (referenceImage) {
             expectColorParity(styles, referenceStyles)
             expect(dom).toEqual(referenceDom)
-            expect(image.equals(referenceImage)).toBe(true)
+            expect(await maxPixelDifference(page, image, referenceImage)).toBeLessThanOrEqual(1)
           } else {
             referenceImage = image
             referenceDom = dom

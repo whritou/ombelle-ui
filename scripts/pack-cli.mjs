@@ -14,6 +14,11 @@ function run(executable, args, cwd = repo) {
   if (result.status !== 0) throw new Error('Release build command failed: ' + result.stdout + result.stderr)
   return result.stdout
 }
+// `pnpm pack:cli -- --release` is the release mode: it refuses a dirty working tree and a version the registry
+// already holds. Without it the packer builds a candidate for local checks and records what it found in release.json.
+const releaseMode = process.argv.includes('--release')
+if (releaseMode && run('git', ['status', '--porcelain']).trim().length > 0)
+  throw new Error('Release packing refuses a dirty working tree: commit or stash your changes first')
 for (const script of ['sync-schema.mjs', 'sync-catalog.mjs', 'build.mjs'])
   run(process.execPath, ['scripts/' + script])
 const { publicCliPackageName } = await import('../packages/contracts/dist/index.js')
@@ -60,27 +65,37 @@ const catalog = JSON.parse(await fs.readFile(path.join(repo, 'packages/catalog/p
 const catalogRequire = createRequire(path.join(repo, 'packages/catalog/package.json'))
 for (const name of Object.keys(catalog.dependencies).filter(name => !name.startsWith('@ombelle/')))
   await collectPackage(catalogRequire.resolve(name))
+// Users receive the versions pinned in the catalog manifest, which can differ from the version the workspace resolves.
+const pins = Object.fromEntries([...(await fs.readFile(path.join(repo, 'packages/catalog/src/manifest.ts'), 'utf8')).matchAll(/^\s*'?([@\w./-]+)'?:\s*'(\d+\.\d+\.\d+)',?\s*\r?$/gm)].map(match => [match[1], match[2]]))
 const notices = []
 for (const [identity, { directory, manifest }] of [...packages].sort(([a], [b]) => a.localeCompare(b))) {
   const files = (await fs.readdir(directory, { withFileTypes: true }))
     .filter(entry => entry.isFile() && /license|notice|copying/i.test(entry.name)).map(entry => entry.name).sort()
   if (!files.length) throw new Error('Missing license text for ' + identity)
   const texts = await Promise.all(files.map(async name => `--- ${name} ---\n${await fs.readFile(path.join(directory, name), 'utf8')}`))
-  notices.push(`=== ${identity} (${typeof manifest.license === 'string' ? manifest.license : 'see license text'}) ===\n${texts.join('\n')}\n`)
+  const pinned = pins[manifest.name]
+  const license = typeof manifest.license === 'string' ? manifest.license : 'see license text'
+  const skew = pinned && pinned !== manifest.version ? `NOTE: projects that install this package receive version ${pinned} (pinned by the Ombelle catalog). The license text below is from version ${manifest.version}, the version the CLI was built against; the registry lists the same license (${license}) for both.
+` : ''
+  notices.push(`=== ${identity} (${typeof manifest.license === 'string' ? manifest.license : 'see license text'}) ===\n${skew}${texts.join('\n')}\n`)
 }
 await fs.copyFile(path.join(repo, 'LICENSE'), path.join(staging, 'LICENSE'))
 await fs.writeFile(path.join(staging, 'THIRD_PARTY_NOTICES.txt'), notices.join('\n'))
 const workspaceManifest = JSON.parse(await fs.readFile(path.join(repo, 'packages/cli/package.json'), 'utf8'))
 const manifest = {
   name: publicCliPackageName, version: workspaceManifest.version,
-  description: 'Guarded source installer for Ombelle presets and Button recipes',
+  description: 'Guarded installer for Ombelle UI: adds reviewed React components, presets and recipes to a Vite or Next.js project as source you own',
+  keywords: ['react', 'components', 'shadcn', 'tailwind', 'cli', 'ui'],
+  repository: { type: 'git', url: 'git+https://github.com/whritou/ombelle-ui.git', directory: 'packages/cli' },
+  homepage: 'https://ombelle-ui.vercel.app',
+  bugs: { url: 'https://github.com/whritou/ombelle-ui/issues' },
   type: 'module', license: 'MIT', bin: { ombelle: './dist/main.js' },
-  engines: { node: '>=24.19.0 <25' },
+  engines: { node: '>=24.19.0 <27' },
   files: ['dist', 'LICENSE', 'THIRD_PARTY_NOTICES.txt', 'README.md'],
   publishConfig: { access: 'public' },
 }
 await fs.writeFile(path.join(staging, 'package.json'), JSON.stringify(manifest, null, 2) + '\n')
-await fs.writeFile(path.join(staging, 'README.md'), '# Ombelle CLI\n\nInstall reviewed React source using local JSON or immutable publication codes. Review with --dry-run before applying with --yes. Recipes preserve saved project defaults. Node 24.19.0 or newer Node 24 is required.\n\nBare codes use https://ombelle-ui.vercel.app. Alternate origins require explicit content hashes. Offline pins cannot detect later withdrawals. See --help for supported inputs.\n')
+await fs.writeFile(path.join(staging, 'README.md'), '# Ombelle CLI\n\nInstall reviewed React source using local JSON or immutable publication codes. Review with --dry-run before applying with --yes. Recipes preserve saved project defaults. Node 24.19.0 or newer, below 27, is required (Node 24 and 26 LTS).\n\nBare codes use https://ombelle-ui.vercel.app. Alternate origins require explicit content hashes. Offline pins cannot detect later withdrawals. See --help for supported inputs.\n')
 await fs.chmod(path.join(staging, 'dist/main.js'), 0o755)
 
 const npmCandidates = [
@@ -95,6 +110,17 @@ for (const file of npmCandidates) {
 }
 if (!npm || run(process.execPath, [npm, '--version']).trim() !== '11.19.0')
   throw new Error('Release packing requires npm 11.19.0; put its bin on PATH or set OMBELLE_RELEASE_NPM_ENTRY to its npm-cli.js')
+let registryVersions = null
+try { registryVersions = JSON.parse(run(process.execPath, [npm, 'view', manifest.name, 'versions', '--json'])) }
+catch (error) {
+  if (String(error.message).includes('E404')) registryVersions = []
+  else if (releaseMode) throw new Error('Could not read the registry to check for an existing ' + manifest.version + ': ' + error.message)
+}
+if (typeof registryVersions === 'string') registryVersions = [registryVersions]
+const alreadyPublished = Array.isArray(registryVersions) && registryVersions.includes(manifest.version)
+if (releaseMode && alreadyPublished)
+  throw new Error(manifest.name + '@' + manifest.version + ' is already published; bump the workspace version first (pnpm version:set <next>)')
+if (alreadyPublished) console.error('Warning: ' + manifest.name + '@' + manifest.version + ' is already on the registry. This candidate has different bytes and cannot be published under that number.')
 const packed = JSON.parse(run(process.execPath, [npm, 'pack', '--ignore-scripts', '--json', '--pack-destination', releaseRoot], staging))[0]
 const tarball = path.join(releaseRoot, packed.filename)
 const integrity = 'sha512-' + createHash('sha512').update(await fs.readFile(tarball)).digest('base64')
@@ -103,6 +129,7 @@ const release = {
   packageName: manifest.name, version: manifest.version, status: 'unpublished-candidate',
   sourceCommit: run('git', ['rev-parse', 'HEAD']).trim(), tarball, integrity,
   workingTreeDirty: run('git', ['status', '--porcelain']).trim().length > 0,
+  releaseMode, versionAlreadyOnRegistry: alreadyPublished,
   files: packed.files.map(file => file.path), bundledPackages: [...packages.keys()].sort(),
 }
 await fs.writeFile(path.join(releaseRoot, 'release.json'), JSON.stringify(release, null, 2) + '\n')

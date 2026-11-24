@@ -1,6 +1,6 @@
 # Table
 
-Table styles a native HTML table for tabular data. It provides a header, a footer, a caption, right-aligned numeric columns and a selected-row state, all inside a container that scrolls horizontally when the table is wider than its space. It is available in flat, minimalist, neo brutalism, ombelle, papier, organic, and retro futurism, in light and dark mode. Liquid glass is experimental; see [Liquid glass](#liquid-glass). It has no client boundary and no dependency beyond the shared utility.
+Table styles a native HTML table for tabular data. It provides a header, a footer, a caption, right-aligned numeric columns and a selected-row state, all inside a container that scrolls horizontally when the table is wider than its space. It is available in flat, minimalist, neo brutalism, ombelle, papier, organic, and retro futurism, in light and dark mode. Liquid glass is supported, without an accessibility guarantee; see [Liquid glass](#liquid-glass). It has no client boundary and no dependency beyond the shared utility.
 
 ## Install and compose
 
@@ -81,7 +81,7 @@ table appearance. When rows contain interactive controls, preserve adequate
 target sizes for those controls in the consuming application.
 
 In forced colors, optional stripes become the system canvas while selected rows
-retain `Highlight` and `HighlightText`. Experimental glass stripes use an opaque
+retain `Highlight` and `HighlightText`. Glass stripes use an opaque
 muted fill; the container retains its existing opaque and reduced-transparency
 fallbacks. These props require CLI 0.7.2 or later.
 

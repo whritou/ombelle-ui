@@ -1,6 +1,6 @@
 // How a project installed before 0.7.5 gets the family list scrollbars (docs/components/scroll-area.md, "Existing lists").
-// The rules changed the installed component stylesheets, which the lock records; `add` never replaces a recorded file
-// whose bytes the catalog changed, and `theme add` writes only the tokens and the shared `ui-style.css`.
+// The rules changed the installed component stylesheets, which the lock records. Since 1.0, `update` and `add` refresh a
+// recorded file that is unedited (PUB-01); `theme add` still writes only the tokens and the shared `ui-style.css`.
 import { afterEach, expect, it } from 'vitest'
 import fs from 'node:fs/promises'
 import path from 'node:path'
@@ -17,7 +17,7 @@ afterEach(async () => {
   for (const root of roots.splice(0)) await fs.rm(root, { recursive: true, force: true })
 })
 
-it('refreshes an unedited Command stylesheet from before 0.7.5 once it is deleted and added again', async () => {
+it('refreshes an unedited Command stylesheet from before 0.7.5 with update or add', async () => {
   const root = await createProject('vite')
   roots.push(root)
   const read = (file: string) => fs.readFile(path.join(root, file), 'utf8')
@@ -41,25 +41,28 @@ it('refreshes an unedited Command stylesheet from before 0.7.5 once it is delete
   lock.artifacts[file] = { ...lock.artifacts[file]!, sha256: sha(before075) }
   await write('ui-library.lock.json', JSON.stringify(lock))
 
-  // `add` stops on the recorded file and writes nothing, even with --yes.
-  const blocked = await command(['add', 'command', '--yes'])
-  expect(blocked.code, blocked.output).toBe(4)
-  expect(jsonRecord(blocked.data)).toMatchObject({
-    warnings: expect.arrayContaining([
-      expect.objectContaining({ code: 'FILE_CONFLICT', path: file, message: 'Existing source requires an explicit migration' }),
-    ]),
-  })
-  expect(await read(file)).toBe(before075)
-  // --overwrite is only for files Ombelle does not own.
+  // --overwrite is for unmanaged or edited files; this one is neither.
   const overwrite = await command(['add', 'command', '--overwrite', file, '--yes'])
-  expect(overwrite.code, overwrite.output).not.toBe(0)
+  expect(overwrite.code, overwrite.output).toBe(2)
   expect(await read(file)).toBe(before075)
   // `theme add` leaves component stylesheets alone.
   const themed = await command(['theme', 'add', './ui-preset.json', '--yes'])
   expect(themed.code, themed.output).toBe(0)
   expect(await read(file)).toBe(before075)
+  // `update` plans the refresh; `add` of the installed component plans the same.
+  const planned = await command(['update', '--dry-run'])
+  expect(planned.code, planned.output).toBe(0)
+  expect(jsonRecord(planned.data).changes).toEqual(expect.arrayContaining([expect.objectContaining({ path: file, action: 'update' })]))
+  const added = await command(['add', 'command', '--yes'])
+  expect(added.code, added.output).toBe(0)
+  expect(await read(file)).toBe(current)
+  expect((JSON.parse(await read('ui-library.lock.json')) as ProjectLock).artifacts[file]!.sha256).toBe(sha(current))
+  await write(file, before075)
+  const relock: ProjectLock = JSON.parse(await read('ui-library.lock.json'))
+  relock.artifacts[file] = { ...relock.artifacts[file]!, sha256: sha(before075) }
+  await write('ui-library.lock.json', JSON.stringify(relock))
 
-  // The route: delete the unedited stylesheet and add the component again. A missing file is planned as new.
+  // The earlier route still works: delete the unedited stylesheet and add the component again.
   await fs.rm(path.join(root, file))
   const migrated = await command(['add', 'command', '--yes'])
   expect(migrated.code, migrated.output).toBe(0)

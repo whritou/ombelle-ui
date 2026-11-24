@@ -1,6 +1,6 @@
 # Hover Card
 
-Hover Card previews what a link points to when the pointer rests on it or keyboard focus reaches it. It is available in all five families in light and dark mode, with Radix and Base UI editions; the template is a client component.
+Hover Card previews what a link points to when the pointer rests on it or keyboard focus reaches it. It is available in all eight families in light and dark mode, with Radix and Base UI editions; the template is a client component.
 
 This component requires CLI **0.7.3** or later: `npx @ombelle-ui/cli@0.7.3 add hover-card`. For a built local checkout:
 
@@ -52,6 +52,6 @@ Part names and `data-slot` values are the same in both editions.
 
 ## Liquid glass
 
-Liquid glass is experimental for Hover Card, as for every glass component, and its findings do not block a release. See [liquid glass](liquid-glass.md).
+Liquid glass is supported for Hover Card without an accessibility guarantee, as for every glass component; only its contrast findings, which depend on the backdrop, are advisory in the specimen audit. See [liquid glass](liquid-glass.md).
 
 See [overlays and search evidence](../evidence/overlays-search-073.md) for the board comparison, the specimen audit and the browser tests.

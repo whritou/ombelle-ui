@@ -12,7 +12,7 @@ describe('Button Group', () => {
   it('provides the parts without client code or extra dependencies', () => {
     expectComponentContract('button-group', { client: false, parts: ['ButtonGroup', 'ButtonGroupSeparator', 'ButtonGroupText'], slots,
       dependencies: [{ name: 'react', version: '19.3.1' }, { name: 'clsx', version: '2.1.1' }, { name: 'tailwind-merge', version: '3.7.0' }],
-      selectors: ["[data-slot='button-group'] > *", ...slots.map(slot => `[data-slot='${slot}']`)], glass: 'experimental' })
+      selectors: ["[data-slot='button-group'] > *", ...slots.map(slot => `[data-slot='${slot}']`)], glass: 'stable' })
   })
 
   it('serves both editions from one template', () => {

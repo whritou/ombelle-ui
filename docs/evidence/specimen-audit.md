@@ -1,6 +1,6 @@
 # Specimen audit
 
-The specimen audit measures every catalog component as a project installs it, in every style family, edition and colour mode. It fails only on measured defects. Screenshots are saved for review and never compared against stored images. Design: [verification harness](../superpowers/specs/2026-11-09-verification-harness-design.md).
+The specimen audit measures every catalog component as a project installs it, in every style family, edition and colour mode. It fails only on measured defects. Screenshots are saved for review and never compared against stored images. Design: [verification harness](../internal/superpowers/specs/2026-11-09-verification-harness-design.md).
 
 ## Recorded runs
 
@@ -11,6 +11,8 @@ All runs were local runs by an agent on Windows 11 Home 10.0.26300, with Node 24
 | `7280c33` | All 20 configurations and the self-tests | 34 passed: 580 specimens, 0 failures |
 | `dedc550` | `neo-brutalism/radix/light` | Passed |
 | `dedc550` | The four liquid-glass configurations | Dark passed. Light: 7 recorded findings per edition (see Liquid glass) |
+
+Papier, organic and retro futurism were added after these runs. Their specimen audit runs are recorded in [decision 0006](../decisions/0006-papier-family.md), [decision 0007](../decisions/0007-organic-family.md) and [decision 0008](../decisions/0008-retro-futurism-family.md), not in the table above.
 
 A whole-branch review after `7280c33` found gaps in the harness:
 

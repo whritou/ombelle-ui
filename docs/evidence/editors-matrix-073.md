@@ -1,6 +1,6 @@
 # Editors, batch 7b, evidence (0.7.3)
 
-The 0.7.3 editor work: measured placeholders, the variant matrix and the diff on Get code. Spec: `docs/superpowers/specs/2026-11-11-editors-matrix-design.md`.
+The 0.7.3 editor work: measured placeholders, the variant matrix and the diff on Get code. Spec: `docs/internal/superpowers/specs/2026-11-11-editors-matrix-design.md`.
 
 Environment for every run below:
 - Windows 11 Home 10.0.26300, Node 24.19.0, pnpm 11.25.0 through `corepack pnpm`.

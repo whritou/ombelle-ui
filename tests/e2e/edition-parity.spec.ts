@@ -10,6 +10,9 @@ import {
 } from '../helpers/edition-parity.js'
 
 type Edition = 'radix' | 'base'
+// Each case opens its own pages, so the 196 cases spread over the workers (1.6 hours in one worker
+// on 23 November).
+test.describe.configure({ mode: 'parallel' })
 // Each load gets its own URL: reloading the same URL lets Chromium restore
 // form controls (such as hidden radio inputs) from the previous state.
 let load = 0
@@ -29,6 +32,9 @@ for (const family of supportedStyleFamilies)
   for (const mode of ['light', 'dark'] as const)
     for (const { id, states, portal } of portedComponents)
       test(`${family} ${mode} ${id} renders identically in both editions`, async ({ context }) => {
+        // Dropdown Menu reloads both editions for each of its states: about 60 seconds beside the
+        // consumer matrix, so it timed out in a different family each run (23 November).
+        test.setTimeout(120_000)
         const pages: Record<Edition, Page> = {
           radix: await context.newPage(),
           base: await context.newPage(),

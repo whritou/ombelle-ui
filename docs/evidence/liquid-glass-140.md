@@ -25,7 +25,7 @@ Read-only production evidence:
 - `https://ombelle-ui.vercel.app/components`: HTTP 200, glass experimental copy and Papier present.
 - Missing snapshot read: HTTP 404 `SNAPSHOT_NOT_FOUND`, rather than storage-unavailable.
 - GitHub reports Vercel success for main `cd5ae3caa3715a99942501e292da685babca3157`:
-  https://vercel.com/whritearthur-9467s-projects/ombelle-ui/CCa4MB77NceUA5C4SHnUwW1bELLJ
+  https://vercel.com/<vercel-team>/ombelle-ui/CCa4MB77NceUA5C4SHnUwW1bELLJ
 
 Automatic approval review rejected a proposed production POST/read-back because
 it would create a persistent public snapshot. No snapshot was published and no

@@ -46,7 +46,7 @@ describe('Radio Group catalog contract', () => {
         "[data-slot='radio-group-option']:has([data-slot='radio-group-item'][data-state='checked'])",
         "[data-slot='radio-group-option']:has([data-slot='radio-group-item'][data-disabled])",
       ],
-      glass: 'experimental',
+      glass: 'stable',
     })
   })
 
@@ -78,7 +78,7 @@ describe('Radio Group catalog contract', () => {
       'data-state="checked"',
       'data-disabled=""',
       'data-slot="radio-group-indicator"',
-      '<label data-slot="radio-group-option"',
+      '<label class="" data-slot="radio-group-option"',
       'Team plan',
     ])
       expect(html).toContain(text)

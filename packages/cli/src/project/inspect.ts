@@ -17,6 +17,18 @@ import { assertStandaloneProject } from './workspace.js'
 import { validateInstalledRecipes } from './recipes.js'
 import { validateInstalledComponentPresets } from './component-presets.js'
 import { validateSnapshotSources } from '../snapshots/source.js'
+import { classifyDeclaration, classifyVersion, majorOf, supportMatrix } from '../support.js'
+import { asNewerDocument } from '../compat.js'
+import { cliVersion } from '../version.js'
+/** A project file a newer CLI wrote (PUB-05, PUB-08): name the version and the way forward. */
+function newerProjectFile(file: string, version: string): FoundationError {
+  return new FoundationError(
+    'UNSUPPORTED_RELEASE',
+    file + ' has ' + version + ', written by a newer Ombelle CLI than ' + cliVersion,
+    file,
+    'Run the newest CLI (npx @ombelle-ui/cli@latest with the same arguments).',
+  )
+}
 export async function readText(
   root: string,
   relative: string,
@@ -28,6 +40,56 @@ export async function readText(
     if ((e as NodeJS.ErrnoException).code === 'ENOENT') return null
     throw e
   }
+}
+const reactAction =
+  'Declare react and react-dom as React 19 or newer (for example "^19.3.1"), reinstall, and run the command again.'
+/** The plan notice for a React major newer than the tested 19.x (REACT_UNTESTED_MAJOR). */
+export function newerReactNotice(what: string): string {
+  return 'React ' + what + ' is newer than the versions this release was tested with (19.x). Components depend on ' +
+    'packages (such as Radix UI or Base UI) that may not declare that React support yet; npm can refuse that ' +
+    'install, and components may need checking after installing.'
+}
+/**
+ * React and ReactDOM (declared, and installed when node_modules has them): React 18 and older are refused
+ * before any write, since the templates use React 19 APIs (a `ref` prop on function components). React
+ * 19.x is the tested range. A newer major, or a range that can resolve to one, is accepted with a notice
+ * (INS-01, PUB-04). Returns the notices.
+ */
+export async function assertSupportedReact(
+  root: string,
+  deps: Record<string, string | undefined>,
+): Promise<string[]> {
+  const range = supportMatrix.react
+  const notices: string[] = []
+  for (const name of ['react', 'react-dom']) {
+    const spec = deps[name]
+    if (typeof spec !== 'string')
+      throw new FoundationError('UNSUPPORTED_PROJECT', 'Declare ' + name + ' in package.json; Ombelle components need React 19 or newer', root, reactAction)
+    const declared = classifyDeclaration(spec, range)
+    if (declared === undefined || declared === 'refused')
+      throw new FoundationError(
+        'UNSUPPORTED_PROJECT',
+        name + ' "' + spec + '" is not supported; Ombelle components need React ' + range.minimum +
+          ' or newer (they use React 19 APIs), declared as an exact version or a range such as ^19.3.1',
+        root,
+        reactAction,
+      )
+    const installed = await readText(root, 'node_modules/' + name + '/package.json').catch(() => null)
+    let version: unknown
+    try { version = installed === null ? undefined : JSON.parse(installed).version } catch { version = undefined }
+    const actual = typeof version === 'string' ? classifyVersion(version, range) : undefined
+    if (actual === 'refused')
+      throw new FoundationError(
+        'UNSUPPORTED_PROJECT',
+        'Installed ' + name + ' ' + version + ' is older than React 19, although package.json declares "' + spec + '"',
+        root,
+        'Reinstall dependencies so node_modules matches package.json, then run the command again.',
+      )
+    if (actual === 'newer') notices.push(newerReactNotice(String(majorOf(version as string))))
+    else if (actual === undefined && declared === 'newer')
+      notices.push(newerReactNotice(Number.isNaN(majorOf(spec)) || majorOf(spec) < 20 ? '"' + spec + '" (it can resolve to React 20 or newer)' : String(majorOf(spec))))
+  }
+  return [...new Set(notices)]
 }
 function declaredManager(value: unknown): PackageManager | undefined {
   if (typeof value !== 'string') return undefined
@@ -111,12 +173,11 @@ export async function inspectProject(
   const framework = deps.next ? 'next' : deps.vite ? 'vite' : undefined
   if (!framework || !deps.react || !/^\D*4(?:\.|$)/.test(deps.tailwindcss ?? ''))
     throw bad('Support is limited to React Vite/Next with Tailwind v4')
-  if (deps.react !== '19.3.1' || deps['react-dom'] !== '19.3.1')
-    throw bad(
-      'Foundation requires exact react and react-dom 19.3.1 declarations; align both versions before installing (ranges are not verified)',
-    )
+  const supportNotices = await assertSupportedReact(root, deps)
   const config = (await loadJson('ui-library.config.json')) as
     ProjectConfig | undefined
+  if (config && typeof config.configVersion === 'number' && config.configVersion > 1)
+    throw newerProjectFile('ui-library.config.json', 'configVersion ' + config.configVersion)
   if (
     config &&
     (config.configVersion !== 1 ||
@@ -197,6 +258,8 @@ export async function inspectProject(
     await safePath(root, p)
   const lock = (await loadJson(config?.lockFile ?? 'ui-library.lock.json')) as
     ProjectLock | undefined
+  if (lock && typeof lock.lockVersion === 'number' && lock.lockVersion > 1)
+    throw newerProjectFile(config?.lockFile ?? 'ui-library.lock.json', 'lockVersion ' + lock.lockVersion)
   if (
     lock &&
     (lock.lockVersion !== 1 ||
@@ -218,7 +281,12 @@ export async function inspectProject(
       lock.artifacts,
       { root, componentsDir, sourceDir, utilsFile, uiAlias, utilsAlias },
     )
-  const preset = raw ? validatePreset(raw) : undefined
+  let preset: ReturnType<typeof validatePreset> | undefined
+  try {
+    preset = raw ? validatePreset(raw) : undefined
+  } catch (error) {
+    throw asNewerDocument(error, 'preset')
+  }
   if (lock) await validateSnapshotSources(lock, preset)
   return {
     ...(manager === 'bun'
@@ -240,6 +308,7 @@ export async function inspectProject(
     upstream,
     edition: detectEdition(upstream?.style) ?? 'radix',
     upstreamStyleSupported: detectEdition(upstream?.style) !== undefined,
+    supportNotices,
     config,
     preset,
     lock,

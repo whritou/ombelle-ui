@@ -14,7 +14,7 @@
   align-items: center;
   inline-size: 100%;
   min-inline-size: 0;
-  min-block-size: var(--control-height, 2.5rem);
+  min-block-size: calc(var(--control-height, 2.5rem) + var(--password-field-size-step, 0rem));
   overflow: clip;
   font-family: var(--font-family);
   font-size: 0.875rem;
@@ -37,7 +37,7 @@
   box-shadow: none;
 }
 [data-slot='password-field-input'] {
-  min-block-size: var(--control-height, 2.5rem);
+  min-block-size: calc(var(--control-height, 2.5rem) + var(--password-field-size-step, 0rem));
 }
 [data-slot='password-field-input']::placeholder {
   color: var(--muted-foreground);
@@ -260,3 +260,9 @@
     transition: none;
   }
 }
+/* 1.0 size scale (DES-12): sm and lg sit 0.5rem below and above the default, which follows --control-height */
+[data-slot='password-field'][data-size='sm'] { --password-field-size-step: -0.5rem; --password-field-font-size: 0.8125rem; }
+[data-slot='password-field'][data-size='lg'] { --password-field-size-step: 0.5rem; --password-field-font-size: 1rem; }
+[data-slot='password-field-control'] { font-size: var(--password-field-font-size, 0.875rem); }
+[data-slot='password-field-input'] { padding-block: 0; }
+/* end 1.0 size scale */

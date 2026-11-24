@@ -1,11 +1,13 @@
 import { beforeAll, expect, it } from 'vitest'
 import { compile, sha256 } from '@ombelle/compiler'
-import { getCatalog } from '@ombelle/catalog'
+import { getCatalogPresets } from '@ombelle/catalog/presets'
 import {
   componentsWithStyleSupport,
   supportedComponentIds,
+  supportedStyleFamilies,
   type CompileResult,
 } from '@ombelle/contracts'
+import { handlePresetCompileMessage } from './compile-protocol'
 import { createPresetDraft, materializePreset } from './model'
 import type { PresetSourceManifest } from '../../../../scripts/generate-preset-gallery'
 import {
@@ -16,12 +18,13 @@ import {
   isPresetAck,
   verifyPresetTokens,
   presetHashOf,
+  maxPresetRenderBytes,
 } from './preview-protocol'
 
 let result: CompileResult, manifest: PresetSourceManifest
 beforeAll(async () => {
   result = await compile({
-    preset: getCatalog('0.1.0').presets.flat,
+    preset: getCatalogPresets('0.1.0').presets.flat,
     componentIds: supportedComponentIds,
     catalogRelease: '0.1.0',
     compilerVersion: '0.1.0',
@@ -121,18 +124,27 @@ it.each([
   if (kind === 'missing') input.result.artifacts.pop()
   if (kind === 'extra') Object.assign(input.view, { unsafe: true })
   if (kind === 'huge')
-    input.result.artifacts[0].content = 'é'.repeat(1024 * 1024)
+    input.result.artifacts[0].content = 'é'.repeat(maxPresetRenderBytes / 2)
   if (kind === 'manifest')
     expected.sources[Object.keys(expected.sources)[0]].canonicalHash =
       'a'.repeat(64)
   expect(await verifyPresetRender(input, 0, expected)).toBeNull()
 })
+it('fits each family gallery render well under the frame size bound', async () => {
+  // The frame drops a larger message, so the preview would fail for that family (Liquid glass passed 1 MiB).
+  for (const family of supportedStyleFamilies) {
+    const compiled = await handlePresetCompileMessage({ type: 'compile-preset', requestId: 1, draft: createPresetDraft(family) })
+    if (compiled.type !== 'preset-compiled') throw new Error(`${family} did not compile`)
+    const message = { type: 'preset-render', requestId: 1, result: compiled.result, view: { mode: 'light', viewport: 'wide' } }
+    expect(new TextEncoder().encode(JSON.stringify(message)).length, family).toBeLessThan(maxPresetRenderBytes * 0.5)
+  }
+}, 120000)
 it('accepts a liquid-glass draft below the contrast bound so the editor can preview it', async () => {
-  const preset = structuredClone(getCatalog('0.1.0').presets['liquid-glass'])
+  const preset = structuredClone(getCatalogPresets('0.1.0').presets['liquid-glass'])
   preset.design = { ...preset.design, glassOpacity: 0.3 }
   const failing = await compile({
     preset,
-    componentIds: componentsWithStyleSupport('liquid-glass', ['experimental']),
+    componentIds: componentsWithStyleSupport('liquid-glass', ['stable', 'experimental']),
     catalogRelease: '0.1.0',
     compilerVersion: '0.1.0',
     glassContrast: 'report',
@@ -142,10 +154,10 @@ it('accepts a liquid-glass draft below the contrast bound so the editor can prev
   const withFilter = { ...manifest, sources: { ...manifest.sources, [filter.logicalPath]: { canonicalHash: filter.sha256, transformedHash: await sha256(filter.content) } } }
   expect(await verifyPresetRender(input, 0, withFilter)).toEqual(input)
 })
-it('accepts a liquid-glass render compiled from every component, all experimental in glass', async () => {
+it('accepts a liquid-glass render compiled from every component, all stable in glass', async () => {
   const glass = await compile({
-    preset: getCatalog('0.1.0').presets['liquid-glass'],
-    componentIds: componentsWithStyleSupport('liquid-glass', ['experimental']),
+    preset: getCatalogPresets('0.1.0').presets['liquid-glass'],
+    componentIds: componentsWithStyleSupport('liquid-glass', ['stable', 'experimental']),
     catalogRelease: '0.1.0',
     compilerVersion: '0.1.0',
   })
@@ -253,7 +265,7 @@ it('rejects a lab ink without a backdrop', async () => {
 })
 
 it('drops the font imports a browser cannot resolve and keeps the font tokens', async () => {
-  const ombelle = structuredClone(getCatalog('0.1.0').presets.ombelle)
+  const ombelle = structuredClone(getCatalogPresets('0.1.0').presets.ombelle)
   const fonted = await compile({
     preset: {
       ...ombelle,

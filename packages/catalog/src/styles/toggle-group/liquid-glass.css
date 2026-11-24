@@ -40,7 +40,7 @@
   block-size: 16px;
 }
 [data-slot='toggle-group-item'][data-variant='segmented'] {
-  min-block-size: 34px;
+  min-block-size: max(1.5rem, calc(var(--control-height) - 0.375rem + var(--toggle-group-size-step, 0rem)));
   padding: 0 16px;
   border: 1px solid transparent;
   border-radius: 999px;
@@ -51,8 +51,8 @@
   font-weight: 700;
 }
 [data-slot='toggle-group-item'][data-variant='toolbar'] {
-  min-inline-size: 42px;
-  min-block-size: 40px;
+  min-inline-size: max(1.5rem, calc(var(--control-height) + 0.125rem + var(--toggle-group-size-step, 0rem)));
+  min-block-size: max(1.5rem, calc(var(--control-height) + var(--toggle-group-size-step, 0rem)));
   padding: 0 10px;
   border: 0;
   border-inline-end: 1px solid var(--input);
@@ -122,3 +122,21 @@
     outline-color: Highlight;
   }
 }
+/* Forced colours: opaque system surfaces, so the system colour pair holds over any backdrop. Each selector outranks the translucent variants and leaves the highlighted states to their own rules. */
+@media (forced-colors: active) {
+  [data-slot='toggle-group']:not([data-state='on']) {
+    background-color: Canvas;
+  }
+  [data-slot='toggle-group-item']:not([data-state='on']) {
+    background-color: ButtonFace;
+  }
+  /* Restated after the translucent pressed glass, which would otherwise keep its alpha over Highlight. */
+  [data-slot='toggle-group-item'][data-state='on'],
+  [data-slot='toggle-group-item'][data-variant][data-state='on'] {
+    background-color: Highlight;
+  }
+}
+/* 1.0 size scale (DES-12): sm and lg sit 0.5rem below and above the default, which follows --control-height */
+[data-slot='toggle-group'][data-size='sm'] { --toggle-group-size-step: -0.5rem; }
+[data-slot='toggle-group'][data-size='lg'] { --toggle-group-size-step: 0.5rem; }
+/* end 1.0 size scale */

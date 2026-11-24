@@ -1,8 +1,10 @@
 name: Foundation
-# Full evidence gate: 40 consumer apps, the browser matrix and the evidence
-# aggregate. It is too slow for every push, so it runs nightly on the default
-# branch and on demand (Actions > Foundation > Run workflow). ci.yml runs the
-# fast checks on every push and pull request.
+# Full evidence gate: every consumer app, the browser matrix, the specimen audit
+# and the evidence aggregate. It is too slow for every push, so it runs nightly on
+# the default branch and on demand (Actions > Foundation > Run workflow). ci.yml
+# runs the fast checks and a browser subset on every push and pull request.
+# A release needs a green run of this workflow on the release commit
+# (docs/cli-release.md).
 on:
   schedule:
     - cron: '0 3 * * *'
@@ -12,7 +14,7 @@ permissions:
 jobs:
   quality:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 90
     env:
       NEXT_TELEMETRY_DISABLED: '1'
     steps:
@@ -22,7 +24,9 @@ jobs:
         with:
           cache-scope: quality
       - name: Verify package quality and audit workspace dependencies
-        timeout-minutes: 40
+        # Unit tests take about 9 minutes and the unsharded integration suite about 25 on
+        # 23 November, then the evidence check collects both inventories again.
+        timeout-minutes: 70
         run: pnpm check:foundation:quality
       - name: Stage finalized evidence after process teardown
         if: always()
@@ -44,11 +48,22 @@ jobs:
           include-hidden-files: true
           if-no-files-found: ignore
           path: .artifacts/upload/browser
+  # The 1,185 browser cases took 119 minutes in one job after 44 minutes of consumer preparation
+  # (24 November), so they run in three shards by spec file (scripts/consumer-shards.mjs), each
+  # about 35 to 45 minutes of tests. Each shard prepares the same consumers; the aggregate requires all three.
   consumers:
     runs-on: ubuntu-latest
-    timeout-minutes: 80
+    timeout-minutes: 180
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3]
     env:
       NEXT_TELEMETRY_DISABLED: '1'
+      # With 2 workers 1,185 browser cases did not finish in 89 minutes; with 4, beside about
+      # forty consumer servers, they took 1.6 hours and long tests timed out (23 November).
+      OMBELLE_E2E_WORKERS: '3'
+      OMBELLE_CONSUMERS_SHARD: ${{ matrix.shard }}/3
     steps:
       # Preparing 40 consumers with their own node_modules can exhaust the
       # runner disk (EDQUOT during bun install). Drop preinstalled toolchains
@@ -72,9 +87,10 @@ jobs:
       - name: Install Chromium and system dependencies
         timeout-minutes: 15
         run: pnpm exec playwright install --with-deps chromium
-      - name: Verify all consumers and browser checks
-        # The expanded 676-case browser matrix follows 40 cold consumer installs.
-        timeout-minutes: 60
+      - name: Verify all consumers and browser checks (shard ${{ matrix.shard }} of 3)
+        # The browser matrix follows every cold consumer install; consumer preparation
+        # alone took 27 to 42 minutes on 22 November.
+        timeout-minutes: 150
         run: pnpm check:foundation:consumers
       - name: Stage finalized evidence after process teardown
         if: always()
@@ -84,7 +100,7 @@ jobs:
         if: always()
         timeout-minutes: 5
         with:
-          name: foundation-consumers-evidence
+          name: foundation-consumers-shard-${{ matrix.shard }}
           include-hidden-files: true
           if-no-files-found: error
           path: .artifacts/upload/core
@@ -92,14 +108,107 @@ jobs:
         if: always()
         timeout-minutes: 5
         with:
-          name: foundation-consumers-browser-evidence
+          name: foundation-consumers-browser-shard-${{ matrix.shard }}
           include-hidden-files: true
           if-no-files-found: ignore
           path: .artifacts/upload/browser
+  # The specimen audit (every specimen in every family, edition and mode, plus the
+  # interaction specs on the preview pages) needs only the generated preview, so it
+  # runs beside the consumers, split into four shards. The aggregate requires all four.
+  specimen:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4]
+    env:
+      NEXT_TELEMETRY_DISABLED: '1'
+      OMBELLE_SPECIMEN_SHARD: ${{ matrix.shard }}/4
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Set up pinned tools and download caches
+        id: setup
+        uses: ./.github/actions/setup-foundation
+        with:
+          cache-scope: specimen
+      - name: Cache Playwright browser downloads
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.cache/ms-playwright
+          key: browsers-v1-${{ runner.os }}-${{ runner.arch }}-node-${{ steps.setup.outputs.node-version }}-playwright-${{ steps.setup.outputs.playwright-version }}-${{ hashFiles('pnpm-lock.yaml') }}
+      - name: Install Chromium and system dependencies
+        timeout-minutes: 15
+        run: pnpm exec playwright install --with-deps chromium
+      - name: Audit specimens (shard ${{ matrix.shard }} of 4)
+        timeout-minutes: 45
+        run: pnpm check:foundation:specimen
+      - name: Stage finalized evidence after process teardown
+        if: always()
+        timeout-minutes: 3
+        run: node scripts/stage-foundation-evidence.mjs
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: always()
+        timeout-minutes: 5
+        with:
+          name: foundation-specimen-shard-${{ matrix.shard }}
+          include-hidden-files: true
+          if-no-files-found: error
+          path: .artifacts/upload/core
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: always()
+        timeout-minutes: 5
+        with:
+          name: foundation-specimen-browser-shard-${{ matrix.shard }}
+          include-hidden-files: true
+          if-no-files-found: ignore
+          path: .artifacts/upload/browser
+  # Every component installed with the built CLI into one Vite and one Next shadcn app per
+  # edition (radix-nova and base-nova), built for production and rendered (TST-13). The
+  # consumer matrix above installs 12 components, Radix only.
+  catalog-consumers:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      NEXT_TELEMETRY_DISABLED: '1'
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Set up pinned tools and download caches
+        id: setup
+        uses: ./.github/actions/setup-foundation
+        with:
+          cache-scope: catalog-consumers
+      - name: Cache Playwright browser downloads
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.cache/ms-playwright
+          key: browsers-v1-${{ runner.os }}-${{ runner.arch }}-node-${{ steps.setup.outputs.node-version }}-playwright-${{ steps.setup.outputs.playwright-version }}-${{ hashFiles('pnpm-lock.yaml') }}
+      - name: Install Chromium and system dependencies
+        timeout-minutes: 15
+        run: pnpm exec playwright install --with-deps chromium
+      - name: Build packages
+        run: pnpm build:packages
+      - name: Install the whole catalog into Radix and Base UI apps and build them
+        timeout-minutes: 30
+        run: pnpm prepare:base-consumers
+      - name: Render every component in each app
+        timeout-minutes: 10
+        run: pnpm test:base-consumers
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: always()
+        timeout-minutes: 5
+        with:
+          name: foundation-catalog-consumers
+          include-hidden-files: true
+          if-no-files-found: ignore
+          path: |
+            .artifacts/catalog-consumers-results.json
+            .artifacts/base-consumers.json
+            test-results
   # Branch protection requires the `verify` check from ci.yml; this job only
   # validates the full evidence for scheduled and manual runs.
   verify:
-    needs: [quality, consumers]
+    needs: [quality, consumers, specimen, catalog-consumers]
     if: always()
     runs-on: ubuntu-latest
     timeout-minutes: 60
@@ -109,7 +218,9 @@ jobs:
         env:
           QUALITY_RESULT: ${{ needs.quality.result }}
           CONSUMERS_RESULT: ${{ needs.consumers.result }}
-        run: test "$QUALITY_RESULT" = success && test "$CONSUMERS_RESULT" = success
+          SPECIMEN_RESULT: ${{ needs.specimen.result }}
+          CATALOG_CONSUMERS_RESULT: ${{ needs.catalog-consumers.result }}
+        run: test "$QUALITY_RESULT" = success && test "$CONSUMERS_RESULT" = success && test "$SPECIMEN_RESULT" = success && test "$CATALOG_CONSUMERS_RESULT" = success
       - name: Set up pinned tools and download caches
         uses: ./.github/actions/setup-foundation
         with:
@@ -119,11 +230,16 @@ jobs:
         with:
           name: foundation-quality-evidence
           path: .artifacts/groups/quality
-      - name: Download consumers core evidence
+      - name: Download consumers shard evidence
         uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
-          name: foundation-consumers-evidence
-          path: .artifacts/groups/consumers
+          pattern: foundation-consumers-shard-*
+          path: .artifacts/groups
+      - name: Download specimen shard evidence
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          pattern: foundation-specimen-shard-*
+          path: .artifacts/groups
       - name: Rebuild references and validate complete matching evidence
         timeout-minutes: 15
         run: pnpm check:foundation:aggregate .artifacts/groups

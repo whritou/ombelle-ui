@@ -5,8 +5,8 @@ import * as Tooltip from '@radix-ui/react-tooltip'
 import { Code, Eye, Moon, Sun } from 'lucide-react'
 import { Component, startTransition, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { preload } from 'react-dom'
-import { defaultGlassPresetId, type StartingPresetId } from '@ombelle/catalog'
-import { styleSupport, type ComponentId, type StyleFamily } from '@ombelle/contracts'
+import { defaultGlassPresetId, type StartingPresetId } from '@ombelle/catalog/presets'
+import { accessibilityCaveatLabel, styleSupport, type ComponentId, type StyleFamily } from '@ombelle/contracts'
 import { offeredStyleFamilies } from '../../snapshots/install-command'
 import { applyStartingPreset, createPresetDraft, materializePreset, type PresetEditorDraft } from '../../preset-editor/model'
 import { labInkFor, pickGlassScene } from '../glass-backdrops'
@@ -94,7 +94,7 @@ export function ComponentPlayground({ id, name, source, styles }: {
   const glass = styleSupport(id, 'liquid-glass')
   useEffect(() => {
     const selected = glassPresetId(new URLSearchParams(window.location.search).get('glass'))
-    if (selected && glass === 'experimental') {
+    if (selected && glass !== 'unavailable') {
       setGlassPreset(selected)
       setPendingFamily('liquid-glass')
       latestPick.current = 'liquid-glass'
@@ -125,7 +125,7 @@ export function ComponentPlayground({ id, name, source, styles }: {
     return option.value === 'liquid-glass'
       ? glass === 'unavailable'
         ? { ...tile, disabled: true, title: `${name} is not available in liquid glass` }
-        : { ...tile, label: 'Liquid Glass', hint: 'experimental' }
+        : { ...tile, label: 'Liquid Glass', hint: accessibilityCaveatLabel }
       : tile
   })
   return (

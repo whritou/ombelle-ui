@@ -23,7 +23,7 @@ shadcn already distributes editable component code, supports custom registries a
 
 Our proposed differentiation is a maintained set of visibly different style families, per-component customization with export parity, persistent project defaults, documented style-specific accessibility, and a later native adapter. Validate that this saves users meaningful work before building a broad catalog.
 
-Do not advertise every possible combination as accessible or supported. Publish a component by style by platform matrix, with stable, experimental, and unavailable statuses.
+Do not advertise every possible combination as accessible or supported. Publish a component by style by platform matrix, with stable, experimental, and unavailable statuses; a stable entry can carry a caveat, as liquid glass does (accessibility not guaranteed).
 
 ## Terminology
 
@@ -42,7 +42,7 @@ Keep these distinctions visible in the editor. A style family should not occupy 
 
 ## First release scope
 
-The web alpha contains Button, Badge, Card, Input, Textarea, Label, Checkbox, Switch, Native Select, Dialog, Tabs, and Tooltip. Flat, minimalist, and neo brutalism receive stable support for all 12. Liquid glass is implemented as experimental for all 12; it is not stable until reviewed. See [liquid glass](components/liquid-glass.md) for its limitations and [its evidence](evidence/liquid-glass.md) for what was measured.
+The web alpha contains Button, Badge, Card, Input, Textarea, Label, Checkbox, Switch, Native Select, Dialog, Tabs, and Tooltip. Flat, minimalist, and neo brutalism receive stable support for all 12. Liquid glass is implemented as stable for all 12, without an accessibility guarantee, because its text contrast depends on the background behind it. See [liquid glass](components/liquid-glass.md) for its limitations and [its evidence](evidence/liquid-glass.md) for what was measured.
 
 The site includes a searchable catalog, component detail pages, style and state previews, a component editor, a global preset editor, and code plus CLI export. Users can download preset JSON and work without an account. Public immutable snapshots enable share links and install commands; publishing requires an explicit action.
 

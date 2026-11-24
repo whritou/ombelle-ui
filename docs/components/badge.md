@@ -4,7 +4,7 @@ Badge displays a short status or category as a native `span`. It is available in
 
 ## Install and use
 
-Initialize the project with a local preset, then install using the private built CLI:
+Initialize the project with a local preset, then install using the CLI:
 
 ```powershell
 pnpm exec node packages/cli/dist/main.js add badge --cwd APP --dry-run --json
@@ -33,7 +33,7 @@ It accepts native span props, classes and React 19 refs; its decorative ARIA
 marker remains owned by the component. Forced colors paint it with `CanvasText`.
 Size and dot composition require CLI 0.7.2 or later.
 
-The default variant uses each family's existing primary or secondary color pair; destructive uses the destructive treatment. Radius, border width, font, and neo brutalist shadows use the saved preset's design tokens. Long text wraps within its container. Forced colors use system colors and a double border for the destructive variant. Liquid glass is experimental and keeps its solid badge fills; the small size and dot add no backdrop filtering.
+The default variant uses each family's existing primary or secondary color pair; destructive uses the destructive treatment. Radius, border width, font, and neo brutalist shadows use the saved preset's design tokens. Long text wraps within its container. Forced colors use system colors and a double border for the destructive variant. Liquid glass is supported, without an accessibility guarantee, and keeps its solid badge fills; the small size and dot add no backdrop filtering.
 
 ## Variants (0.7.3)
 

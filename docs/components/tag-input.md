@@ -1,6 +1,6 @@
 # Tag Input
 
-Tag Input is a field of removable tags. Enter or comma adds the typed text as a tag, and Backspace in the empty field removes the last one. It is available in all five families in light and dark mode, in one template for both editions; the template is a client component.
+Tag Input is a field of removable tags. Enter or comma adds the typed text as a tag, and Backspace in the empty field removes the last one. It is available in all eight families in light and dark mode, in one template for both editions; the template is a client component.
 
 This component requires CLI **0.7.3** or later: `npx @ombelle-ui/cli@0.7.3 add tag-input`. For a built local checkout:
 
@@ -36,6 +36,8 @@ export function Topics() {
   - `allowDuplicates` defaults to false.
   - `disabled` turns off the field and the remove buttons.
   - With `name`, each tag submits as a hidden input with that name.
+  - A form reset returns the tags to `defaultValue`, clears the typed text and the announcement, and calls `onValueChange` when the tags change.
+  - `labels` changes the words: `list` ("Selected tags"), `remove(tag)` ("Remove <tag>"), `duplicate(tag)` ("<tag> is already added"), `max(max)` ("You can add up to <max> tags"), `added(tags)` ("Added <tags>") and `removed(tag)` ("Removed <tag>").
 - **Typing:**
   - Added text is trimmed, and empty parts are dropped.
   - Pasting text that contains separators or new lines adds each part.
@@ -46,6 +48,10 @@ export function Topics() {
 - **Announcements:** a polite live region announces "Added glass", "Removed glass", "glass is already added" and "You can add up to 8 tags". It is visually hidden by the component's own styles.
 - **Helper:** `addTags(current, text, { separators, max, allowDuplicates })` is exported for apps that need the same rules elsewhere.
 
+## Size (1.0)
+
+`TagInput` takes `size`. `sm` is one 0.5rem step below the density's control height, `default` is the control height (2.5rem, or 2.25rem with compact density) and `lg` is one step above it, as on every control on the [shared size scale](../03-components-styles-accessibility.md#sizes). `sm` text is 0.8125rem and `lg` text 1rem. Leaving `size` out renders what earlier releases render; only `sm` and `lg` set `data-size`. The default field is 2px taller than the control height (4px in neo-brutalism, organic and retro futurism, whose border is thicker), as before. At `sm`, a field holding tags grows to fit them, because tags keep their 24px remove buttons.
+
 ## Recipe
 
 The recipe editor sets `max`, the label, the placeholder and up to eight starting tags. Starting tags past `max` are rejected.
@@ -54,6 +60,6 @@ Compilation emits `components/ui/tag-input.tsx`, `components/ui/tag-input.css` a
 
 ## Liquid glass
 
-Liquid glass is experimental for Tag Input, as for every glass component, and its findings do not block a release. See [liquid glass](liquid-glass.md).
+Liquid glass is supported for Tag Input without an accessibility guarantee, as for every glass component; only its contrast findings, which depend on the backdrop, are advisory in the specimen audit. See [liquid glass](liquid-glass.md).
 
 See [form controls evidence](../evidence/form-controls-073.md) for the board comparison, the specimen audit and the browser tests.

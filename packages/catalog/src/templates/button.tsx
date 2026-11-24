@@ -3,7 +3,7 @@ import * as React from 'react'
 import { Slot } from '@radix-ui/react-slot'
 import { cva, type VariantProps } from 'class-variance-authority'
 import { cn } from './utils.js'
-const buttonVariants = cva(
+const buttonClasses = cva(
   'inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium',
   {
     variants: {
@@ -28,7 +28,7 @@ const buttonVariants = cva(
   },
 )
 export type ButtonProps = React.ComponentProps<'button'> &
-  VariantProps<typeof buttonVariants> & {
+  VariantProps<typeof buttonClasses> & {
     asChild?: boolean
     /** Shows a spinner, sets aria-busy and disables the button. Ignored with asChild. */
     loading?: boolean
@@ -38,7 +38,7 @@ export function Button({
   variant = 'default',
   size = 'default',
   asChild = false,
-  loading = false,
+  loading,
   type = 'button',
   disabled,
   children,
@@ -46,13 +46,16 @@ export function Button({
   ...props
 }: ButtonProps) {
   const Component = asChild ? Slot : 'button'
-  const busy = loading && !asChild
+  const busy = loading === true && !asChild
+  // Only a Button that takes a loading prop (true or false) measures itself.
+  const watchesLoading = loading !== undefined && !asChild
   const ownRef = React.useRef<HTMLButtonElement | null>(null)
   const restingWidth = React.useRef<number | undefined>(undefined)
   // Loading keeps the width measured at rest, so the spinner never makes the button grow.
-  // Every render at rest measures again, so a label or size changed since is kept too.
+  // Every render at rest measures again, so a label or size changed since is kept too; a Button
+  // without a loading prop never forces that layout read.
   React.useLayoutEffect(() => {
-    if (!busy && ownRef.current) restingWidth.current = ownRef.current.getBoundingClientRect().width
+    if (watchesLoading && !busy && ownRef.current) restingWidth.current = ownRef.current.getBoundingClientRect().width
   })
   React.useLayoutEffect(() => {
     const element = ownRef.current
@@ -78,7 +81,7 @@ export function Button({
       data-variant={variant}
       data-size={size}
       {...(!asChild ? { type } : {})}
-      className={cn(buttonVariants({ variant, size }), className)}
+      className={cn(buttonClasses({ variant, size }), className)}
       disabled={disabled || busy || undefined}
       aria-busy={busy || undefined}
       {...props}
@@ -101,4 +104,20 @@ export function Button({
       )}
     </Component>
   )
+}
+
+export type ButtonVariantsOptions = VariantProps<typeof buttonClasses> & { className?: string }
+// Read from an element, so a beside install, which renames the slot in markup, renames it here too.
+const buttonSlot = (<span data-slot="button" /> as React.ReactElement<{ 'data-slot': string }>).props['data-slot']
+/**
+ * The attributes an element needs to look like a Button: the family stylesheets select
+ * data-slot, data-variant and data-size, not a class. Spread the result onto the element.
+ */
+export function buttonVariants({ variant = 'default', size = 'default', className }: ButtonVariantsOptions = {}) {
+  return {
+    'data-slot': buttonSlot,
+    'data-variant': variant ?? 'default',
+    'data-size': size ?? 'default',
+    className: cn(buttonClasses({ variant, size }), className),
+  } as const
 }

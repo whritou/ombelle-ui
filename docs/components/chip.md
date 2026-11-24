@@ -1,6 +1,6 @@
 # Chip
 
-Chip is a compact token. A pressable chip is a filter that turns on and off; a static chip is a label, optionally with a remove button. ChipGroup names a row of chips. It is available in all five families in light and dark mode, in one template for both editions; the template is a client component.
+Chip is a compact token. A pressable chip is a filter that turns on and off; a static chip is a label, optionally with a remove button. ChipGroup names a row of chips. It is available in all eight families in light and dark mode, in one template for both editions; the template is a client component.
 
 This component requires CLI **0.7.3** or later: `npx @ombelle-ui/cli@0.7.3 add chip`. For a built local checkout:
 
@@ -35,6 +35,10 @@ export function Topic({ onRemove }: { onRemove(): void }) {
 - `ChipGroup` is a `role="group"`. Name it with `aria-label` or `aria-labelledby`.
 - The remove button is a 24px target, so a chip stays at least 28px tall.
 
+## Size (1.0)
+
+Chip has no `size` prop. Its height follows density: 0.75rem less than the control height (28px; 32px in organic and retro futurism), so compact density makes chips 4px shorter. Chips are not on the [shared size scale](../03-components-styles-accessibility.md#sizes) because their 24px remove button sets their floor and they sit inside fields that set their own size.
+
 ## Recipe
 
 The recipe editor sets `mode` (`pressable` or `removable`), the pressed chip ids, the group label, and one to six chips. Only chips in the recipe may be pressed.
@@ -43,6 +47,6 @@ Compilation emits `components/ui/chip.tsx`, `components/ui/chip.css` and `exampl
 
 ## Liquid glass
 
-Liquid glass is experimental for Chip, as for every glass component, and its findings do not block a release. See [liquid glass](liquid-glass.md).
+Liquid glass is supported for Chip without an accessibility guarantee, as for every glass component; only its contrast findings, which depend on the backdrop, are advisory in the specimen audit. See [liquid glass](liquid-glass.md).
 
 See [form controls evidence](../evidence/form-controls-073.md) for the board comparison and the specimen audit.

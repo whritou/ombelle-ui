@@ -95,7 +95,17 @@ for (const [id, field] of Object.entries(fields)) test(`edits and restores ${id}
 })
 
 async function appearance(parts: Locator) {
-  return parts.evaluateAll(elements => elements.map(element => {
+  return parts.evaluateAll(elements => {
+    // Colours resolve to sRGB bytes: the editor keeps the authored oklch() while a production
+    // build may serialise the same colour as lab(), so compare what is painted.
+    const context = new OffscreenCanvas(1, 1).getContext('2d', { willReadFrequently: true })!
+    const rgba = (color: string) => {
+      context.clearRect(0, 0, 1, 1)
+      context.fillStyle = color
+      context.fillRect(0, 0, 1, 1)
+      return [...context.getImageData(0, 0, 1, 1).data]
+    }
+    return elements.map(element => {
     const style = getComputedStyle(element)
     return {
       tag: element.tagName, text: element.textContent?.trim(),
@@ -103,10 +113,40 @@ async function appearance(parts: Locator) {
       role: element.getAttribute('role'), checked: element.getAttribute('aria-checked'),
       selected: element.getAttribute('aria-selected'), value: element.getAttribute('aria-valuenow'),
       disabled: element.hasAttribute('disabled'),
-      color: style.color, background: style.backgroundColor, border: style.borderTopColor,
-      radius: style.borderTopLeftRadius, display: style.display,
+      // Only what paints: text colour where the part has text of its own, border colour where a border
+      // is drawn. A track or a wrapper (Progress, Native Select) inherits the page's colour, which a
+      // host app and the editor are free to differ on; the parts inside it are compared themselves.
+      color: [...element.childNodes].some(node => node.nodeType === Node.TEXT_NODE && node.textContent?.trim())
+        ? rgba(style.color) : null,
+      // Whether the text colour is just the parent's: the editor page and a host app have different page
+      // colours, so a part that inherits its colour on both sides is not compared on it (see below).
+      inheritsColor: element.parentElement !== null && getComputedStyle(element.parentElement).color === style.color,
+      background: rgba(style.backgroundColor),
+      border: parseFloat(style.borderTopWidth) > 0 ? rgba(style.borderTopColor) : null,
+      // A flex or grid parent blockifies its children (inline-flex computes as flex): the editor and the
+      // installed stage nest the recipe at different depths, so compare the display type, not its inline-ness.
+      radius: style.borderTopLeftRadius, display: style.display.replace(/^inline-/, ''),
     }
-  }))
+    })
+  })
+}
+
+type Appearance = Awaited<ReturnType<typeof appearance>>
+
+// The two sides may round a converted colour to neighbouring bytes; allow 1/255 per channel.
+function appearanceDifferences(left: Appearance, right: Appearance) {
+  if (left.length !== right.length) return [`${left.length} parts against ${right.length}`]
+  return left.flatMap((part, index) => {
+    const other = right[index]!
+    return (Object.keys(part) as (keyof typeof part)[]).flatMap(key => {
+      if (key === 'inheritsColor' || (key === 'color' && part.inheritsColor && other.inheritsColor)) return []
+      const a = part[key], b = other[key]
+      const same = Array.isArray(a) && Array.isArray(b)
+        ? a.length === b.length && a.every((value, channel) => Math.abs(value - b[channel]!) <= 1)
+        : a === b
+      return same ? [] : [`${index}.${key}: ${JSON.stringify(a)} against ${JSON.stringify(b)}`]
+    })
+  })
 }
 
 const overlayParts = {
@@ -118,7 +158,10 @@ const overlayParts = {
 } as const
 
 for (const framework of ['vite', 'next'] as const) test(`installed catalog recipes match the editor in ${framework}`, async ({ page, context }) => {
-  test.setTimeout(480_000)
+  // Vite installs every catalog recipe one CLI call at a time, then builds: 8 minutes was not enough
+  // beside the rest of the consumer matrix (23 November). Each recipe page also starts a cold editor
+  // compiler (5 to 7 s on CI), so the Vite case took 15.5, 18.7 and over 20 minutes on CI (24 November).
+  test.setTimeout(framework === 'vite' ? 1_800_000 : 480_000)
   const recipes = catalogRecipeFixtures().filter(recipe =>
     framework === 'vite' || ['badge', 'checkbox', 'dialog'].includes(recipe.component))
   await page.addInitScript(drafts => {
@@ -135,22 +178,35 @@ for (const framework of ['vite', 'next'] as const) test(`installed catalog recip
     try {
       for (const recipe of recipes) {
         await page.goto(`http://127.0.0.1:3000/editor/component/${recipe.component}`)
-        await expect(page.getByRole('button', { name: 'Get code', exact: true })).toBeEnabled()
+        // Each page starts a cold compiler worker that then runs the catalog, batch and recipe
+        // compiles in turn: 5-7 s for one cold compile on a CI runner, so allow 30 s as the gallery does.
+        await expect(page.getByRole('button', { name: 'Get code', exact: true })).toBeEnabled({ timeout: 30000 })
         const iframe = page.locator('iframe[title$="recipe preview"]')
         const preview = iframe.contentFrame()
         const box = await iframe.boundingBox()
         expect(box).not.toBeNull()
         await consumer.setViewportSize({ width: Math.round(box!.width), height: Math.round(box!.height) })
-        const parts = '[data-ombelle-recipe][data-slot]'
+        const allParts = '[data-ombelle-recipe][data-slot]'
         for (const mode of ['light', 'dark'] as const) {
           await page.getByRole('radiogroup', { name: 'Preview mode' }).getByRole('radio', { name: mode, exact: false }).click()
           const frameRoot = preview.locator('html')
           if (mode === 'dark') await expect(frameRoot).toHaveClass(/\bdark\b/)
           else await expect(frameRoot).not.toHaveClass(/\bdark\b/)
           await consumer.goto(`${url}/?recipe=${recipe.id}&mode=${mode}`)
-          await expect(consumer.locator('main')).toHaveAttribute('data-ready', 'true')
+          await expect(consumer.locator('main[data-ready]')).toHaveAttribute('data-ready', 'true')
           const id = recipe.component
-          const left = preview.locator(parts), right = consumer.locator(parts)
+          // The triggers of Dialog, Sheet, Alert Dialog, Popover, Tooltip and Dropdown Menu carry no catalog
+          // style. The editor draws them as buttons (recipe-preview-trigger in apps/preview) so they read as
+          // clickable, while an app styles its own. Leave out exactly the parts the editor drew that way, on
+          // both sides; their content parts are still compared. Called once the parts have rendered.
+          const compareParts = async () => {
+            const chrome = await preview.locator(`.recipe-preview-trigger${allParts}`)
+              .evaluateAll(elements => elements.map(element => element.getAttribute('data-slot')!))
+            const parts = allParts + chrome.map(slot => `:not([data-slot="${slot}"])`).join('')
+            const left = preview.locator(parts), right = consumer.locator(parts)
+            const expected = await appearance(right)
+            await expect.poll(async () => appearanceDifferences(await appearance(left), expected), { message: `${id} in ${mode}` }).toEqual([])
+          }
           if (id in overlayParts) {
             const [role, slot] = overlayParts[id as keyof typeof overlayParts]
             const name = 'trigger' in recipe.content ? recipe.content.trigger : 'Edited select'
@@ -166,7 +222,7 @@ for (const framework of ['vite', 'next'] as const) test(`installed catalog recip
             }
             await expect(leftContent).toBeVisible()
             await expect(rightContent).toBeVisible()
-            await expect.poll(() => appearance(left), { message: `${id} in ${mode}` }).toEqual(await appearance(right))
+            await compareParts()
             await page.keyboard.press('Escape')
             await consumer.keyboard.press('Escape')
             await expect(leftContent).toBeHidden()
@@ -174,9 +230,10 @@ for (const framework of ['vite', 'next'] as const) test(`installed catalog recip
             await expect(leftTrigger).toBeFocused()
             await expect(rightTrigger).toBeFocused()
           } else {
-            await expect(left.first()).toBeAttached()
-            await expect(right.first()).toBeAttached()
-            await expect.poll(() => appearance(left), { message: `${id} in ${mode}` }).toEqual(await appearance(right))
+            // A closed Sheet or Alert Dialog may show nothing but its trigger: then both sides compare no parts.
+            await expect(preview.locator(allParts).first()).toBeAttached()
+            await expect(consumer.locator(allParts).first()).toBeAttached()
+            await compareParts()
           }
           if (id === 'progress') {
             await expect(preview.getByRole('progressbar')).toHaveAttribute('aria-valuenow', '25')
@@ -196,7 +253,7 @@ for (const framework of ['vite', 'next'] as const) test(`installed catalog recip
       }
       if (glass.length) {
         await consumer.goto(`${url}/?recipe=glass-isolation&mode=dark`)
-        await expect(consumer.locator('main')).toHaveAttribute('data-ready', 'true')
+        await expect(consumer.locator('main[data-ready]')).toHaveAttribute('data-ready', 'true')
         const filterIds = await consumer.locator('filter[id^="ombelle-recipe-"]').evaluateAll(filters => filters.map(filter => filter.id))
         expect(new Set(filterIds).size).toBe(2)
         for (const suffix of ['first', 'second']) {

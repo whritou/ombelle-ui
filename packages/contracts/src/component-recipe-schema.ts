@@ -1,7 +1,7 @@
 // Generated from schemas/component-recipe.schema.json; do not edit independently.
 export const componentRecipeSchema = {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ui.example.com/schemas/component-recipe-2.0.json",
+  "$id": "https://ombelle-ui.vercel.app/schemas/component-recipe-2.0.json",
   "type": "object",
   "required": [
     "schemaVersion",
@@ -2190,7 +2190,7 @@ export const componentRecipeSchema = {
                     "title": "Link",
                     "maxLength": 1000,
                     "default": "",
-                    "pattern": "^(?:$|/(?!/)|#[A-Za-z0-9_-]|https://)"
+                    "pattern": "^(?:$|/(?![/\\\\])|#[A-Za-z0-9_-]|https://)"
                   }
                 },
                 "additionalProperties": false,
@@ -4644,7 +4644,7 @@ export const componentRecipeSchema = {
                     "title": "Link",
                     "maxLength": 200,
                     "default": "/",
-                    "pattern": "^(/|#|https?://)"
+                    "pattern": "^(?:/(?![/\\\\])|#[A-Za-z0-9_-]|https://)"
                   },
                   "links": {
                     "type": "array",
@@ -4672,7 +4672,7 @@ export const componentRecipeSchema = {
                           "title": "Link",
                           "maxLength": 200,
                           "default": "/",
-                          "pattern": "^(/|#|https?://)"
+                          "pattern": "^(?:/(?![/\\\\])|#[A-Za-z0-9_-]|https://)"
                         },
                         "description": {
                           "type": "string",

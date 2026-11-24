@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import type { RecipeCompileResult } from '@ombelle/contracts'
 import type { CompileDiagnostic, CompileRequest, CompileResponse } from './compile-protocol'
 import { validatePreviewCompileResult } from './preview-protocol'
+import { acquireWorker, nextRequestId } from './shared-worker'
 
 export type CompilerState = {
   status: 'idle' | 'compiling' | 'compiled' | 'invalid'
@@ -59,12 +60,12 @@ export function useCompiler(recipe: unknown): CompilerState {
   const latestRequestId = useRef(0)
 
   useEffect(() => {
-    const instance = new Worker('/editor-compiler.worker.js', { type: 'module' })
+    const { worker: instance, release } = acquireWorker('/editor-compiler.worker.js')
     worker.current = instance
-    instance.onmessage = (event: MessageEvent<unknown>) => {
+    const onMessage = (event: MessageEvent<unknown>) => {
       setState((previous) => acceptCompileResponse(previous, event.data, latestRequestId.current))
     }
-    instance.onerror = () => {
+    const onError = () => {
       setState((previous) => ({
         status: 'invalid',
         result: previous.result,
@@ -72,14 +73,18 @@ export function useCompiler(recipe: unknown): CompilerState {
         stale: previous.result !== null,
       }))
     }
+    instance.addEventListener('message', onMessage)
+    instance.addEventListener('error', onError)
     return () => {
-      instance.terminate()
+      instance.removeEventListener('message', onMessage)
+      instance.removeEventListener('error', onError)
+      release()
       worker.current = null
     }
   }, [])
 
   useEffect(() => {
-    const requestId = ++latestRequestId.current
+    const requestId = (latestRequestId.current = nextRequestId())
     setState((previous) => ({
       ...previous,
       status: 'compiling',

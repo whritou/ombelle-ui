@@ -26,7 +26,7 @@
     box-shadow var(--motion-duration);
 }
 [data-slot='select-trigger'][data-size='sm'] {
-  min-block-size: 2rem;
+  min-block-size: calc(var(--control-height) - 0.5rem);
   padding-block: 0.25rem;
   padding-inline: 0.75rem;
   font-size: 0.8125rem;
@@ -306,3 +306,7 @@
 [data-slot='select-item'][data-highlighted]{background:var(--accent);color:var(--accent-foreground);outline:2px solid var(--ring);outline-offset:-2px}
 [data-slot='select-separator']{block-size:2px;border-radius:2px;background:var(--rf-rule)}
 @media (forced-colors: active){[data-slot='select-content']{border:2px solid CanvasText;box-shadow:none}[data-slot='select-item'][data-highlighted]{background:Highlight;color:HighlightText}}
+/* 1.0 size scale (DES-12): sm and lg sit 0.5rem below and above the default, which follows --control-height */
+[data-slot='select-trigger']:not(:has([data-select-chip])), [data-slot='select-trigger'][data-size='sm']:not(:has([data-select-chip])) { padding-block: 0; }
+[data-slot='select-trigger'][data-size='lg'] { min-block-size: calc(var(--control-height) + 0.5rem); font-size: 1rem; }
+/* end 1.0 size scale */

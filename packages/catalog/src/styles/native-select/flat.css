@@ -24,7 +24,7 @@
   cursor: pointer;
 }
 [data-slot='native-select'][data-size='sm'] {
-  min-height: 2rem;
+  min-height: calc(var(--control-height) - 0.375rem);
   padding-block: 0.25rem;
   padding-inline-start: 0.75rem;
 }
@@ -85,3 +85,6 @@ select[multiple] + [data-slot='native-select-icon'] {
     border-bottom-width: 4px;
   }
 }
+/* 1.0 size scale (DES-12): sm and lg sit 0.5rem below and above the default, which follows --control-height */
+[data-slot='native-select'][data-size='lg'] { min-height: calc(var(--control-height) + 0.625rem); font-size: 1rem; }
+/* end 1.0 size scale */
