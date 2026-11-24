@@ -3,23 +3,33 @@ import { maxPixelDifference } from './pixel-difference.js'
 
 export async function snapshotPresetDom(locator: Locator) {
   return locator.evaluate((root) => {
-    // <noscript> never renders while scripts run, and its text differs by renderer: server rendering
-    // (a Next consumer) fills in input-otp's fallback style, client rendering (the editor) leaves it empty.
-    const nodes = [root, ...root.querySelectorAll('*')].filter((node) => !node.closest('noscript'))
-    return nodes.map((node) => {
-      const css = getComputedStyle(node)
-      return {
-        tag: node.tagName,
-        text: node.children.length ? null : node.textContent,
-        slot: node.getAttribute('data-slot'),
-        state: node.getAttribute('data-state'),
-        invalid: node.getAttribute('aria-invalid'),
-        disabled: node.hasAttribute('disabled'),
-        styles: Object.fromEntries(
-          ['color','background-color','font-family','font-size','font-weight','border-radius','border-width','border-color','box-shadow','min-height','height','padding','transition-duration','opacity'].map((key) => [key, css.getPropertyValue(key)]),
-        ),
-      }
-    })
+    // The editor gallery skips rendering sections out of view (content-visibility: auto in
+    // fixtures/shared/preset-gallery.css), and a skipped section reports its 480px placeholder
+    // height. Render every section while measuring so both sides report real layout.
+    const override = root.ownerDocument.createElement('style')
+    override.textContent = '* { content-visibility: visible !important; }'
+    root.ownerDocument.head.append(override)
+    try {
+      // <noscript> never renders while scripts run, and its text differs by renderer: server rendering
+      // (a Next consumer) fills in input-otp's fallback style, client rendering (the editor) leaves it empty.
+      const nodes = [root, ...root.querySelectorAll('*')].filter((node) => !node.closest('noscript'))
+      return nodes.map((node) => {
+        const css = getComputedStyle(node)
+        return {
+          tag: node.tagName,
+          text: node.children.length ? null : node.textContent,
+          slot: node.getAttribute('data-slot'),
+          state: node.getAttribute('data-state'),
+          invalid: node.getAttribute('aria-invalid'),
+          disabled: node.hasAttribute('disabled'),
+          styles: Object.fromEntries(
+            ['color','background-color','font-family','font-size','font-weight','border-radius','border-width','border-color','box-shadow','min-height','height','padding','transition-duration','opacity'].map((key) => [key, css.getPropertyValue(key)]),
+          ),
+        }
+      })
+    } finally {
+      override.remove()
+    }
   })
 }
 
