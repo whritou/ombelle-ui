@@ -74,7 +74,8 @@ jobs:
   # foundation.yml, which a release needs green.
   browser:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    # The audit part measures up to 12 components in every configuration (scripts/pr-audit-components.ts).
+    timeout-minutes: 40
     strategy:
       fail-fast: false
       matrix:

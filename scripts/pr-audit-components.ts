@@ -22,8 +22,10 @@ export function changedComponents(files: string[]): string[] {
   return [...ids].sort()
 }
 
-// A change to many components keeps the job near ten minutes; Foundation measures the rest.
-export const auditLimit = 20
+// A change to many components stays within the job's time limit; Foundation measures the rest. Twenty
+// components took about 26 minutes of tests (29 of 37 configurations in 20 minutes, release 1.0 on main),
+// past the 30-minute job with its setup; twelve take about 16.
+export const auditLimit = 12
 export function auditComponents(files: string[]): { components: string[]; deferred: string[] } {
   const all = [...new Set([...representativeComponents, ...changedComponents(files)])]
   return { components: all.slice(0, auditLimit), deferred: all.slice(auditLimit) }
