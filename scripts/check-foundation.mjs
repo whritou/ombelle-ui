@@ -43,7 +43,7 @@ try {
   for (const file of files) await fs.rm('.artifacts/' + file, { force: true })
   await fs.rm('.artifacts/component-preset-measurements-parts', { recursive: true, force: true })
   const result = await runFoundationStages({
-    stages: (group === 'aggregate' ? ['build:packages'] : foundationSteps[group]).map((name) => ({ name, command: process.execPath, args: [script, 'run', name], env })),
+    stages: (group === 'aggregate' ? ['build:packages', 'generate:preview'] : foundationSteps[group]).map((name) => ({ name, command: process.execPath, args: [script, 'run', name], env })),
     reportPath, logsDirectory: '.artifacts/logs', metadata: report, signal: controller.signal,
   })
   report = result.report
