@@ -167,7 +167,7 @@ Do them in this order of value:
 6. **Take a second, off-GitHub copy of the backups.** The workflow keeps encrypted artifacts for 90 days inside GitHub only. Either download one encrypted backup per quarter to private storage and log it in the drill table below, or add an upload step to the workflow to a second store with object lock (for example an R2 or S3 bucket). The credentials for that store are owner secrets.
 7. **Optional: stop building Vercel previews for `dependabot/*`** with the project's Ignored Build Step; CI already covers them. This also lowers the Neon branch pressure.
 8. **Optional: Neon's own preview-branch cleanup.** Some versions of the Neon-Vercel integration offer automatic deletion of obsolete preview branches; check whether this project's integration has it. The sweep below does not depend on it.
-9. **npm provenance.** See [proposed CI publishing](cli-release.md#proposed-ci-publishing-owner-action).
+9. **npm provenance.** See [CI publishing with provenance](cli-release.md#ci-publishing-with-provenance-owner-setup).
 
 ## Credential inventory and rotation
 
