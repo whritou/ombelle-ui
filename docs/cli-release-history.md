@@ -5,9 +5,10 @@ This is the dated record of every `@ombelle-ui/cli` release: what changed, what 
 The 1.0.0 release freezes the 1.0 public contract and ships the 1.0 audit fixes (see the 1.0.0 CHANGELOG entry and
 the [upgrade guide](upgrading-to-1.0.md)). The CLI gains `update`, `preset apply`, `preset show`, `info`, `doctor` and
 `diff`, versioned `--json` output with coded notices, React 19 ranges, and recovery for interrupted applies; installed
-source changes in glass CSS, `styles/ui-style.css` and the Data Table example. It is the first release published from
-GitHub Actions with npm trusted publishing and a provenance attestation (`publish-cli.yml`, approved through the
-`npm-release` environment), from `517c6309`, where Foundation run 45485446635 passed. No install command on the website
+source changes in glass CSS, `styles/ui-style.css` and the Data Table example. `@ombelle-ui/cli@1.0.0` was published
+on 2026-11-24 from `517c6309`, where Foundation run 45485446635 passed, and is the `latest` tag. It is the first release
+published from GitHub Actions with npm trusted publishing and a provenance attestation (`publish-cli.yml`, approved
+through the `npm-release` environment). No install command on the website
 needed a newer installer before it (`installRules` is empty). Published first, then `pnpm version:set --published 1.0.0`
 (and `--check --published`) and deploy from `main`. The registry tarball, its integrity, a fresh registry install and a
 production dry-run `init` were verified after publication. See [release evidence](evidence/npm-1.0.0-2026-11-24.md).
