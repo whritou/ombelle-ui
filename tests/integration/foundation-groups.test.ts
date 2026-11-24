@@ -345,6 +345,12 @@ test.each([
   await mutate(root)
   await expect(aggregateFoundationEvidence(root, commit, { inventories }).then(() => undefined)).rejects.toThrow()
 })
+test('accepts specimen specs that repeat a title in different describe blocks', async () => {
+  // Playwright ids cover the describe path; calendar.spec.ts repeats titles across blocks (24 November).
+  const root = await fixture()
+  await patch(root, 'foundation-specimen-shard-1', 'specimen-results.json', (r) => { r.suites[0].specs[1].title = r.suites[0].specs[0].title })
+  await expect(aggregateFoundationEvidence(root, commit, { inventories })).resolves.toMatchObject({ status: 'passed' })
+})
 test('rejects passed reports without their measured evidence files', async () => {
   const root = await fixture()
   await fs.rm(path.join(root, 'consumers/recipe-measurements.json'))
