@@ -2,6 +2,7 @@ import fs from 'node:fs/promises'
 import { readFileSync } from 'node:fs'
 import { supportedComponentIds } from '../packages/contracts/src/component-ids.ts'
 import path from 'node:path'
+import os from 'node:os'
 import { execFile } from 'node:child_process'
 import { promisify } from 'node:util'
 import { fileURLToPath } from 'node:url'
@@ -26,6 +27,10 @@ export const evidenceFiles = {
   specimen: ['specimen-audit.json', 'specimen-results.json'],
 }
 export { parseShard } from './specimen-shard.mjs'
+export { parseConsumerShard } from './consumer-shards.mjs'
+// Consumer evidence that browser specs write: in a sharded run exactly one shard holds each file.
+// Every other consumer file comes from consumer preparation, which every shard repeats.
+export const consumerTestEvidence = ['browser-version.json', 'minimalist-measurements.json', 'recipe-measurements.json', 'component-preset-measurements.json']
 const repo = fileURLToPath(new URL('../', import.meta.url))
 const read = async (directory, file) => JSON.parse(await fs.readFile(path.join(directory, file), 'utf8'))
 const fail = (message) => { throw new Error(message) }
@@ -238,6 +243,8 @@ export async function validateGroupEvidence(directory, group, options = {}) {
     return { specimenAudit: validateSpecimenAudit(audit), counts: { specimen: { expected: specs.length, knownFailures: knownFailures(specs) } } }
   }
   if (group !== 'consumers') fail('Unknown foundation group')
+  // A shard is checked for what it ran; the aggregate merges the shards and checks everything.
+  if (options.shard) return { consumersShard: { specs: passingSpecs(await read(directory, 'browser-results.json'), 'browser').length } }
   const browser = validateBrowserResults(await read(directory, 'browser-results.json'))
   const consumerMatrix = finalizeConsumerEvidence(consumerCases(), await read(directory, 'consumer-matrix.json'))
   const minimalistMeasurements = validateMinimalistMeasurements(await read(directory, 'minimalist-measurements.json'))
@@ -253,18 +260,40 @@ export async function validateGroupEvidence(directory, group, options = {}) {
 export function combineEvidence(...groups) {
   return Object.assign({}, ...groups, { counts: Object.assign({}, ...groups.map(group => group.counts)) })
 }
-/** The specimen group is one unsharded report, or shards 1..total of one total, each once. */
-function requireSpecimenShards(shards) {
+/** A group is one unsharded report, or shards 1..total of one total, each once. */
+function requireShards(shards, label) {
   if (shards.length === 1 && !shards[0].report.shard) return
   const total = shards[0]?.report.shard?.total
   if (!Number.isInteger(total) || shards.length !== total || shards.some(({ report }) => report.shard?.total !== total)
-    || new Set(shards.map(({ report }) => report.shard.current)).size !== total) fail('Missing or duplicate specimen shard')
+    || new Set(shards.map(({ report }) => report.shard.current)).size !== total) fail('Missing or duplicate ' + label + ' shard')
+}
+/**
+ * Merge consumer shard evidence into one directory the unsharded validation reads: the browser
+ * reports joined (each spec once, checked against the pinned counts), each test-written file from
+ * the one shard whose specs wrote it, and the preparation files every shard produced from shard 1.
+ */
+export async function mergeConsumerShards(roots, output) {
+  const reports = await Promise.all(roots.map(root => read(root, 'browser-results.json')))
+  const sum = key => reports.reduce((total, report) => total + (report.stats?.[key] ?? 0), 0)
+  const browser = {
+    ...reports[0], suites: reports.flatMap(report => report.suites ?? []), errors: reports.flatMap(report => report.errors ?? []),
+    stats: { ...reports[0].stats, expected: sum('expected'), unexpected: sum('unexpected'), skipped: sum('skipped'), flaky: sum('flaky'), duration: Math.max(...reports.map(report => report.stats?.duration ?? 0)) },
+  }
+  await fs.writeFile(path.join(output, 'browser-results.json'), JSON.stringify(browser))
+  const exists = file => fs.access(file).then(() => true, () => false)
+  for (const file of evidenceFiles.consumers.filter(name => name !== 'browser-results.json')) {
+    const holders = []
+    for (const root of roots) if (await exists(path.join(root, file))) holders.push(root)
+    if (consumerTestEvidence.includes(file) ? holders.length !== 1 : holders.length !== roots.length) fail('Missing or duplicate consumer shard evidence: ' + file)
+    await fs.copyFile(path.join(holders[0], file), path.join(output, file))
+  }
+  return output
 }
 export async function aggregateFoundationEvidence(directory, sourceCommit, options = {}) {
   if (!/^[a-f0-9]{40,64}$/.test(sourceCommit)) fail('Missing actual source commit')
   const entries = await fs.readdir(directory, { withFileTypes: true })
   if (entries.some(entry => !entry.isDirectory())) fail('Expected only foundation group artifacts')
-  const groups = new Map(), shards = []
+  const groups = new Map(), shards = [], consumerShards = []
   // Check every prerequisite before validating the potentially large content.
   for (const entry of entries) {
     const root = path.join(directory, entry.name)
@@ -275,12 +304,24 @@ export async function aggregateFoundationEvidence(directory, sourceCommit, optio
     const expected = foundationSteps[report.group]
     if (!Array.isArray(report.steps) || report.steps.length !== expected.length || report.steps.some((step, index) => step.name !== expected[index] || step.status !== 'passed' || step.exitCode !== 0)) fail('Incomplete or failed foundation stages: ' + report.group)
     if (report.group === 'specimen') shards.push({ root, report })
+    else if (report.group === 'consumers') consumerShards.push({ root, report })
     else groups.set(report.group, { root, report })
   }
-  if (!groups.has('quality') || !groups.has('consumers') || !shards.length) fail('Missing or duplicate foundation group')
-  requireSpecimenShards(shards)
+  if (!groups.has('quality') || !consumerShards.length || !shards.length) fail('Missing or duplicate foundation group')
+  requireShards(shards, 'specimen')
+  requireShards(consumerShards, 'consumers')
   const quality = await validateGroupEvidence(groups.get('quality').root, 'quality', options)
-  const consumers = await validateGroupEvidence(groups.get('consumers').root, 'consumers')
+  let consumers
+  if (consumerShards.length === 1) consumers = await validateGroupEvidence(consumerShards[0].root, 'consumers')
+  else {
+    const merged = await fs.mkdtemp(path.join(os.tmpdir(), 'ombelle-consumer-shards-'))
+    try {
+      await mergeConsumerShards(consumerShards.sort((a, b) => a.report.shard.current - b.report.shard.current).map(shard => shard.root), merged)
+      consumers = await validateGroupEvidence(merged, 'consumers')
+    } finally {
+      await fs.rm(merged, { recursive: true, force: true })
+    }
+  }
   const parts = []
   for (const { root } of shards) parts.push(await validateGroupEvidence(root, 'specimen'))
   let specimen
@@ -293,6 +334,6 @@ export async function aggregateFoundationEvidence(directory, sourceCommit, optio
     const merged = mergeSpecimenAudits(audits)
     specimen = { specimenAudit: validateSpecimenAudit(merged), specimenAuditEvidence: merged, counts: { specimen: { expected: specs.length, knownFailures: knownFailures(specs) } } }
   }
-  const reports = { ...Object.fromEntries([...groups].map(([group, value]) => [group, value.report])), specimen: shards.map(shard => shard.report) }
+  const reports = { ...Object.fromEntries([...groups].map(([group, value]) => [group, value.report])), consumers: consumerShards.length === 1 ? consumerShards[0].report : consumerShards.map(shard => shard.report), specimen: shards.map(shard => shard.report) }
   return { ...combineEvidence(quality, consumers, specimen), sourceCommit, status: 'passed', exitCode: 0, groups: reports }
 }

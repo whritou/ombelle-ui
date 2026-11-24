@@ -6,6 +6,7 @@ import { sha256 } from '@ombelle/compiler'
 import { supportedStyleFamilies } from '../../packages/contracts/src/style-families.js'
 import { expectColorParity } from '../helpers/color-compare.js'
 import { assertScopedButtonFocus } from '../helpers/recipe-browser.js'
+import { componentPresetMeasurementParts } from './component-presets.teardown.js'
 import {
   componentPresetReferences,
   componentPresetArtifact,
@@ -20,7 +21,6 @@ import {
   assertComponentPresetHostIsolation,
 } from '../helpers/component-preset-isolation.js'
 import {
-  validateComponentPresetMeasurements,
   componentPresetIsolationMethod,
   type ComponentPresetMeasurement,
 } from '../../scripts/component-preset-evidence.js'
@@ -28,8 +28,11 @@ import {
 const map = JSON.parse(fs.readFileSync('.artifacts/consumers.json', 'utf8'))
 const rows: ComponentPresetMeasurement[] = []
 const previewOnly = process.env.OMBELLE_COMPONENT_PRESET_PREVIEW_ONLY === '1'
+// Each case is independent, so the 128 cases spread over the workers (1.2 hours in one worker on
+// 23 November). Every worker writes its rows to a part; component-presets.teardown.ts merges the
+// parts once all workers finish and validates the complete set.
+test.describe.configure({ mode: 'parallel' })
 test.beforeAll(({ browser }, info) => {
-  fs.rmSync('.artifacts/component-preset-measurements.json', { force: true })
   fs.writeFileSync(
     '.artifacts/component-preset-browser-version.json',
     JSON.stringify(
@@ -43,11 +46,11 @@ test.beforeAll(({ browser }, info) => {
     ),
   )
 })
-test.afterAll(async () => {
-  if (!previewOnly) {
-    await validateComponentPresetMeasurements(rows)
+test.afterAll(async ({}, info) => {
+  if (!previewOnly && rows.length) {
+    fs.mkdirSync(componentPresetMeasurementParts, { recursive: true })
     fs.writeFileSync(
-      '.artifacts/component-preset-measurements.json',
+      path.join(componentPresetMeasurementParts, 'worker-' + info.workerIndex + '.json'),
       JSON.stringify(rows, null, 2),
     )
   }

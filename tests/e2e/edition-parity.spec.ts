@@ -10,6 +10,9 @@ import {
 } from '../helpers/edition-parity.js'
 
 type Edition = 'radix' | 'base'
+// Each case opens its own pages, so the 196 cases spread over the workers (1.6 hours in one worker
+// on 23 November).
+test.describe.configure({ mode: 'parallel' })
 // Each load gets its own URL: reloading the same URL lets Chromium restore
 // form controls (such as hidden radio inputs) from the previous state.
 let load = 0

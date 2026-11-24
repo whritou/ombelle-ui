@@ -6,6 +6,8 @@ import { afterEach, expect, test } from 'vitest'
 import { supportedComponentIds } from '@ombelle/contracts'
 // @ts-expect-error JavaScript gate entry point
 import { advisoryBaseline, aggregateFoundationEvidence, foundationSteps, specimenSpecCounts, validateBrowserResults, validateSpecimenAudit, validateTestResults } from '../../scripts/foundation-evidence.mjs'
+// @ts-expect-error JavaScript gate entry point
+import { consumerShardFiles } from '../../scripts/consumer-shards.mjs'
 import { consumerFixture, presetMeasurements, recipeMeasurements, minimalistMeasurements } from '../helpers/foundation-evidence-fixture.js'
 
 const roots: string[] = []
@@ -290,6 +292,56 @@ test.each([
   ['a skipped specimen spec', async (root: string) => { await patch(root, 'foundation-specimen-shard-1', 'specimen-results.json', (r) => { r.suites[0].specs[0].tests[0].results[0].status = 'skipped' }) }],
 ])('rejects specimen evidence with %s', async (_label, mutate) => {
   const root = await fixture()
+  await mutate(root)
+  await expect(aggregateFoundationEvidence(root, commit, { inventories }).then(() => undefined)).rejects.toThrow()
+})
+/** The consumers group as CI runs it: three shards by spec file, each with its browser cases and preparation files. */
+async function shardConsumers(root: string) {
+  const owned = consumerShardFiles as string[][]
+  const shardOf = (file: string) => owned.findIndex(files => files.includes(file)) + 1 || owned.length + 1
+  // Test-written evidence and the spec that writes it.
+  const writers: Record<string, string> = { 'browser-version.json': 'parity.spec.ts', 'minimalist-measurements.json': 'minimalist-states.spec.ts', 'recipe-measurements.json': 'recipes.spec.ts', 'component-preset-measurements.json': 'component-presets.spec.ts' }
+  const source = path.join(root, 'consumers')
+  const browser = JSON.parse(await fs.readFile(path.join(source, 'browser-results.json'), 'utf8'))
+  const report = JSON.parse(await fs.readFile(path.join(source, 'foundation-report.json'), 'utf8'))
+  const total = owned.length + 1
+  for (let current = 1; current <= total; current++) {
+    const directory = 'foundation-consumers-shard-' + current
+    await fs.mkdir(path.join(root, directory))
+    for (const file of await fs.readdir(source)) {
+      if (file === 'browser-results.json' || file === 'foundation-report.json') continue
+      if (writers[file] && shardOf(writers[file]) !== current) continue
+      await fs.copyFile(path.join(source, file), path.join(root, directory, file))
+    }
+    const suites = browser.suites.filter((suite: any) => shardOf(suite.file) === current)
+    const expected = suites.reduce((sum: number, suite: any) => sum + suite.specs.length, 0)
+    await write(root, directory, 'browser-results.json', { ...browser, suites, stats: { ...browser.stats, expected } })
+    await write(root, directory, 'foundation-report.json', { ...report, shard: { current, total } })
+  }
+  await fs.rm(source, { recursive: true })
+}
+test('merges three consumer shards into the complete consumer evidence', async () => {
+  const root = await fixture()
+  await shardConsumers(root)
+  const result = await aggregateFoundationEvidence(root, commit, { inventories })
+  expect(result).toMatchObject({ status: 'passed', counts: { browser: { expected: 1185 } } })
+  expect(Object.keys(result.consumerMatrix)).toHaveLength(54)
+  expect(result.recipeEvidence.measurements).toHaveLength(490)
+  expect(result.componentPresetEvidence.measurements).toHaveLength(490)
+  expect(result.groups.consumers).toHaveLength(3)
+})
+test.each([
+  ['a missing shard', async (root: string) => { await fs.rm(path.join(root, 'foundation-consumers-shard-2'), { recursive: true }) }],
+  ['a duplicated shard', async (root: string) => { await patch(root, 'foundation-consumers-shard-3', 'foundation-report.json', (r) => { r.shard.current = 1 }) }],
+  ['a browser case no shard ran', async (root: string) => { await patch(root, 'foundation-consumers-shard-1', 'browser-results.json', (r) => { r.suites[0].specs.pop(); r.stats.expected-- }) }],
+  ['a browser file two shards ran', async (root: string) => { await patch(root, 'foundation-consumers-shard-1', 'browser-results.json', (r) => { r.suites.push({ ...r.suites[0] }); r.stats.expected *= 2 }) }],
+  ['a failed browser case', async (root: string) => { await patch(root, 'foundation-consumers-shard-3', 'browser-results.json', (r) => { r.suites[0].specs[0].tests[0].results[0].status = 'failed' }) }],
+  ['test-written evidence from two shards', async (root: string) => { await fs.copyFile(path.join(root, 'foundation-consumers-shard-2/recipe-measurements.json'), path.join(root, 'foundation-consumers-shard-1/recipe-measurements.json')) }],
+  ['test-written evidence from no shard', async (root: string) => { await fs.rm(path.join(root, 'foundation-consumers-shard-2/component-preset-measurements.json')) }],
+  ['preparation evidence missing from a shard', async (root: string) => { await fs.rm(path.join(root, 'foundation-consumers-shard-1/consumer-matrix.json')) }],
+])('rejects consumer shard evidence with %s', async (_label, mutate) => {
+  const root = await fixture()
+  await shardConsumers(root)
   await mutate(root)
   await expect(aggregateFoundationEvidence(root, commit, { inventories }).then(() => undefined)).rejects.toThrow()
 })

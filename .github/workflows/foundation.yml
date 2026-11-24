@@ -48,14 +48,22 @@ jobs:
           include-hidden-files: true
           if-no-files-found: ignore
           path: .artifacts/upload/browser
+  # The 1,185 browser cases took 119 minutes in one job after 44 minutes of consumer preparation
+  # (24 November), so they run in three shards by spec file (scripts/consumer-shards.mjs), each
+  # about 35 to 45 minutes of tests. Each shard prepares the same consumers; the aggregate requires all three.
   consumers:
     runs-on: ubuntu-latest
-    timeout-minutes: 240
+    timeout-minutes: 180
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3]
     env:
       NEXT_TELEMETRY_DISABLED: '1'
       # With 2 workers 1,185 browser cases did not finish in 89 minutes; with 4, beside about
       # forty consumer servers, they took 1.6 hours and long tests timed out (23 November).
       OMBELLE_E2E_WORKERS: '3'
+      OMBELLE_CONSUMERS_SHARD: ${{ matrix.shard }}/3
     steps:
       # Preparing 40 consumers with their own node_modules can exhaust the
       # runner disk (EDQUOT during bun install). Drop preinstalled toolchains
@@ -79,10 +87,10 @@ jobs:
       - name: Install Chromium and system dependencies
         timeout-minutes: 15
         run: pnpm exec playwright install --with-deps chromium
-      - name: Verify all consumers and browser checks
+      - name: Verify all consumers and browser checks (shard ${{ matrix.shard }} of 3)
         # The browser matrix follows every cold consumer install; consumer preparation
         # alone took 27 to 42 minutes on 22 November.
-        timeout-minutes: 210
+        timeout-minutes: 150
         run: pnpm check:foundation:consumers
       - name: Stage finalized evidence after process teardown
         if: always()
@@ -92,7 +100,7 @@ jobs:
         if: always()
         timeout-minutes: 5
         with:
-          name: foundation-consumers-evidence
+          name: foundation-consumers-shard-${{ matrix.shard }}
           include-hidden-files: true
           if-no-files-found: error
           path: .artifacts/upload/core
@@ -100,7 +108,7 @@ jobs:
         if: always()
         timeout-minutes: 5
         with:
-          name: foundation-consumers-browser-evidence
+          name: foundation-consumers-browser-shard-${{ matrix.shard }}
           include-hidden-files: true
           if-no-files-found: ignore
           path: .artifacts/upload/browser
@@ -222,11 +230,11 @@ jobs:
         with:
           name: foundation-quality-evidence
           path: .artifacts/groups/quality
-      - name: Download consumers core evidence
+      - name: Download consumers shard evidence
         uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
-          name: foundation-consumers-evidence
-          path: .artifacts/groups/consumers
+          pattern: foundation-consumers-shard-*
+          path: .artifacts/groups
       - name: Download specimen shard evidence
         uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
