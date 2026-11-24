@@ -177,7 +177,9 @@ for (const framework of ['vite', 'next'] as const) test(`installed catalog recip
     try {
       for (const recipe of recipes) {
         await page.goto(`http://127.0.0.1:3000/editor/component/${recipe.component}`)
-        await expect(page.getByRole('button', { name: 'Get code', exact: true })).toBeEnabled()
+        // Each page starts a cold compiler worker that then runs the catalog, batch and recipe
+        // compiles in turn: 5-7 s for one cold compile on a CI runner, so allow 30 s as the gallery does.
+        await expect(page.getByRole('button', { name: 'Get code', exact: true })).toBeEnabled({ timeout: 30000 })
         const iframe = page.locator('iframe[title$="recipe preview"]')
         const preview = iframe.contentFrame()
         const box = await iframe.boundingBox()

@@ -98,6 +98,20 @@ export function createPresetCompiler(
     activeKey: string | null = null,
     pendingKey: string | null = null
   let timer: ReturnType<typeof setTimeout> | undefined
+  // At most one request in flight. The worker compiles requests one after another and never skips a
+  // superseded one, so a post per edit queues every stale draft behind the latest: on a slow machine
+  // the latest result came back about 26 s after the edit. While a request is out, only the latest
+  // draft waits; it is sent when the reply arrives.
+  let inFlight: { requestId: number; key: string } | null = null,
+    queued: PresetCompileRequest | null = null
+  const dispatch = (request: PresetCompileRequest) => {
+    if (inFlight) {
+      queued = request
+      return
+    }
+    inFlight = { requestId: request.requestId, key: canonicalize(request.draft) }
+    send(request)
+  }
   const emit = (next: PresetCompilerState) => {
     state = next
     notify(next)
@@ -119,11 +133,20 @@ export function createPresetCompiler(
       })
       const id = activeId
       timer = setTimeout(
-        () => send({ type: 'compile-preset', requestId: id, draft }),
+        () => dispatch({ type: 'compile-preset', requestId: id, draft }),
         150,
       )
     },
     receive(input: unknown) {
+      if (inFlight && record(input) && input.requestId === inFlight.requestId) {
+        const settled = inFlight.key
+        inFlight = null
+        const next = queued
+        queued = null
+        // A reply for the very draft now current answers it; anything else sends the latest draft.
+        if (next && settled === pendingKey && response(input)) activeId = input.requestId
+        else if (next) dispatch(next)
+      }
       if (
         !response(input) ||
         input.requestId !== activeId ||
@@ -149,6 +172,9 @@ export function createPresetCompiler(
     },
     fail() {
       clearTimeout(timer)
+      // The worker is gone or its reply is lost: free the slot, so the next edit or Retry sends at once.
+      inFlight = null
+      queued = null
       activeId = nextRequestId()
       emit({
         ...state,
@@ -163,6 +189,8 @@ export function createPresetCompiler(
     },
     dispose() {
       clearTimeout(timer)
+      inFlight = null
+      queued = null
       activeId = nextRequestId()
       pendingKey = null
     },
