@@ -1,11 +1,27 @@
 import { expect, test, type Locator, type Page } from '@playwright/test'
 import { maxPixelDifference } from './pixel-difference.js'
 
+// The gallery skips rendering sections out of view (content-visibility: auto in
+// fixtures/shared/preset-gallery.css), in the editor and in installed apps alike. A skipped section
+// reports its 480px placeholder height and paints nothing until a frame after it scrolls in, so
+// measurements and screenshots render every section while they run.
+const renderAll = '* { content-visibility: visible !important; }'
+const overrideId = 'ombelle-parity-render-all'
+async function setRenderAll(locator: Locator, on: boolean) {
+  await locator.evaluate((element, { on, css, id }) => {
+    const document = element.ownerDocument
+    document.getElementById(id)?.remove()
+    if (!on) return
+    const style = document.createElement('style')
+    style.id = id
+    style.textContent = css
+    document.head.append(style)
+  }, { on, css: renderAll, id: overrideId })
+}
+
 export async function snapshotPresetDom(locator: Locator) {
   return locator.evaluate((root) => {
-    // The editor gallery skips rendering sections out of view (content-visibility: auto in
-    // fixtures/shared/preset-gallery.css), and a skipped section reports its 480px placeholder
-    // height. Render every section while measuring so both sides report real layout.
+    // Render every section while measuring (see renderAll above).
     const override = root.ownerDocument.createElement('style')
     override.textContent = '* { content-visibility: visible !important; }'
     root.ownerDocument.head.append(override)
@@ -34,6 +50,24 @@ export async function snapshotPresetDom(locator: Locator) {
 }
 
 export async function assertPresetGalleryButtonPixels(input: {
+  page: Page
+  iframe: Locator
+  previewButton: Locator
+  installedButton: Locator
+  label: string
+}) {
+  const { installedButton, previewButton } = input
+  await setRenderAll(previewButton, true)
+  await setRenderAll(installedButton, true)
+  try {
+    await compareButtonPixels(input)
+  } finally {
+    await setRenderAll(previewButton, false)
+    await setRenderAll(installedButton, false)
+  }
+}
+
+async function compareButtonPixels(input: {
   page: Page
   iframe: Locator
   previewButton: Locator
