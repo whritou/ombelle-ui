@@ -2,7 +2,18 @@
 
 This is the dated record of every `@ombelle-ui/cli` release: what changed, what the website gates on, and what was verified after publication. It is append-only history. Statements about a "current" or "published" installer inside an entry describe that release's day, not today. The procedure for making a release is [cli-release.md](cli-release.md), and the version npm serves is `npm view @ombelle-ui/cli dist-tags`.
 
-The 0.9.1 entry below records the tarball published from `d162ab30`. The tree that follows it packs a different tarball under the same number; see [the version clash](cli-release.md#version-clash-in-this-tree).
+The 1.0.0 release freezes the 1.0 public contract and ships the 1.0 audit fixes (see the 1.0.0 CHANGELOG entry and
+the [upgrade guide](upgrading-to-1.0.md)). The CLI gains `update`, `preset apply`, `preset show`, `info`, `doctor` and
+`diff`, versioned `--json` output with coded notices, React 19 ranges, and recovery for interrupted applies; installed
+source changes in glass CSS, `styles/ui-style.css` and the Data Table example. `@ombelle-ui/cli@1.0.0` was published
+on 2026-11-24 from `517c6309`, where Foundation run 45485446635 passed, and is the `latest` tag. It is the first release
+published from GitHub Actions with npm trusted publishing and a provenance attestation (`publish-cli.yml`, approved
+through the `npm-release` environment). No install command on the website
+needed a newer installer before it (`installRules` is empty). Published first, then `pnpm version:set --published 1.0.0`
+(and `--check --published`) and deploy from `main`. The registry tarball, its integrity, a fresh registry install and a
+production dry-run `init` were verified after publication. See [release evidence](evidence/npm-1.0.0-2026-11-24.md).
+
+The 0.9.1 entry below records the tarball published from `d162ab30`. The 1.0 work that followed it was packed and published as 1.0.0, never as 0.9.1.
 
 The 0.9.1 release fixes catalog styles and changes no contract: Meter frames only its plain bar and gives the ring
 `data-mode="circle"`, Input OTP rings only the active slot, tab counts keep a gap from their label, Organic and

@@ -9,7 +9,7 @@ All six workspace packages use software version 1.0.0. This is the workspace ver
 
 ## Version in this tree
 
-The workspace is version 1.0.0, which is not on npm yet: the registry's latest is 0.9.1 (21 November 2026, from `d162ab30`). Until 1.0.0 is published and `version:set --published 1.0.0` is merged, the website keeps pinning the 0.9.1 installer (`publishedInstaller`), which does not contain the 1.0 fixes. Every number is final once published; `pnpm pack:cli -- --release` refuses a version the registry already has.
+The workspace and the published installer are both 1.0.0 (24 November 2026, from `517c6309`, published by `publish-cli.yml` with provenance). The next release bumps first with `pnpm version:set <next>`; every number is final once published, and `pnpm pack:cli -- --release` refuses a version the registry already has.
 
 ## Rules
 

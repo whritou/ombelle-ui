@@ -14,7 +14,7 @@ the installed source; nothing from Ombelle runs in your app.
   ([CLI specification](docs/05-cli-specification.md)). It plans first, shows every file and dependency change, and
   refuses to overwrite edited files.
 
-The six workspace packages are version **1.0.0**. The installer is published as `@ombelle-ui/cli@0.9.1` on
+The six workspace packages are version **1.0.0**. The installer is published as `@ombelle-ui/cli@1.0.0` on
 [npm](https://www.npmjs.com/package/@ombelle-ui/cli). What is promised to stay stable at 1.0 is
 written down in the [1.0 public contract](docs/1.0-public-contract.md); the open decisions are in
 [1.0 decisions](docs/1.0-decisions.md).
