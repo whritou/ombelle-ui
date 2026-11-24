@@ -159,8 +159,9 @@ const overlayParts = {
 
 for (const framework of ['vite', 'next'] as const) test(`installed catalog recipes match the editor in ${framework}`, async ({ page, context }) => {
   // Vite installs every catalog recipe one CLI call at a time, then builds: 8 minutes was not enough
-  // beside the rest of the consumer matrix (23 November).
-  test.setTimeout(framework === 'vite' ? 1_200_000 : 480_000)
+  // beside the rest of the consumer matrix (23 November). Each recipe page also starts a cold editor
+  // compiler (5 to 7 s on CI), so the Vite case took 15.5, 18.7 and over 20 minutes on CI (24 November).
+  test.setTimeout(framework === 'vite' ? 1_800_000 : 480_000)
   const recipes = catalogRecipeFixtures().filter(recipe =>
     framework === 'vite' || ['badge', 'checkbox', 'dialog'].includes(recipe.component))
   await page.addInitScript(drafts => {
