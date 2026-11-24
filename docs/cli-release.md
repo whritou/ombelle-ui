@@ -3,17 +3,13 @@
 How to publish `@ombelle-ui/cli`. It is a procedure, not a log: the dated record of past releases is
 [CLI release history](cli-release-history.md), and the evidence for each is in `docs/evidence/npm-<version>-<date>.md`.
 
-`pnpm pack:cli` generates `.artifacts/cli-release/ombelle-ui-cli-0.9.1.tgz` and a separate `release.json` containing its SHA-512 integrity, source commit, dirty-tree status, whether the version already exists on the registry, the file inventory and the bundled package inventory. The package contains bundled JavaScript, its manifest, README, MIT license and third-party notices. It has no workspace dependencies or installation scripts. Packing does not publish anything or enable public website commands.
+`pnpm pack:cli` generates `.artifacts/cli-release/ombelle-ui-cli-1.0.0.tgz` and a separate `release.json` containing its SHA-512 integrity, source commit, dirty-tree status, whether the version already exists on the registry, the file inventory and the bundled package inventory. The package contains bundled JavaScript, its manifest, README, MIT license and third-party notices. It has no workspace dependencies or installation scripts. Packing does not publish anything or enable public website commands.
 
-All six workspace packages use software version 0.9.1. This is the workspace version, not necessarily a published one: the version npm serves is `npm view @ombelle-ui/cli dist-tags`, and the version the website tells people to install is `publishedInstaller` in `apps/www/src/snapshots/install-command.ts`. They are updated by different commands (`version:set` and `version:set --published`) and are deliberately separate.
+All six workspace packages use software version 1.0.0. This is the workspace version, not necessarily a published one: the version npm serves is `npm view @ombelle-ui/cli dist-tags`, and the version the website tells people to install is `publishedInstaller` in `apps/www/src/snapshots/install-command.ts`. They are updated by different commands (`version:set` and `version:set --published`) and are deliberately separate.
 
-## Version clash in this tree
+## Version in this tree
 
-`@ombelle-ui/cli@0.9.1` is already published (21 November 2026, from `d162ab30`). The tree this procedure ships with has the 1.0 fixes on top of that commit but still says 0.9.1, so `pnpm pack:cli` here builds a **different tarball under a version npm will refuse to take again**, and the website still pins an installer without those fixes. Therefore:
-
-- Do not publish a candidate built at 0.9.1. `pnpm pack:cli -- --release` refuses it (the registry already has that number) and a plain `pnpm pack:cli` warns and records `versionAlreadyOnRegistry: true` in `release.json`.
-- The next release must bump first: `pnpm version:set <next>` (a release candidate such as `1.0.0-rc.1` is not accepted by the version script, which takes `x.y.z`; use `0.9.2` or go straight to `1.0.0`). Which number is next is the owner's call; every number is final once published.
-- Until that release, the website pins the installer it pins today (`publishedInstaller`), and anyone running the pinned or the unpinned command gets the published 0.9.1 tarball, which does not contain the 1.0 fixes (for example the dependency re-pinning fix CLI-01).
+The workspace is version 1.0.0, which is not on npm yet: the registry's latest is 0.9.1 (21 November 2026, from `d162ab30`). Until 1.0.0 is published and `version:set --published 1.0.0` is merged, the website keeps pinning the 0.9.1 installer (`publishedInstaller`), which does not contain the 1.0 fixes. Every number is final once published; `pnpm pack:cli -- --release` refuses a version the registry already has.
 
 ## Rules
 
@@ -21,7 +17,7 @@ All six workspace packages use software version 0.9.1. This is the workspace ver
 2. **Never reuse a version number.** npm will not accept it, and a different tarball under the same number is a silent fork. The packer checks the registry.
 3. **Publish first, deploy second.** The website deploys from `main` on every merge and emits install codes and commands based on `publishedInstaller` and the minimum-CLI gates in `install-command.ts`. A site that advertises a CLI that is not on npm yet gives users commands that fail. The order is always: publish, `version:set --published`, deploy.
 4. **Gate before publishing.** `pnpm check:foundation` must pass, or the release record states exactly what was not run and why. Several earlier releases skipped it; the history says which.
-5. **The owner publishes.** Publishing needs the npm identity `ombelle` (owner of the `@ombelle-ui` organization) with 2FA. An agent or CI job never does this; see [proposed CI publishing](#proposed-ci-publishing-owner-action).
+5. **The owner publishes.** Publishing needs the npm identity `ombelle` (owner of the `@ombelle-ui` organization) with 2FA. An agent never does this. The [CI publishing workflow](#ci-publishing-with-provenance-owner-setup) publishes only after the owner approves its environment.
 
 ## Procedure
 
@@ -111,13 +107,11 @@ Add `docs/evidence/npm-<version>-<date>.md` (use the previous one as the templat
 
 Follow the "Bad CLI release" runbook in [production operations](production-operations.md#bad-cli-release): deprecate the version, move `latest` back with `npm dist-tag`, and point the website at a working version with `version:set --published <good>` before anything else.
 
-## Proposed CI publishing (owner action)
+## CI publishing with provenance (owner setup)
 
-Publishing is a manual `npm publish` from the owner's workstation with a long-lived credential. Proposed replacement, which only the owner can enable because it needs the npm and GitHub account settings:
+`.github/workflows/publish-cli.yml` publishes from GitHub Actions with a signed provenance statement and no stored token (SEC-03). It runs on manual dispatch from `main` with the version and dist-tag, packs with `pnpm pack:cli -- --release`, checks `release.json` (release mode, clean tree, version not on npm, source commit equals the run's commit, the five-file inventory), uploads the candidate, and runs `npm publish --provenance`. It works only after the owner sets up, once:
 
-1. On npm, configure **trusted publishing** for `@ombelle-ui/cli`: repository `whritou/ombelle-ui`, workflow `publish-cli.yml`, environment `npm-release`. No token is stored.
-2. In GitHub, create the environment `npm-release` with the owner as required reviewer.
-3. Add `.github/workflows/publish-cli.yml` that runs on a `cli-v*` tag or manual dispatch, installs with the frozen lockfile, runs `pnpm pack:cli -- --release`, and publishes the tarball with `npm publish --provenance` (`permissions: id-token: write, contents: read`). The workflow publishes the tarball built from the tagged commit, so the registry integrity equals the artifact attached to the run.
-4. Keep steps 5 to 7 above manual or add them as a post-publish job.
+1. On npm, **trusted publishing** for `@ombelle-ui/cli`: GitHub Actions, repository `whritou/ombelle-ui`, workflow `publish-cli.yml`, environment `npm-release`.
+2. In GitHub, the environment `npm-release` with the owner as required reviewer, so every publish waits for an approval.
 
-This gives a signed provenance statement tying each version to a commit, removes the workstation credential, and lets a second maintainer release. It is not implemented here because the workflow cannot be tested without those settings; the repository's current `.github/workflows/` has no publish workflow.
+Until then the publish step fails and nothing is published; step 4's manual `npm publish` stays the fallback. With it, steps 5 to 7 above stay manual, the registry integrity equals the artifact attached to the run, and a second maintainer can release by approving the environment.

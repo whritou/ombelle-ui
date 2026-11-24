@@ -1,0 +1,70 @@
+name: Publish CLI
+# Publishes @ombelle-ui/cli to npm with a provenance statement (SEC-03, docs/cli-release.md "CI publishing").
+# The owner sets it up once, outside this repository:
+#   1. npm > @ombelle-ui/cli > Settings > Trusted publishing: GitHub Actions, repository whritou/ombelle-ui,
+#      workflow publish-cli.yml, environment npm-release.
+#   2. GitHub > Settings > Environments: create npm-release with the owner as required reviewer.
+# No npm token is stored. Until both exist the publish step fails and nothing is published.
+# Run it from main after the release commit's Foundation run passed (docs/cli-release.md step 4).
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Version to publish; must equal packages/cli/package.json
+        required: true
+      tag:
+        description: npm dist-tag (latest, or next for a version people opt into)
+        required: true
+        default: latest
+permissions:
+  contents: read
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment: npm-release
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      VERSION: ${{ inputs.version }}
+      TAG: ${{ inputs.tag }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Set up pinned tools and install the workspace
+        uses: ./.github/actions/setup-foundation
+        with:
+          cache-scope: publish
+      - name: Require the requested version and tag
+        run: |
+          test "$(node -p "require('./packages/cli/package.json').version")" = "$VERSION"
+          case "$TAG" in latest|next) ;; *) echo "Use the latest or next tag"; exit 1 ;; esac
+      - name: Pack the release candidate
+        # Refuses a dirty tree and a version the registry already has.
+        run: pnpm pack:cli -- --release
+      - name: Check the candidate record
+        run: |
+          node -e '
+            const r = require("./.artifacts/cli-release/release.json")
+            const files = ["LICENSE", "README.md", "THIRD_PARTY_NOTICES.txt", "dist/main.js", "package.json"]
+            const listed = (r.files ?? []).map(f => typeof f === "string" ? f : f.path).sort()
+            const problems = [
+              r.releaseMode !== true && "not release mode",
+              r.workingTreeDirty !== false && "dirty tree",
+              r.versionAlreadyOnRegistry !== false && "version already on npm",
+              r.version !== process.env.VERSION && "version " + r.version,
+              r.sourceCommit !== process.env.GITHUB_SHA && "source " + r.sourceCommit,
+              JSON.stringify(listed) !== JSON.stringify(files) && "files " + listed.join(","),
+            ].filter(Boolean)
+            if (problems.length) { console.error(problems.join("; ")); process.exit(1) }
+            console.log("Candidate " + r.version + " from " + r.sourceCommit + ", integrity " + r.integrity)
+          '
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: cli-release-${{ inputs.version }}
+          path: |
+            .artifacts/cli-release/release.json
+            .artifacts/cli-release/ombelle-ui-cli-${{ inputs.version }}.tgz
+          if-no-files-found: error
+      - name: Publish with provenance
+        run: npm publish ".artifacts/cli-release/ombelle-ui-cli-$VERSION.tgz" --access public --ignore-scripts --provenance --tag "$TAG"
