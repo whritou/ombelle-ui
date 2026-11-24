@@ -221,3 +221,10 @@ test('the default gate preserves child failure and durable stage details', async
   expect(report.completedAt).toEqual(expect.any(String))
   expect(await read(path.join(root, '.artifacts/logs/build-packages.log'))).toContain('gate child failed')
 })
+test('stages every evidence file the aggregate validates', async () => {
+  // A file the aggregate reads but staging drops reaches verify as ENOENT (specimen-results.json, 24 November).
+  const { coreFiles } = await import(new URL('../../scripts/stage-foundation-evidence.mjs', import.meta.url).href)
+  const { evidenceFiles } = await import(new URL('../../scripts/foundation-evidence.mjs', import.meta.url).href)
+  for (const file of Object.values(evidenceFiles as Record<string, string[]>).flat()) expect(coreFiles).toContain(file)
+  expect(coreFiles).toContain('foundation-report.json')
+})

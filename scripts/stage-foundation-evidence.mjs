@@ -2,14 +2,16 @@ import fs from 'node:fs/promises'
 import path from 'node:path'
 import { pathToFileURL } from 'node:url'
 
-const coreFiles = [
+// Every file the aggregate validates (evidenceFiles in foundation-evidence.mjs) must be staged here;
+// tests/integration/foundation-runner.test.ts checks the two lists agree.
+export const coreFiles = [
   'foundation-report.json', 'unit-results.json', 'integration-results.json',
   'browser-results.json', 'npm-version.json', 'yarn-versions.json', 'yarn-matrix.json',
   'bun-version.json', 'bun-matrix.json', 'browser-version.json', 'install-provenance.json',
   'consumer-pending.json', 'consumer-matrix.json', 'minimalist-measurements.json',
   'recipe-measurements.json', 'recipe-consumers.json',
   'component-preset-measurements.json', 'component-preset-consumers.json',
-  'component-preset-browser-version.json', 'specimen-audit.json',
+  'component-preset-browser-version.json', 'specimen-audit.json', 'specimen-results.json',
 ]
 
 async function copyStable(source, destination) {
