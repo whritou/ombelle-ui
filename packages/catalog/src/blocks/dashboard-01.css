@@ -1,6 +1,105 @@
-/* Placeholder: replaced by the real dashboard-01 styles. */
+/* Layout only: the components carry each family's look. */
 [data-block="dashboard-01"] {
   display: grid;
-  gap: var(--space-4);
-  padding: var(--space-6);
+  gap: 1.5rem;
+  padding: 1rem;
+  inline-size: 100%;
+  max-inline-size: 72rem;
+  margin-inline: auto;
+  box-sizing: border-box;
+}
+
+[data-block="dashboard-01"] > * {
+  min-inline-size: 0;
+}
+
+[data-block="dashboard-01"] [data-block-part="intro"] {
+  display: grid;
+  gap: 0.25rem;
+}
+
+[data-block="dashboard-01"] [data-block-part="intro"] h2,
+[data-block="dashboard-01"] [data-block-part="intro"] p {
+  margin: 0;
+}
+
+[data-block="dashboard-01"] [data-block-part="intro"] h2 {
+  font-family: var(--font-family);
+  font-size: 1.5rem;
+  line-height: 1.2;
+}
+
+[data-block="dashboard-01"] [data-block-part="intro"] p {
+  color: var(--muted-foreground);
+}
+
+[data-block="dashboard-01"] [data-block-part="tabs"] {
+  display: grid;
+  gap: 1rem;
+  justify-items: start;
+}
+
+[data-block="dashboard-01"] [data-block-part="tabs"] > * {
+  min-inline-size: 0;
+}
+
+/* Only the visible panel gets a layout: the tabs styles hide inactive ones, and an
+   unconditional display here would override that (and the hidden attribute). */
+[data-block="dashboard-01"] [data-block-part="panel"]:not([hidden]):not([data-state="inactive"]) {
+  display: grid;
+  inline-size: 100%;
+}
+
+[data-block="dashboard-01"] [data-block-part="figures"] {
+  display: grid;
+  gap: 1rem;
+  min-inline-size: 0;
+}
+
+[data-block="dashboard-01"] [data-block-part="stats"] {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: minmax(0, 1fr);
+}
+
+[data-block="dashboard-01"] [data-block-part="change"] {
+  margin: 0;
+  color: var(--muted-foreground);
+  font-size: 0.875rem;
+}
+
+[data-block="dashboard-01"] [data-block-part="activity"] {
+  min-inline-size: 0;
+}
+
+[data-block="dashboard-01"] [data-block-part="person"] {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  white-space: nowrap;
+}
+
+[data-block="dashboard-01"] [data-block-part="visually-hidden"] {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+@media (min-width: 640px) {
+  [data-block="dashboard-01"] [data-block-part="stats"] {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  [data-block="dashboard-01"] {
+    padding: 2rem 1.5rem;
+  }
+
+  [data-block="dashboard-01"] [data-block-part="stats"] {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
 }

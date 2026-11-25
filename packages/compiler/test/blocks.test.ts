@@ -5,7 +5,7 @@ import { blockManifest, getCatalog } from '@ombelle/catalog'
 import { compile } from '../src/index.js'
 
 const catalog = getCatalog('0.1.0')
-const run = (edition: 'radix' | 'base', blockIds: readonly ('login-01' | 'settings-01')[] = ['login-01']) =>
+const run = (edition: 'radix' | 'base', blockIds: readonly ('login-01' | 'settings-01' | 'pricing-01' | 'dashboard-01')[] = ['login-01']) =>
   compile({
     preset: catalog.presets.ombelle,
     componentIds: [],
@@ -75,6 +75,76 @@ describe('block artifacts', () => {
     const desktop = css.split('@media (max-width: 767.98px)')[0]
     const rules = [...desktop.matchAll(/([^{}]+)\{([^}]*)\}/g)]
     for (const [, selector, body] of rules) {
+      if (!selector.includes('[data-block-part="panel"]') || !/(^|;|\s)display\s*:/.test(body)) continue
+      expect(selector).toContain(':not([hidden]):not([data-state="inactive"])')
+    }
+  })
+
+  it.each(['radix', 'base'] as const)('compiles the %s pricing-01 block', async (edition) => {
+    const result = await run(edition, ['pricing-01'])
+    const paths = result.artifacts.map((artifact) => artifact.logicalPath)
+    expect(source(result, 'blocks/pricing-01.tsx').kind).toBe('block')
+    expect(source(result, 'blocks/pricing-01.css').kind).toBe('block')
+    for (const id of blockManifest['pricing-01'].components) expect(paths).toContain(`components/ui/${id}.tsx`)
+    const content = source(result, 'blocks/pricing-01.tsx').content
+    expect(content).toContain("'./pricing-01.css'")
+    if (edition === 'base') expect(content).not.toContain('asChild')
+    expect(content).toContain('export function Pricing01')
+    expect(content).toContain('<ToggleGroup')
+    expect(content).toContain('Monthly')
+    expect(content).toContain('Yearly')
+    expect(content).toContain('aria-label=')
+    // Three plan cards are rendered from exampleData.plans, exactly one of them highlighted.
+    expect(content).toContain('exampleData.plans.map')
+    expect(content.match(/highlighted: (true|false)/g) ?? []).toHaveLength(3)
+    expect(content.match(/highlighted: true/g) ?? []).toHaveLength(1)
+    expect(content).toContain('Recommended')
+    expect(content).toContain('<Badge')
+    expect(content).toContain('exampleData')
+    expect(content).toContain('Example prices')
+    expect(content).toContain('showExampleNotice')
+    expect(content).toContain('Example only:')
+    expect((content.match(/<h2|level=\{2\}/g) ?? []).length).toBe(1)
+    expect(content.match(/<h[13-6]|level=\{[13-6]\}/g) ?? []).toHaveLength(0)
+    expect(content).not.toContain('<h1')
+    expect(content).not.toContain('fetch(')
+    expect(content).not.toContain('Acme')
+  })
+
+  it.each(['radix', 'base'] as const)('compiles the %s dashboard-01 block', async (edition) => {
+    const result = await run(edition, ['dashboard-01'])
+    const paths = result.artifacts.map((artifact) => artifact.logicalPath)
+    expect(source(result, 'blocks/dashboard-01.tsx').kind).toBe('block')
+    expect(source(result, 'blocks/dashboard-01.css').kind).toBe('block')
+    for (const id of blockManifest['dashboard-01'].components) expect(paths).toContain(`components/ui/${id}.tsx`)
+    const content = source(result, 'blocks/dashboard-01.tsx').content
+    expect(content).toContain("'./dashboard-01.css'")
+    if (edition === 'base') expect(content).not.toContain('asChild')
+    else expect(content).toContain('asChild')
+    expect(content).toContain('export function Dashboard01')
+    expect(content).not.toContain('Sidebar')
+    expect(content).toContain('<Meter')
+    expect(content).toContain('<Progress')
+    expect(content).toContain('<Table')
+    expect(content).toContain('<Badge')
+    expect(content).toContain('>7 days<')
+    expect(content).toContain('>30 days<')
+    expect(content).toContain('<DropdownMenu')
+    expect(content).toContain('<DropdownMenuItem')
+    expect(content).toContain('aria-label=')
+    expect(content).toContain('exampleData')
+    expect(content).toContain('showExampleNotice')
+    expect(content).toContain('Example only:')
+    expect((content.match(/<h2|level=\{2\}/g) ?? []).length).toBe(1)
+    expect(content.match(/<h[13-6]|level=\{[13-6]\}/g) ?? []).toHaveLength(0)
+    expect(content).not.toContain('<h1')
+    expect(content).not.toContain('fetch(')
+    expect(content).not.toContain('Acme')
+  })
+
+  it("leaves pricing-01 and dashboard-01 layout rules out of Tabs panel display overrides", () => {
+    const css = catalog.blockStyles['dashboard-01']!
+    for (const [, selector, body] of css.matchAll(/([^{}]+)\{([^}]*)\}/g)) {
       if (!selector.includes('[data-block-part="panel"]') || !/(^|;|\s)display\s*:/.test(body)) continue
       expect(selector).toContain(':not([hidden]):not([data-state="inactive"])')
     }
