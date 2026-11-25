@@ -86,8 +86,8 @@ Each has one landmark or labelled region and a single `h2` heading (the host pag
 | --- | --- | --- | --- |
 | `login-01` | Centred sign-in card: email, password with show/hide, remember me, submit, forgot-password link, sign-up line, an error alert shown on demand | Card, Field, Input, Password Field, Checkbox, Button, Alert, Separator, Label | Sign-in submit, forgot password, sign-up link |
 | `settings-01` | Account settings: Profile (name, email, bio, avatar), Notifications (switches and a radio group), Danger zone with a confirm dialog, grouped by Tabs on desktop and stacked on phones | Tabs, Card, Field, Input, Textarea, Select, Switch, Radio Group, Avatar, Button, Alert Dialog, Separator, Toast | Save, delete account |
-| `pricing-01` | Three plans with a monthly/yearly toggle, a highlighted plan, feature lists and a comparison note | Toggle Group, Card, Badge, Button, Separator | Plan selection (no checkout) |
-| `dashboard-01` | Overview content area: four stat cards, a usage meter, a recent-activity table with status badges, and a tabbed range (7 days / 30 days) | Card, Meter, Progress, Badge, Table, Tabs, Avatar, Button, Dropdown Menu | All data |
+| `pricing-01` | Three plans with a monthly/yearly toggle, a highlighted plan, feature lists and a comparison note | Toggle Group, Card, Badge, Button, Separator, Toast | Plan selection (no checkout) |
+| `dashboard-01` | Overview content area: four stat cards, a usage meter, a recent-activity table with status badges, and a tabbed range (7 days / 30 days) | Card, Meter, Progress, Badge, Table, Tabs, Avatar, Button, Dropdown Menu, Toast | All data |
 
 `dashboard-01` is the content area only, without a Sidebar shell, so it drops into an existing layout. (My call: a shell block is a different product, closer to an app template.)
 
@@ -98,7 +98,7 @@ Content and layout start from the existing preset scenes (`sign-in.tsx`, `settin
 - `scripts/sync-catalog.mjs` reads `packages/catalog/src/blocks/` and adds `blockTemplates`, `blockBaseTemplates` and `blockStyles` to `catalogData` in `generated.ts`.
 - `packages/contracts` gains `supportedBlockIds` and `BlockId`, kept separate from `supportedComponentIds` so every list driven by component ids (specimens, consumers, audits) is unaffected unless it opts in.
 - `scripts/catalog-style-lint.ts` gains a block rule: every selector in `blocks/<id>.css` must name a `data-block="<id>"` root or a `data-block-part` marker, and may not name a component slot. That keeps a block from restyling a component, which would break the family look.
-- The compiler gains `compileBlock(input)`, which:
+- The compiler gains block support (the plan makes it a `blockIds` option on `compile()`), which:
   - compiles the block's component list exactly as `compile()` would for those ids (same preset, family and edition), and
   - adds two artifacts of a new kind `block`: `blocks/<id>.tsx` (the edition's template) and `blocks/<id>.css`.
   - Output is deterministic, and `Artifact['kind']` becomes `'component' | 'style' | 'usage' | 'utility' | 'block'`. `schemas/project-lock.schema.json` gains the `block` kind.
