@@ -13,7 +13,7 @@
     "pack:cli": "node scripts/pack-cli.mjs",
     "build:editor-worker": "node scripts/build-editor-worker.mjs",
     "build": "pnpm build:packages",
-    "typecheck": "node scripts/sync-schema.mjs && node scripts/sync-catalog.mjs && tsc --noEmit",
+    "typecheck": "node scripts/sync-schema.mjs && node scripts/sync-catalog.mjs && tsc --noEmit && tsc --noEmit -p tsconfig.blocks-base.json",
     "test:unit": "vitest run packages apps/www/src --reporter=default --reporter=json --outputFile=.artifacts/unit-results.json",
     "test:integration": "vitest run --config vitest.integration.config.ts tests/integration --reporter=default --reporter=json --outputFile=.artifacts/integration-results.json",
     "test:hosted-storage": "node --env-file-if-exists=.env.hosted.local node_modules/vitest/vitest.mjs run --config vitest.postgres.config.ts",

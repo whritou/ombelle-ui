@@ -1,6 +1,99 @@
-/* Placeholder: replaced by the real settings-01 styles. */
+/* Layout only: the components carry each family's look. */
 [data-block="settings-01"] {
   display: grid;
-  gap: var(--space-4);
-  padding: var(--space-6);
+  justify-items: center;
+  padding: 1rem;
+  inline-size: 100%;
+  box-sizing: border-box;
+}
+
+[data-block="settings-01"] [data-block-part="card"] {
+  inline-size: 100%;
+  max-inline-size: 44rem;
+  min-inline-size: 0;
+}
+
+[data-block="settings-01"] [data-block-part="tabs"] {
+  display: grid;
+  gap: 1.5rem;
+}
+
+[data-block="settings-01"] [data-block-part="panel"] {
+  display: grid;
+  gap: 1rem;
+  min-inline-size: 0;
+}
+
+/* On desktop the tab names each panel, so a panel's own title only appears when stacked. */
+[data-block="settings-01"] [data-block-part="panel-title"] {
+  display: none;
+  margin: 0;
+  font-weight: 600;
+}
+
+[data-block="settings-01"] [data-block-part="form"] {
+  display: grid;
+  gap: 1rem;
+}
+
+[data-block="settings-01"] [data-block-part="identity"] {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+[data-block="settings-01"] [data-block-part="identity"] p {
+  display: grid;
+  margin: 0;
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
+}
+
+[data-block="settings-01"] [data-block-part="actions"] {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+[data-block="settings-01"] [data-block-part="danger"] {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+[data-block="settings-01"] [data-block-part="danger"] p {
+  margin: 0;
+}
+
+@media (max-width: 767.98px) {
+  [data-block="settings-01"] [data-block-part="tab-list"] {
+    display: none;
+  }
+
+  /* Inactive panels carry the hidden attribute: show every one of them, stacked. */
+  [data-block="settings-01"] [data-block-part="panel"],
+  [data-block="settings-01"] [data-block-part="panel"][hidden] {
+    display: grid;
+  }
+
+  [data-block="settings-01"] [data-block-part="panel"] + [data-block-part="panel"] {
+    padding-block-start: 1.5rem;
+    border-block-start: max(var(--border-width), 1px) solid var(--border);
+  }
+
+  [data-block="settings-01"] [data-block-part="panel-title"] {
+    display: block;
+  }
+
+  [data-block="settings-01"] [data-block-part="actions"] > * {
+    flex: 1 1 100%;
+  }
+}
+
+@media (min-width: 768px) {
+  [data-block="settings-01"] {
+    padding: 3rem 1.5rem;
+  }
 }

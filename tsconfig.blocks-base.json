@@ -1,0 +1,9 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "paths": {
+      "@/components/ui/*": ["./packages/catalog/src/templates/base/*", "./packages/catalog/src/templates/*"]
+    }
+  },
+  "include": ["packages/catalog/src/blocks/base/**/*.tsx", "apps/preview/src/vite-env.d.ts"]
+}

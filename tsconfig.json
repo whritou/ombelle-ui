@@ -11,5 +11,5 @@
     "apps/www/src/**/*.tsx",
     "playwright.config.ts"
   ],
-  "exclude": ["**/dist", "**/node_modules", "fixtures", ".artifacts"]
+  "exclude": ["**/dist", "**/node_modules", "fixtures", ".artifacts", "packages/catalog/src/blocks/base"]
 }

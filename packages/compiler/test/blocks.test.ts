@@ -5,7 +5,7 @@ import { blockManifest, getCatalog } from '@ombelle/catalog'
 import { compile } from '../src/index.js'
 
 const catalog = getCatalog('0.1.0')
-const run = (edition: 'radix' | 'base', blockIds: readonly 'login-01'[] = ['login-01']) =>
+const run = (edition: 'radix' | 'base', blockIds: readonly ('login-01' | 'settings-01')[] = ['login-01']) =>
   compile({
     preset: catalog.presets.ombelle,
     componentIds: [],
@@ -44,6 +44,28 @@ describe('block artifacts', () => {
     expect(content).not.toContain('<h1')
     expect(content).toContain('showExampleNotice')
     expect(content).toContain("Example only: this form doesn't sign anyone in")
+    expect(content).not.toContain('fetch(')
+    expect(content).not.toContain('Acme')
+  })
+
+  it.each(['radix', 'base'] as const)('compiles the %s settings-01 block', async (edition) => {
+    const result = await run(edition, ['settings-01'])
+    const paths = result.artifacts.map((artifact) => artifact.logicalPath)
+    expect(source(result, 'blocks/settings-01.tsx').kind).toBe('block')
+    expect(source(result, 'blocks/settings-01.css').kind).toBe('block')
+    for (const id of blockManifest['settings-01'].components) expect(paths).toContain(`components/ui/${id}.tsx`)
+    const content = source(result, 'blocks/settings-01.tsx').content
+    expect(content).toContain("'./settings-01.css'")
+    if (edition === 'base') expect(content).not.toContain('asChild')
+    else expect(content).toContain('asChild')
+    expect(content).toContain('export function Settings01')
+    expect(content).toContain('<Tabs')
+    expect(content).toContain('<AlertDialog')
+    expect(content.match(/level=\{2\}/g) ?? []).toHaveLength(1)
+    expect(content.match(/<h[1-6]|level=\{[13-6]\}/g) ?? []).toHaveLength(0)
+    expect(content).toContain('showExampleNotice')
+    expect(content).toContain('Example only: nothing was saved')
+    expect(content).toContain('Example only: no account was deleted')
     expect(content).not.toContain('fetch(')
     expect(content).not.toContain('Acme')
   })
