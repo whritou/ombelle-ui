@@ -28,6 +28,7 @@ const exampleData = {
 
 export function Login01() {
   const [noticeShown, setNoticeShown] = React.useState(false)
+  const titleId = React.useId()
   const passwordId = React.useId()
   const rememberId = React.useId()
 
@@ -37,10 +38,10 @@ export function Login01() {
   }
 
   return (
-    <section data-block="login-01" aria-labelledby="login-01-title">
+    <section data-block="login-01" aria-labelledby={titleId}>
       <Card data-block-part="card">
         <CardHeader>
-          <CardTitle level={2} id="login-01-title">
+          <CardTitle level={2} id={titleId}>
             {exampleData.title}
           </CardTitle>
           <CardDescription>{exampleData.description}</CardDescription>

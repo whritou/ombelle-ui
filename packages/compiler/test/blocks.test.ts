@@ -45,6 +45,7 @@ describe('block artifacts', () => {
     expect(content).toContain('showExampleNotice')
     expect(content).toContain("Example only: this form doesn't sign anyone in")
     expect(content).not.toContain('fetch(')
+    expect(content).not.toContain('Acme')
   })
 
   it('leaves output without blockIds byte-identical', async () => {

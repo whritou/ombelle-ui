@@ -18,7 +18,8 @@
 }
 
 [data-block="login-01"] [data-block-part="notice"]:empty {
-  display: none;
+  /* Stays rendered so the live region is announced; cancels the form gap while empty. */
+  margin-block-end: -1rem;
 }
 
 [data-block="login-01"] [data-block-part="label-row"] {
