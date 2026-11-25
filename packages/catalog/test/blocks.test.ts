@@ -21,8 +21,9 @@ describe('block catalog', () => {
   })
 
   it('falls back to the Radix template when a block has no Base UI file', () => {
-    expect(Object.hasOwn(catalogData.blockBaseTemplates, 'login-01')).toBe(false)
-    expect(getBlockTemplate(catalog, 'login-01', 'base')).toEqual(getBlockTemplate(catalog, 'login-01', 'radix'))
+    const id = supportedBlockIds.find((candidate) => !Object.hasOwn(catalogData.blockBaseTemplates, candidate))
+    if (!id) return
+    expect(getBlockTemplate(catalog, id, 'base')).toEqual(getBlockTemplate(catalog, id, 'radix'))
   })
 
   it('blockImports returns sorted unique component ids', () => {

@@ -91,6 +91,8 @@ export function lintBlockStyles(id: string, css: string): string[] {
     if (foreign) messages.push(`${where} names the ${foreign} block root, not ${id}`)
     else if (!selector.attributes.some(name => name === 'data-block' || name === 'data-block-part'))
       messages.push(`${where} names no ${id} block root or part`)
+    else if (selector.attributes.includes('data-slot'))
+      messages.push(`${where} names a component slot; block styles name only the block root or its parts`)
   }
   postcss.parse(css).walkDecls(decl => {
     if (decl.parent?.parent?.type === 'atrule' && (decl.parent.parent as postcss.AtRule).name.endsWith('keyframes')) return

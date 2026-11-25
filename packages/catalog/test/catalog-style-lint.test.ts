@@ -68,6 +68,12 @@ describe('block style lint', () => {
     expect(lintBlockStyles('login-01', '[data-block="login-01"]{padding:var(--space-6)}@keyframes spin{from{opacity:0}to{opacity:1}}')).toEqual([])
   })
 
+  it('reports a component slot even under the block root', () => {
+    const messages = lintBlockStyles('login-01', '[data-block="login-01"] [data-slot="button"]{gap:1rem}')
+    expect(messages).toHaveLength(1)
+    expect(messages[0]).toContain('names a component slot')
+  })
+
   it('reports a root that belongs to another block', () => {
     expect(lintBlockStyles('login-01', '[data-block="pricing-01"]{gap:var(--space-4)}')).toHaveLength(1)
   })
