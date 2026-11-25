@@ -1,5 +1,6 @@
 import {
   FoundationError,
+  type BlockId,
   type ComponentId,
   type Edition,
   type CompileResult,
@@ -8,7 +9,7 @@ import {
   isStyleFamily,
   isSupportedContractRelease,
 } from '@ombelle/contracts'
-import { getCatalog, getTemplate, expansionExamples, baseToastExample } from '@ombelle/catalog'
+import { getCatalog, getTemplate, getBlockTemplate, blockManifest, expansionExamples, baseToastExample } from '@ombelle/catalog'
 import { format } from 'prettier/standalone'
 import typescript from 'prettier/plugins/typescript'
 import estree from 'prettier/plugins/estree'
@@ -72,6 +73,8 @@ const defaultUsage =
 export async function compile(input: {
   preset: unknown
   componentIds: readonly ComponentId[]
+  /** Blocks to compile: each adds blocks/<id>.tsx and .css, and the components it imports. */
+  blockIds?: readonly BlockId[]
   catalogRelease: string
   compilerVersion: string
   /**
@@ -103,7 +106,10 @@ export async function compile(input: {
       'Style family is not available in the foundation',
       '/styleFamily',
     )
-  const ids = [...new Set(input.componentIds)].sort()
+  const blockIds = [...new Set(input.blockIds ?? [])].sort()
+  const ids = [
+    ...new Set([...input.componentIds, ...blockIds.flatMap((id) => blockManifest[id].components)]),
+  ].sort()
   assertStyleAvailable(ids, family)
   if (family === 'liquid-glass' && input.glassContrast !== 'report')
     assertGlassContrast(preset.data)
@@ -166,6 +172,13 @@ export async function compile(input: {
     })
     for (const dep of template.dependencies)
       dependencies.set(dep.name, dep.version)
+  }
+  for (const id of blockIds) {
+    const template = getBlockTemplate(catalog, id, input.edition ?? 'radix')
+    drafts.push(
+      { logicalPath: 'blocks/' + id + '.tsx', kind: 'block', content: template.content },
+      { logicalPath: 'blocks/' + id + '.css', kind: 'block', content: template.styles },
+    )
   }
   // Glass surfaces refract in Chromium once this filter is mounted.
   if (family === 'liquid-glass' && ids.length)

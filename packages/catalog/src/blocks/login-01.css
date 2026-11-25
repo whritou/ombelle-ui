@@ -1,6 +1,60 @@
-/* Placeholder: replaced by the real login-01 styles. */
+/* Layout only: the components carry each family's look. */
 [data-block="login-01"] {
   display: grid;
-  gap: var(--space-4);
-  padding: var(--space-6);
+  justify-items: center;
+  padding: 1rem;
+  inline-size: 100%;
+  box-sizing: border-box;
+}
+
+[data-block="login-01"] [data-block-part="card"] {
+  inline-size: 100%;
+  max-inline-size: 26rem;
+}
+
+[data-block="login-01"] [data-block-part="form"] {
+  display: grid;
+  gap: 1rem;
+}
+
+[data-block="login-01"] [data-block-part="notice"]:empty {
+  display: none;
+}
+
+[data-block="login-01"] [data-block-part="label-row"] {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.25rem 1rem;
+}
+
+[data-block="login-01"] [data-block-part="remember"] {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+[data-block="login-01"] [data-block-part="footer"] {
+  display: grid;
+  gap: 1rem;
+  inline-size: 100%;
+}
+
+[data-block="login-01"] [data-block-part="footer"] p {
+  margin: 0;
+  text-align: center;
+}
+
+[data-block="login-01"] a {
+  color: var(--primary);
+  text-underline-offset: 0.2em;
+}
+
+@media (min-width: 768px) {
+  [data-block="login-01"] {
+    padding: 3rem 1.5rem;
+    min-block-size: 32rem;
+    align-content: center;
+  }
 }
