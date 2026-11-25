@@ -24,6 +24,7 @@ Targets CLI 1.1.0 (not yet released). Blocks are the first work after 1.0.
 **Contracts**
 
 - Block files are recorded only in the lock's `artifacts` with `kind: "block"`. There is no new lock field and `lockVersion` stays 1, so a 1.0 CLI reading or rewriting the lock keeps the records. `schemas/project-lock.schema.json` accepts the `block` kind.
+- `--json`: `changes[].kind` and `info`'s `files[].kind` gain the value `block` (additive; `outputVersion` stays 1). Tools that switch on `kind` should accept values they do not know.
 - New notice codes `BLOCK_COMPONENT_EDITED` and `BLOCK_COMPONENT_MISSING`. `docs/05-cli-specification.md` has a Blocks section; `docs/1.0-public-contract.md` adds block ids and `add <block>` to the stable grammar once 1.1.0 is released.
 - Verification: the specimen audit covers each block in every family, edition and mode, and its evidence counts blocks apart from component specimens. Block toasts are measured over the bare page, which raises each of the four liquid glass advisory baselines by 2 (the example Toast's focus ring on the bare backdrop in light mode, in `settings-01` and `dashboard-01`). Base UI consumers render all four blocks and the npm and pnpm consumers include `login-01`. `tests/integration/blocks-older-cli.test.ts` runs the published 1.0 CLI against a lock with blocks; it needs npm registry access (`OMBELLE_REGISTRY_TESTS=1`, set by `pnpm check:foundation`), so the quality group now needs registry access.
 
