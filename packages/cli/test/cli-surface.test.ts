@@ -85,6 +85,8 @@ it('gives every notice the CLI writes a stable code (PUB-06)', () => {
   expect(noticeCode('mount <LiquidGlassFilter /> from components/ui/liquid-glass-filter once')).toBe('GLASS_FILTER_MOUNT')
   expect(noticeCode('An interrupted operation left .ombelle-operation.lock; the next apply restores')).toBe('INTERRUPTED_OPERATION')
   expect(noticeCode('Palette only: components.json style "radix-vega" is not one Ombelle styles')).toBe('THEME_PALETTE_ONLY')
+  expect(noticeCode('src/components/ui/button.tsx was edited after install; login-01 uses it as is')).toBe('BLOCK_COMPONENT_EDITED')
+  expect(noticeCode('login-01 needs card; run ombelle add login-01')).toBe('BLOCK_COMPONENT_MISSING')
 })
 
 // PUB-05: a document from a newer release is named as such, with the way forward, not a bare INVALID_DATA.

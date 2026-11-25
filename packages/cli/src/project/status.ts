@@ -9,6 +9,7 @@ import {
   type Preset,
   type ProjectContext,
 } from '@ombelle/contracts'
+import { blockManifest } from '@ombelle/catalog'
 import { compile, compileButtonPreset, compileInstallableRecipe, sha256 } from '@ombelle/compiler'
 import { readText } from './inspect.js'
 import { besideComponents } from './beside.js'
@@ -52,6 +53,8 @@ export type ManagedFile = {
 }
 export type ProjectStatus = {
   components: ComponentId[]
+  /** The blocks compiled with the components. */
+  blocks: BlockId[]
   files: ManagedFile[]
   /** The ordinary compile, reused by update so it plans exactly what status reported. */
   compiled?: CompileResult
@@ -89,19 +92,29 @@ async function stateOf(recorded: string, current: string | null, expected: strin
   return catalogChanged ? 'edited-update-available' : 'edited'
 }
 
-/** Recompiles every installed owner with its recorded input and compares it with disk and the lock. */
+/**
+ * Recompiles every installed owner with its recorded input and compares it with disk and the lock.
+ * `ids` and `blocks` narrow the question to those components and blocks (a block brings the components
+ * it needs); without either, every installed component and block is compiled. `scoped: false` leaves
+ * out recipe and component-preset rows.
+ */
 export async function projectStatus(
   context: ProjectContext,
-  options: { ids?: readonly ComponentId[]; scoped?: boolean } = {},
+  options: { ids?: readonly ComponentId[]; blocks?: readonly BlockId[]; scoped?: boolean } = {},
 ): Promise<ProjectStatus> {
   const lock = context.lock
-  if (!lock || !context.preset) return { components: [], files: [], dependencies: [] }
-  const ids = options.ids ?? installedComponentIds(context)
+  if (!lock || !context.preset) return { components: [], files: [], blocks: [], dependencies: [] }
+  const named = options.ids !== undefined || options.blocks !== undefined
+  const ids = options.ids ?? (named ? [] : installedComponentIds(context))
+  const blocks = options.blocks ?? (named ? [] : installedBlockIds(context))
+  // The components the question covers: the named or installed ones, and those the blocks need.
+  const covered = new Set<ComponentId>([...ids, ...blocks.flatMap((id) => blockManifest[id].components)])
   const expected = new Map<string, { content: string; owner: FileOwner }>()
   const dependencies: Dependency[] = []
   const compiled = await compile({
     preset: context.preset as Preset,
     componentIds: ids,
+    ...(blocks.length ? { blockIds: blocks } : {}),
     catalogRelease: lock.catalogRelease,
     compilerVersion: lock.compilerVersion,
     glassContrast: 'report',
@@ -116,9 +129,10 @@ export async function projectStatus(
     const match = /^components\/ui\/([a-z0-9-]+)\.(tsx|css)$/.exec(artifact.logicalPath)
     const usage = artifact.kind === 'usage' ? /([a-z0-9-]+)\.tsx$/.exec(artifact.logicalPath) : null
     const id = (match?.[1] ?? usage?.[1]) as ComponentId | undefined
+    const block = artifact.kind === 'block' ? ownerOf(artifact.logicalPath) : undefined
     expected.set(target.path, {
       content: target.content,
-      owner: id && ids.includes(id) ? { type: 'component', id } : { type: 'shared' },
+      owner: block?.type === 'block' ? block : id && covered.has(id) ? { type: 'component', id } : { type: 'shared' },
     })
   }
   if (options.scoped !== false) {
@@ -147,9 +161,11 @@ export async function projectStatus(
   const files: ManagedFile[] = []
   for (const [file, record] of Object.entries(lock.artifacts).sort(([a], [b]) => (a < b ? -1 : 1))) {
     const owner = expected.get(file)?.owner ?? owners.get(file) ?? ownerOf(record.logicalPath)
-    // With explicit ids, other components' files are outside the question.
-    if (options.ids && owner.type === 'component' && !options.ids.includes(owner.id)) continue
-    if (options.scoped === false && owner.type !== 'component' && owner.type !== 'shared') continue
+    // With explicit ids or blocks, other components' and blocks' files are outside the question.
+    if (named && owner.type === 'component' && !covered.has(owner.id)) continue
+    if (named && owner.type === 'block' && !blocks.includes(owner.id)) continue
+    // Block files are ordinary managed files; only recipe and component-preset rows are scoped.
+    if (options.scoped === false && (owner.type === 'recipe' || owner.type === 'component-preset')) continue
     const current = await readText(context.root, file)
     const content = expected.get(file)?.content
     files.push({
@@ -161,7 +177,7 @@ export async function projectStatus(
       ...(content === undefined ? {} : { expected: content }),
     })
   }
-  return { components: [...ids], files, compiled, dependencies }
+  return { components: [...ids], blocks: [...blocks], files, compiled, dependencies }
 }
 
 function ownerOf(logicalPath: string): FileOwner {

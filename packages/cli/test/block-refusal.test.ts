@@ -16,13 +16,11 @@ async function run(args: string[]) {
   return { code, record: JSON.parse(stdout), files: await fs.readdir(root) }
 }
 
-// TODO(Task 8): update plans block ids; until then it refuses them before reading the project.
 for (const args of [['update', 'login-01'], ['update', 'button', 'login-01']])
-  it('refuses block ids in update until update plans them: ' + args.join(' '), async () => {
+  it('accepts block ids in update and goes on to read the project: ' + args.join(' '), async () => {
     const { code, record, files } = await run(args)
-    expect(code).toBe(2)
-    expect(record.error).toMatchObject({ code: 'INVALID_DATA', path: '/componentIds' })
-    expect(record.error.message).toBe('update does not take block ids yet: login-01; run add login-01')
+    expect(code).toBe(3)
+    expect(record.error.code).toBe('UNSUPPORTED_PROJECT')
     expect(files).toEqual([])
   })
 

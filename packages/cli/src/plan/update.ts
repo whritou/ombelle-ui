@@ -1,5 +1,7 @@
 import {
   FoundationError,
+  type BlockId,
+  type CatalogId,
   type ComponentId,
   type CompileResult,
   type Dependency,
@@ -8,9 +10,11 @@ import {
   type ProjectLock,
 } from '@ombelle/contracts'
 import { canonicalize, sha256 } from '@ombelle/compiler'
+import { blockManifest } from '@ombelle/catalog'
+import { splitCatalogIds } from '../component-ids.js'
 import { readText } from '../project/inspect.js'
 import { resolutionKey, type Resolution } from '../project/beside.js'
-import { installedComponentIds, projectStatus } from '../project/status.js'
+import { installedBlockIds, installedComponentIds, projectStatus } from '../project/status.js'
 import { planDependencies } from './dependencies.js'
 import {
   editedConflict,
@@ -34,27 +38,41 @@ async function setLock(plan: InstallPlan, context: ProjectContext, lock: Project
 
 /**
  * `update [ids]` (PUB-01, INS-05): refresh managed source whose catalog bytes changed. Ordinary
- * components plan through planAdd, so they follow exactly the rules `add` follows; without ids, the
- * recipe and component-preset rows the lock records are refreshed by the same rule. `--overwrite`
- * replaces a managed file edited after install.
+ * components and blocks plan through planAdd, so they follow exactly the rules `add` follows; without
+ * ids, every installed component and block is a target, and the recipe and component-preset rows the
+ * lock records are refreshed by the same rule. A named block brings its components, and one of them
+ * edited after install that only the block needs is kept, as `add <block>` keeps it (blocks spec, CLI).
+ * `--overwrite` replaces a managed file edited after install.
  */
 export async function planUpdate(
   context: ProjectContext,
-  ids: readonly ComponentId[],
+  ids: readonly CatalogId[],
   resolutions: Record<string, Resolution>,
 ): Promise<InstallPlan> {
   if (!context.preset || !context.config || !context.lock)
     throw new FoundationError('UNSUPPORTED_PROJECT', 'Initialize a saved project preset first', context.root, 'Run init --preset <file|code>.')
+  const { components, blocks } = splitCatalogIds(ids)
   const installed = installedComponentIds(context)
-  const missing = ids.filter((id) => !installed.includes(id))
+  const installedBlocks = installedBlockIds(context)
+  const missing = [
+    ...components.filter((id) => !installed.includes(id)),
+    ...blocks.filter((id) => !installedBlocks.includes(id)),
+  ]
   if (missing.length)
     throw new FoundationError('INVALID_DATA', 'Not installed: ' + missing.join(', '), '/componentIds', 'Install them with add ' + missing.join(' ') + '.')
-  const targets = ids.length ? [...ids] : installed
-  const status = await projectStatus(context, { ids: targets, scoped: ids.length === 0 })
+  const targets = ids.length ? [...new Set(components)] : installed
+  const targetBlocks: BlockId[] = ids.length ? [...new Set(blocks)] : installedBlocks
+  // Components reached only through a named block, each with the blocks that need it.
+  const viaBlocks = new Map<ComponentId, BlockId[]>()
+  if (ids.length)
+    for (const block of targetBlocks)
+      for (const id of blockManifest[block].components)
+        if (!targets.includes(id)) viaBlocks.set(id, [...(viaBlocks.get(id) ?? []), block])
+  const status = await projectStatus(context, { ids: targets, blocks: targetBlocks, scoped: ids.length === 0 })
   const scopedFiles = status.files.filter((file) => file.owner.type === 'recipe' || file.owner.type === 'component-preset')
   const scopedKeys = new Set(scopedFiles.map((file) => resolutionKey(file.path)))
   const ordinaryResolutions = Object.fromEntries(Object.entries(resolutions).filter(([file]) => !scopedKeys.has(resolutionKey(file))))
-  const plan = await planAdd(context, status.compiled as CompileResult, ordinaryResolutions)
+  const plan = await planAdd(context, status.compiled as CompileResult, ordinaryResolutions, { viaBlocks })
   if (!scopedFiles.length) return plan
 
   // Recipe and component-preset rows: their files, then their records in the lock planAdd wrote.

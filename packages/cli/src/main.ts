@@ -159,10 +159,6 @@ function validateRequest(request: ParsedArgs): void {
   // Component ids are checked against the catalog before any preset, project, or style-support work.
   if (command === 'add' || command === 'update') {
     assertKnownCatalogIds(operands)
-    // TODO(Task 8): remove this refusal once update plans block ids.
-    const { blocks } = splitCatalogIds(operands)
-    if (command === 'update' && blocks.length)
-      throw new FoundationError('INVALID_DATA', 'update does not take block ids yet: ' + blocks.join(', ') + '; run add ' + blocks.join(' '), '/componentIds')
   }
   // Environment settings are read before planning, not after the first file is written (PUB-08).
   dependencyTimeoutMs(process.env)
@@ -252,7 +248,7 @@ async function runPlan(request: ParsedArgs, io: IO, json: boolean): Promise<numb
     const planWith = async (chosen: Record<string, Resolution>) => {
       let planned: InstallPlan
       if (command === 'add') planned = await planAdd(context, await compileFor(ids, chosen, blocks), chosen, { viaBlocks })
-      else if (command === 'update') planned = await planUpdate(context, ids, chosen)
+      else if (command === 'update') planned = await planUpdate(context, operands as CatalogId[], chosen)
       else if (full)
         planned = await planPresetApply(context, await compileFor([], chosen), await compileFor(installedComponentIds(context), chosen), chosen)
       else planned = await planTheme(context, await compileFor([], chosen))

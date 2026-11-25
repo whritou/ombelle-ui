@@ -1,6 +1,7 @@
 // `add <block>` (blocks spec, CLI): a block installs with the components it needs, in one plan, as managed
 // files beside the `ui` folder. Its only difference from `add <component>`: a component Ombelle installed
-// and the user edited is kept when only a block needs it.
+// and the user edited is kept when only a block needs it. `update`, `doctor` and `diff` treat block files
+// like other managed files.
 import { afterEach, expect, it } from 'vitest'
 import fs from 'node:fs/promises'
 import path from 'node:path'
@@ -10,6 +11,7 @@ import type { ProjectLock } from '@ombelle/contracts'
 import { createProject } from '../helpers/projects.js'
 import { runBuiltCli, jsonRecord } from '../helpers/cli-runtime.js'
 import { snapshotTree } from '../helpers/tree.js'
+import { runCli } from '../../packages/cli/src/main.js'
 
 const roots: string[] = []
 const sha = (content: string) => createHash('sha256').update(content).digest('hex')
@@ -135,7 +137,7 @@ it('treats block files as managed files: refresh when unedited, conflict when ed
   expect((await p.command(['add', 'login-01', '--yes'])).code).toBe(0)
   const current = await p.read(block)
 
-  // Edited after install: add conflicts, offering --overwrite (update <block> lands with Task 8).
+  // Edited after install: add conflicts, offering --overwrite.
   await p.write(block, current + '\n// my change\n')
   const before = await snapshotTree(p.root)
   const edited = await p.command(['add', 'login-01', '--yes'])
@@ -181,4 +183,116 @@ it('installs components and blocks together, and refuses unknown ids and --besid
   expect(mixed.code, mixed.output).toBe(0)
   for (const file of [ui('badge'), ui('toggle-group'), 'src/components/blocks/pricing-01.tsx', 'src/components/blocks/pricing-01.css'])
     await expect(p.read(file)).resolves.toBeTruthy()
+}, 180000)
+
+it('update refreshes an unedited block file the catalog changed, and update with no operands plans block files', async () => {
+  const p = await project()
+  expect((await p.command(['add', 'login-01', '--yes'])).code).toBe(0)
+  const current = await p.read(block)
+  await p.installedEarlier(block, current + '\n// earlier catalog\n')
+
+  const all = await p.command(['update', '--dry-run'])
+  expect(all.code, all.output).toBe(0)
+  expect(changes(all.data).find((c) => c.path === block)?.action).toBe('update')
+  expect(changes(all.data).find((c) => c.path === blockCss)?.action).toBe('noop')
+
+  const refreshed = await p.command(['update', 'login-01', '--yes'])
+  expect(refreshed.code, refreshed.output).toBe(0)
+  expect(notices(refreshed.data)).toContainEqual({ code: 'FILE_REFRESHED', message: 'refresh ' + block + ' (unedited since install; the catalog source changed)' })
+  expect(await p.read(block)).toBe(current)
+  expect(JSON.parse(await p.read('ui-library.lock.json')).artifacts[block].sha256).toBe(sha(current))
+
+  const notInstalled = await p.command(['update', 'pricing-01', '--yes'])
+  expect(notInstalled.code, notInstalled.output).toBe(2)
+  expect(jsonRecord(jsonRecord(notInstalled.data).error)).toMatchObject({ code: 'INVALID_DATA', message: 'Not installed: pricing-01' })
+}, 180000)
+
+it('update <block> conflicts on an edited block file until --overwrite, and keeps an edited component only the block needs', async () => {
+  const p = await project()
+  expect((await p.command(['add', 'login-01', '--yes'])).code).toBe(0)
+  const current = await p.read(block)
+  const button = ui('button')
+  const editedButton = (await p.read(button)) + '\n// my change\n'
+  await p.write(button, editedButton)
+
+  // Only the block needs the button: update login-01 keeps the edit, with a notice.
+  const kept = await p.command(['update', 'login-01', '--yes'])
+  expect(kept.code, kept.output).toBe(0)
+  expect(changes(kept.data).find((c) => c.path === button)?.action).toBe('noop')
+  expect(notices(kept.data)).toContainEqual({ code: 'BLOCK_COMPONENT_EDITED', message: button + ' was edited after install; login-01 uses it as is' })
+  expect(await p.read(button)).toBe(editedButton)
+
+  // Named on the command line, the edited button conflicts as update button would.
+  const named = await p.command(['update', 'button', 'login-01', '--yes'])
+  expect(named.code, named.output).toBe(4)
+  expect(warnings(named.data)).toEqual([expect.objectContaining({ code: 'FILE_CONFLICT', path: button, resolutions: ['overwrite'] })])
+
+  // The block file edited after install conflicts, as every managed file does.
+  await p.write(block, current + '\n// my change\n')
+  const before = await snapshotTree(p.root)
+  const edited = await p.command(['update', 'login-01', '--yes'])
+  expect(edited.code, edited.output).toBe(4)
+  expect(warnings(edited.data)).toEqual([expect.objectContaining({ code: 'FILE_CONFLICT', path: block, resolutions: ['overwrite'] })])
+  expect(warnings(edited.data)[0]!.message).toContain('--overwrite ' + block)
+  expect(await snapshotTree(p.root)).toEqual(before)
+
+  // Installed by an earlier catalog and edited since: still a conflict, until --overwrite replaces it.
+  await p.installedEarlier(block, current + '\n// earlier catalog\n')
+  await p.write(block, current + '\n// earlier catalog\n// my change\n')
+  const stale = await p.command(['update', 'login-01', '--yes'])
+  expect(stale.code, stale.output).toBe(4)
+  expect(warnings(stale.data)).toEqual([expect.objectContaining({ code: 'FILE_CONFLICT', path: block, resolutions: ['overwrite'] })])
+  const replaced = await p.command(['update', 'login-01', '--overwrite', block, '--yes'])
+  expect(replaced.code, replaced.output).toBe(0)
+  expect(await p.read(block)).toBe(current)
+  expect(await p.read(button)).toBe(editedButton)
+}, 180000)
+
+it('doctor warns about a missing block component, update <block> recreates it, and diff lists block files', async () => {
+  const p = await project()
+  expect((await p.command(['add', 'login-01', '--yes'])).code).toBe(0)
+  const card = ui('card')
+  const cardSource = await p.read(card)
+  const lock: ProjectLock = JSON.parse(await p.read('ui-library.lock.json'))
+  for (const file of Object.keys(lock.artifacts))
+    if (/^src\/components\/ui\/card\.(tsx|css)$/.test(file)) {
+      delete lock.artifacts[file]
+      await fs.rm(path.join(p.root, file))
+    }
+  await p.write('ui-library.lock.json', JSON.stringify(lock))
+
+  const doctor = await p.command(['doctor'])
+  expect(doctor.code, doctor.output).toBe(0)
+  expect(jsonRecord(doctor.data).status).toBe('success')
+  expect(jsonRecord(doctor.data).checks).toContainEqual({
+    id: 'blocks',
+    status: 'warn',
+    code: 'BLOCK_COMPONENT_MISSING',
+    message: 'login-01 needs card; run ombelle add login-01',
+    nextAction: 'Run ombelle add login-01 or ombelle update login-01.',
+  })
+  let text = ''
+  expect(await runCli(['doctor', '--cwd', p.root], { stdout: (t) => { text += t }, stderr: () => {} })).toBe(0)
+  expect(text).toContain('warn blocks: login-01 needs card; run ombelle add login-01\n  Next: Run ombelle add login-01 or ombelle update login-01.')
+
+  const recreated = await p.command(['update', 'login-01', '--yes'])
+  expect(recreated.code, recreated.output).toBe(0)
+  expect(changes(recreated.data).find((c) => c.path === card)?.action).toBe('create')
+  expect(await p.read(card)).toBe(cardSource)
+  expect(JSON.parse(await p.read('ui-library.lock.json')).artifacts[card]).toMatchObject({ logicalPath: 'components/ui/card.tsx', sha256: sha(cardSource) })
+  const healthy = await p.command(['doctor'])
+  expect(jsonRecord(healthy.data).checks).toContainEqual(expect.objectContaining({ id: 'blocks', status: 'pass' }))
+
+  await p.write(block, (await p.read(block)) + '\n// my change\n')
+  for (const args of [['diff'], ['diff', 'login-01']]) {
+    const diff = await p.command(args)
+    expect(diff.code, diff.output).toBe(0)
+    const files = jsonRecord(diff.data).files as { path: string; owner: string; state: string; diff: string }[]
+    expect(files.map((f) => f.path), args.join(' ')).toEqual([block])
+    expect(files[0]).toMatchObject({ owner: 'login-01', state: 'edited' })
+    expect(files[0]!.diff).toContain('-// my change')
+  }
+  const info = await p.command(['info'])
+  const states = Object.fromEntries((jsonRecord(info.data).files as { path: string; owner: string; state: string }[]).map((f) => [f.path, f.owner + ' ' + f.state]))
+  expect(states).toMatchObject({ [block]: 'login-01 edited', [blockCss]: 'login-01 current' })
 }, 180000)
