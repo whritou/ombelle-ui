@@ -18,9 +18,14 @@
   gap: 1.5rem;
 }
 
-[data-block="settings-01"] [data-block-part="panel"] {
+/* Only the visible panel gets a layout: the tabs styles hide inactive ones with display: none,
+   and an unconditional display here would override that (and the hidden attribute). */
+[data-block="settings-01"] [data-block-part="panel"]:not([hidden]):not([data-state="inactive"]) {
   display: grid;
   gap: 1rem;
+}
+
+[data-block="settings-01"] [data-block-part="panel"] {
   min-inline-size: 0;
 }
 
@@ -74,8 +79,10 @@
 
   /* Inactive panels carry the hidden attribute: show every one of them, stacked. */
   [data-block="settings-01"] [data-block-part="panel"],
-  [data-block="settings-01"] [data-block-part="panel"][hidden] {
+  [data-block="settings-01"] [data-block-part="panel"][hidden],
+  [data-block="settings-01"] [data-block-part="panel"][data-state="inactive"] {
     display: grid;
+    gap: 1rem;
   }
 
   [data-block="settings-01"] [data-block-part="panel"] + [data-block-part="panel"] {

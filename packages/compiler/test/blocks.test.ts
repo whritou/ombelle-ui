@@ -70,6 +70,16 @@ describe('block artifacts', () => {
     expect(content).not.toContain('Acme')
   })
 
+  it('never sets display on a settings-01 panel outside a visible-only selector or the phone query', () => {
+    const css = catalog.blockStyles['settings-01']!
+    const desktop = css.split('@media (max-width: 767.98px)')[0]
+    const rules = [...desktop.matchAll(/([^{}]+)\{([^}]*)\}/g)]
+    for (const [, selector, body] of rules) {
+      if (!selector.includes('[data-block-part="panel"]') || !/(^|;|\s)display\s*:/.test(body)) continue
+      expect(selector).toContain(':not([hidden]):not([data-state="inactive"])')
+    }
+  })
+
   it('leaves output without blockIds byte-identical', async () => {
     const result = await compile({
       preset: catalog.presets.ombelle,
