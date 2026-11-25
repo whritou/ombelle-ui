@@ -6,7 +6,7 @@ Entries are written for someone upgrading a project. From 1.0 each release group
 
 Targets CLI 1.1.0 (not yet released). Blocks are the first work after 1.0.
 
-**Open item.** The Yarn and Bun consumer fixture locks do not yet include `@radix-ui/react-separator` 1.2.0, which `login-01` and the other blocks need. The minimalist Yarn Classic, modern Yarn and Bun consumer cases will fail their frozen-lock check until those locks are regenerated with Yarn and Bun. This is not verified as passing.
+**Open item.** The Bun consumer fixture locks (`fixtures/bun/`) do not yet include `@radix-ui/react-separator` 1.2.0, which `login-01` and the other blocks need, so the Bun consumer cases will fail their frozen-lock check until those locks are regenerated with Bun. The three Yarn fixture locks (`fixtures/yarn/`) were regenerated with Yarn 1.22.22 and 4.18.1 and now include it. The Bun cases are not verified as passing.
 
 **Installed source**
 
