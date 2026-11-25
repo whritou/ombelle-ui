@@ -63,7 +63,7 @@ The new components (Label, Textarea, Native Select) are installed only after the
 
 CI runs two independent checkouts with separate setup/cache scopes:
 
-- `pnpm check:foundation:quality` builds packages, runs `pnpm test:unit` and `pnpm test:integration`, generates preview sources needed by typecheck, checks TypeScript, and runs `pnpm audit:workspace`. The integration command honors `OMBELLE_INTEGRATION_WORKERS`.
+- `pnpm check:foundation:quality` builds packages, runs `pnpm test:unit` and `pnpm test:integration`, generates preview sources needed by typecheck, checks TypeScript, and runs `pnpm audit:workspace`. The integration command honors `OMBELLE_INTEGRATION_WORKERS`. The group sets `OMBELLE_REGISTRY_TESTS=1`, so it needs npm registry access: `tests/integration/blocks-older-cli.test.ts` installs the published 1.0 CLI from npm to check that a 1.0 CLI keeps block records.
 - `pnpm check:foundation:consumers` builds packages, generates preview, prepares all consumers, builds preview, runs the specimen audit, builds consumers, and runs the eighteen browser specs with the existing controlled workers. There is no browser file sharding.
 - `pnpm check:foundation:aggregate DIRECTORY` rebuilds package reference helpers and validates the two stable core artifact directories inside DIRECTORY. It never prepares consumers, starts browser servers, or imports machine-local consumer root descriptors.
 

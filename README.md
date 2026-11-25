@@ -81,7 +81,8 @@ measures every component specimen. See [AGENTS.md](AGENTS.md) for the source and
 preview, prepares and builds **54** standalone consumers (npm and pnpm on Vite and Next.js for every stable family, Yarn
 Classic, modern Yarn and Bun rows for flat and minimalist, two liquid glass rows and two font rows), and runs a
 **1,185-case** browser matrix across 21 specs plus the specimen audit. It needs registry access and the toolchain
-below.
+below. The quality group installs the published 1.0 CLI from npm for `tests/integration/blocks-older-cli.test.ts`, so it
+needs npm registry access too.
 
 - Browser evidence is Chromium only (Windows, and bundled Chromium in Linux CI). No Firefox, Safari, native text zoom,
   NVDA or VoiceOver results exist, and no manual assistive-technology review has been recorded

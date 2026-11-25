@@ -1,10 +1,10 @@
 import fs from 'node:fs/promises'
 import { compile } from '@ombelle/compiler'
-import type { ComponentId, StyleFamily } from '@ombelle/contracts'
+import { isBlockId, type CatalogId, type ComponentId, type StyleFamily } from '@ombelle/contracts'
 
 // These scenarios deliberately cover a subset of the catalog. Keep CLI installs
 // and their independent compiler reference on the same component scope.
-export function consumerAddBatches(family: StyleFamily): ComponentId[][] {
+export function consumerAddBatches(family: StyleFamily): CatalogId[][] {
   return family === 'liquid-glass'
     ? [['button', 'dialog'], ['badge'], ['card'], ['tabs', 'tooltip']]
     : [
@@ -14,6 +14,8 @@ export function consumerAddBatches(family: StyleFamily): ComponentId[][] {
         ['card'],
         ['label', 'textarea', 'native-select'],
         ['checkbox', 'switch', 'tabs', 'tooltip'],
+        // A block installs with its components and is checked against the same compiler reference.
+        ['login-01'],
       ]
 }
 
@@ -32,9 +34,11 @@ export async function consumerPreset(family: StyleFamily, fonts = false) {
 }
 
 export async function compileConsumerReference(family: StyleFamily, fonts = false) {
+  const ids = consumerAddBatches(family).flat()
   return compile({
     preset: await consumerPreset(family, fonts),
-    componentIds: consumerAddBatches(family).flat(),
+    componentIds: ids.filter((id) => !isBlockId(id)) as ComponentId[],
+    blockIds: ids.filter(isBlockId),
     catalogRelease: '0.1.0',
     compilerVersion: '0.1.0',
   })

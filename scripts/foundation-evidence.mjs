@@ -1,6 +1,7 @@
 import fs from 'node:fs/promises'
 import { readFileSync } from 'node:fs'
 import { supportedComponentIds } from '../packages/contracts/src/component-ids.ts'
+import { supportedBlockIds } from '../packages/contracts/src/block-ids.ts'
 import path from 'node:path'
 import os from 'node:os'
 import { execFile } from 'node:child_process'
@@ -186,7 +187,8 @@ function validateAuditRows(rows) {
   const seen = rows.map(auditKey)
   if (!rows.length || new Set(seen).size !== seen.length || seen.some(key => !auditConfigurations.includes(key))) incompleteAudit()
   for (const row of rows) {
-    if (row.specimens !== supportedComponentIds.length) incompleteAudit()
+    // Components and blocks are counted apart: a block is page-sized and measured at two widths.
+    if (row.specimens !== supportedComponentIds.length || row.blocks !== supportedBlockIds.length) incompleteAudit()
     const advisory = row.contrastAdvisoryFindings
     if (!Number.isInteger(advisory) || advisory < 0) incompleteAudit()
     if (advisory > (advisoryBaseline[auditKey(row)] ?? 0)) fail('Contrast advisory findings above baseline: ' + auditKey(row) + ' ' + advisory + ' > ' + (advisoryBaseline[auditKey(row)] ?? 0))

@@ -3,20 +3,21 @@ import path from 'node:path'
 import postcss from 'postcss'
 import {
   FoundationError,
-  type ComponentId,
+  type CatalogId,
   type ProjectContext,
 } from '@ombelle/contracts'
 import { resolvePreset } from '@ombelle/compiler'
-import { getCatalog } from '@ombelle/catalog'
+import { blockManifest, getCatalog } from '@ombelle/catalog'
 import { inspectProject, readText } from './project/inspect.js'
-import { installedComponentIds, ownerLabel, projectStatus, type FileState, type ManagedFile } from './project/status.js'
+import { installedBlockIds, installedComponentIds, ownerLabel, projectStatus, type FileState, type ManagedFile } from './project/status.js'
 import { portable } from './project/paths.js'
 import { operationLockName } from './apply/recovery.js'
 import { checkInstallRuntime } from './apply/manager.js'
 import { supportedNodeVersion, runtimeNotice, runtimeRequirement } from './apply/executable.js'
-import { assertKnownComponentIds } from './component-ids.js'
+import { assertKnownCatalogIds, splitCatalogIds } from './component-ids.js'
 import { unifiedDiff } from './diff.js'
 import { outputVersion } from './format.js'
+import { noticeCode, type NoticeCode } from './notices.js'
 import { supportMatrix } from './support.js'
 import type { ParsedArgs } from './args.js'
 import { cliVersion } from './version.js'
@@ -28,7 +29,7 @@ const states: FileState[] = ['current', 'update-available', 'edited', 'edited-up
 export async function runReport(request: ParsedArgs, io: IO, json: boolean): Promise<number> {
   const { command, operands, flags } = request
   if (command !== 'diff' && operands.length) throw new FoundationError('INVALID_DATA', command + ' takes no operands')
-  if (command === 'diff') assertKnownComponentIds(operands)
+  if (command === 'diff') assertKnownCatalogIds(operands)
   const root = path.resolve(flags['--cwd'] ?? process.cwd())
   const manager = flags['--package-manager'] as ProjectContext['manager'] | undefined
   if (command === 'doctor') return doctor(root, manager, io, json)
@@ -109,12 +110,13 @@ export async function runReport(request: ParsedArgs, io: IO, json: boolean): Pro
   // diff
   if (!context.lock || !context.preset)
     throw new FoundationError('UNSUPPORTED_PROJECT', 'No managed files to compare', context.root, 'Run init --preset <file|code>.')
-  const ids = operands as ComponentId[]
+  const { components: ids, blocks } = splitCatalogIds(operands as CatalogId[])
   const installed = installedComponentIds(context)
-  const missing = ids.filter((id) => !installed.includes(id))
+  const installedBlocks = installedBlockIds(context)
+  const missing = [...ids.filter((id) => !installed.includes(id)), ...blocks.filter((id) => !installedBlocks.includes(id))]
   if (missing.length)
     throw new FoundationError('INVALID_DATA', 'Not installed: ' + missing.join(', '), '/componentIds', 'Install them with add ' + missing.join(' ') + '.')
-  const status = await projectStatus(context, ids.length ? { ids, scoped: false } : {})
+  const status = await projectStatus(context, operands.length ? { ids, blocks, scoped: false } : {})
   const changed = status.files.filter((file) => file.state !== 'current' && file.state !== 'not-generated')
   const files = changed.map((file) => ({
     path: file.path,
@@ -134,7 +136,7 @@ function componentState(files: ManagedFile[]): FileState {
   return 'current'
 }
 
-type Check = { id: string; status: 'pass' | 'warn' | 'fail'; message: string; path?: string; nextAction?: string }
+type Check = { id: string; status: 'pass' | 'warn' | 'fail'; code?: NoticeCode; message: string; path?: string; nextAction?: string }
 /**
  * `doctor`: runtime, project support, preset and lock agreement, managed files, the stylesheet import,
  * declared dependencies and leftover operations. Exits 0 when no check fails, 3 when one does.
@@ -190,6 +192,17 @@ async function doctor(root: string, manager: ProjectContext['manager'] | undefin
       }
       if (!status.files.some((file) => fileChecks[file.state]))
         add({ id: 'files', status: 'pass', message: status.files.length + ' managed files match the catalog' })
+      // Each installed block's components are installed (blocks spec, CLI): a missing one is a warning.
+      const components = installedComponentIds(context)
+      let missingComponents = 0
+      for (const block of status.blocks)
+        for (const id of blockManifest[block].components.filter((component) => !components.includes(component))) {
+          missingComponents++
+          const message = block + ' needs ' + id + '; run ombelle add ' + block
+          add({ id: 'blocks', status: 'warn', code: noticeCode(message), message, nextAction: 'Run ombelle add ' + block + ' or ombelle update ' + block + '.' })
+        }
+      if (status.blocks.length && !missingComponents)
+        add({ id: 'blocks', status: 'pass', message: 'Installed blocks have their components: ' + status.blocks.join(', ') })
       if (context.upstreamStyleSupported && lock.artifacts[context.styleFile]) {
         const css = await readText(context.root, context.cssEntry)
         const relative = portable(path.relative(path.dirname(context.cssEntry), context.styleFile))

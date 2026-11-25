@@ -1,4 +1,7 @@
 import { expect, it } from 'vitest'
+import { supportedBlockIds, styleFamilies } from '@ombelle/contracts'
+import { consumerAddBatches } from '../../scripts/consumer-components.js'
+import { baseConsumerBlocks, baseConsumerPage } from '../../scripts/prepare-base-consumers.js'
 import { consumerCases, stableConsumerCases, assignConsumerPorts } from '../../scripts/consumer-matrix.js'
 const legacy=['vite-flat','vite-neo-brutalism','next-flat','next-neo-brutalism','npm-vite-flat','npm-vite-neo-brutalism','npm-next-flat','npm-next-neo-brutalism','yarn-classic-vite','yarn-modern-next','yarn-pnp-vite','bun-text-vite-node','bun-text-vite-bun','bun-binary-vite-node','bun-binary-vite-bun','bun-text-next-node','bun-text-next-bun','bun-binary-next-node','bun-binary-next-bun']
 it('retains nineteen IDs, adds fifteen minimalist cases, four ombelle cases, four papier cases, four organic cases, four retro-futurism cases, two experimental glass cases and two font cases',()=>{
@@ -33,4 +36,16 @@ it('allocates unique ports across all manager groups',()=>{
  expect(ports).toHaveLength(54);expect(new Set(ports).size).toBe(54);expect(ports).not.toContain(4173)
  expect(()=>assignConsumerPorts([...rows,rows[0]])).toThrow()
  expect(()=>assignConsumerPorts(rows,65530)).toThrow()
+})
+it('installs login-01 in the npm and pnpm batches of every stable family, and all four blocks in the Base UI consumers',()=>{
+ for(const family of styleFamilies){
+  const ids=consumerAddBatches(family).flat() as string[]
+  expect(ids.includes('login-01'),family).toBe(family!=='liquid-glass')
+  expect(ids.filter(id=>(supportedBlockIds as readonly string[]).includes(id)),family).toEqual(family==='liquid-glass'?[]:['login-01'])
+ }
+ expect(baseConsumerBlocks).toEqual([...supportedBlockIds])
+ for(const framework of ['vite','next'] as const){
+  const page=baseConsumerPage(framework)
+  for(const id of supportedBlockIds)expect(page,id).toContain("@/components/blocks/"+id)
+ }
 })

@@ -2,7 +2,7 @@
 
 ## Product definition
 
-Provide ready-made UI components that developers install as editable source and customize through a website or local code. A developer selects a visual style, sets a project preset, and receives future components in that same design system. Begin with components, then add composed blocks, then dedicated guidance and skills for AI agents.
+Provide ready-made UI components that developers install as editable source and customize through a website or local code. A developer selects a visual style, sets a project preset, and receives future components in that same design system. Begin with components, then add composed blocks (the first four, `login-01`, `settings-01`, `pricing-01` and `dashboard-01`, are delivered in CLI 1.1.0, unreleased), then dedicated guidance and skills for AI agents.
 
 The core product promise is consistency across design and implementation: the preview, exported files, installed component, and later additions agree on the same preset and component versions.
 
@@ -52,7 +52,7 @@ The public preset-code workflow distinguishes project styling (`theme add <code>
 
 For an already initialized shadcn project, a dedicated `theme add <preset>` command merges the palette and design tokens into its configured global stylesheet, normally `globals.css`. This path saves project defaults without rerunning shadcn initialization or reinstalling component source.
 
-Web beta adds JSX output after the initial TSX implementation passes. All four package managers are alpha requirements. React Native, composed blocks, agent skills, custom code execution, private team libraries, and payment features follow separate milestones.
+Web beta adds JSX output after the initial TSX implementation passes. All four package managers are alpha requirements. React Native, further blocks beyond the first four, agent skills, custom code execution, private team libraries, and payment features follow separate milestones.
 
 ## Primary journeys
 

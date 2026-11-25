@@ -180,7 +180,7 @@ export const guideSections: Record<GuideSlug, GuideSection[]> = {
   troubleshooting: [
     { id: 'unsupported-project', title: 'The installer rejects my project', content: <>
       <ol><li>Check Node is 24.19.0 or newer Node 24 and the target is Vite React TSX or Next.js App Router TSX with Tailwind v4.</li><li>Run from the app’s package folder, or set <code>--cwd</code>. Workspace projects are unsupported.</li><li>Confirm local JSON paths resolve from the invoking directory, not from <code>--cwd</code>.</li><li>Check the detected edition. Recipes and preset-scoped Buttons require Radix, even though ordinary components also support Base UI.</li></ol>
-      <p>Use <code>--dry-run --json</code> to inspect a failed plan. Unknown components or malformed inputs exit with code 2, unsupported projects/releases with 3, file conflicts with 4, snapshot resolution failures with 5, and dependency failures with 6.</p>
+      <p>Use <code>--dry-run --json</code> to inspect a failed plan. Unknown components or blocks, or malformed inputs, exit with code 2, unsupported projects/releases with 3, file conflicts with 4, snapshot resolution failures with 5, and dependency failures with 6.</p>
     </> },
     { id: 'file-conflicts', title: 'A file conflict blocks installation', content: <>
       <p>Read the reported path. App-owned components may be installed beside with <code>--beside</code> or explicitly replaced with <code>--overwrite</code>. Already modified Ombelle-owned source requires manual reconciliation; <code>--yes</code> cannot force it through.</p>

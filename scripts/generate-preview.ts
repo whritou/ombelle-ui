@@ -7,6 +7,7 @@ import {
   supportedStyleFamilies,
   styleFamilies,
   supportedComponentIds,
+  supportedBlockIds,
   componentsWithStyleSupport,
 } from '@ombelle/contracts'
 import { writePreviewRecipes } from '../tests/helpers/recipe-fixture.js'
@@ -124,6 +125,7 @@ async function writeEdition(family: (typeof styleFamilies)[number], edition: Edi
   const result = await compile({
     preset: JSON.parse(await fs.readFile('packages/catalog/src/presets/' + family + '.json', 'utf8')),
     componentIds: ported,
+    blockIds: supportedBlockIds,
     catalogRelease: '0.1.0',
     compilerVersion: '0.1.0',
     edition,
@@ -138,7 +140,10 @@ async function writeEdition(family: (typeof styleFamilies)[number], edition: Edi
       dest,
       artifact.kind === 'component'
         ? artifact.content.replaceAll('@/lib/utils', '../../lib/utils')
-        : artifact.content,
+        // A block sits beside components/, so it reaches them one folder up, as an install does.
+        : artifact.kind === 'block'
+          ? artifact.content.replaceAll('@/components/ui', '../components/ui')
+          : artifact.content,
     )
   }
   const scenario = 'fixtures/shared/edition-scenario' + (edition === 'base' ? '-base' : '') + '.tsx'
@@ -159,7 +164,7 @@ async function writeEdition(family: (typeof styleFamilies)[number], edition: Edi
   await fs.writeFile(
     root + '/preview.css',
     // The audit pages render specimens from ../../audit/*.json, whose layout classes Tailwind must see.
-    '@import "../../../base.css";\n@import "./styles/ui-tokens.css";\n@import "./styles/ui-style.css";\n@source "./components";\n@source "./scenario.tsx";\n@source "./components-076-scenario.tsx";\n@source "./app-shell-09-scenario.tsx";\n@source "../../audit";\n',
+    '@import "../../../base.css";\n@import "./styles/ui-tokens.css";\n@import "./styles/ui-style.css";\n@source "./components";\n@source "./scenario.tsx";\n@source "./components-076-scenario.tsx";\n@source "./app-shell-09-scenario.tsx";\n@source "./blocks";\n@source "../../audit";\n',
   )
   await fs.writeFile(root + '/entry.tsx', "import './preview.css'\nexport { default } from './scenario'\n")
 }

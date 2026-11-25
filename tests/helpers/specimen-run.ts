@@ -13,7 +13,7 @@ export function specimenRunIsPartial(): boolean {
   return Boolean(process.env.OMBELLE_AUDIT_COMPONENTS?.trim() || process.env.OMBELLE_AUDIT_FONTS || process.env.OMBELLE_AUDIT_FAMILIES?.trim())
 }
 
-type Part = { runId: string; family: string; edition: string; mode: string; transparency?: 'reduced'; specimens: number; sections: number; checks: Record<string, number>; failures: number; contrastAdvisoryFindings: number; browser: unknown }
+type Part = { runId: string; family: string; edition: string; mode: string; transparency?: 'reduced'; specimens: number; blocks: number; sections: number; checks: Record<string, number>; failures: number; contrastAdvisoryFindings: number; browser: unknown }
 
 /**
  * Merge this run's configuration parts into the evidence file the Foundation gate validates, stamped with
@@ -38,8 +38,8 @@ export async function mergeSpecimenParts(runId: string) {
     runId: process.env.GITHUB_RUN_ID ? `github:${process.env.GITHUB_RUN_ID}/${process.env.GITHUB_RUN_ATTEMPT ?? '1'}` : `local:${runId}`,
     ...(shard ? { shard } : {}),
     node: process.version, browser: parts[0]!.browser,
-    configurations: parts.map(({ family, edition, mode, transparency, specimens, sections, checks, contrastAdvisoryFindings }) =>
-      ({ family, edition, mode, ...(transparency ? { transparency } : {}), specimens, sections, checks, contrastAdvisoryFindings })),
+    configurations: parts.map(({ family, edition, mode, transparency, specimens, blocks, sections, checks, contrastAdvisoryFindings }) =>
+      ({ family, edition, mode, ...(transparency ? { transparency } : {}), specimens, blocks, sections, checks, contrastAdvisoryFindings })),
     failures: parts.reduce((sum, part) => sum + part.failures, 0),
   }
   await fs.writeFile('.artifacts/specimen-audit.json', JSON.stringify(evidence, null, 2) + '\n')

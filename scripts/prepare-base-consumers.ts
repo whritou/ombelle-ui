@@ -9,7 +9,7 @@ import fs from 'node:fs/promises'
 import os from 'node:os'
 import path from 'node:path'
 import { spawn } from 'node:child_process'
-import { supportedComponentIds } from '@ombelle/contracts'
+import { supportedBlockIds, supportedComponentIds } from '@ombelle/contracts'
 
 export const baseConsumers = [
   { id: 'pnpm-vite-radix', fixture: 'vite', edition: 'radix', framework: 'vite', source: 'src', port: 4303 },
@@ -30,8 +30,14 @@ const run = (command: string, args: string[], cwd: string) =>
     )
   })
 
-// A page with every component example, shadcn's own Button and the beside one.
-function page(framework: 'vite' | 'next') {
+/** The blocks every Base UI consumer installs and renders, each with its exported function. */
+export const baseConsumerBlocks = supportedBlockIds
+const blockExports: Record<(typeof supportedBlockIds)[number], string> = {
+  'login-01': 'Login01', 'settings-01': 'Settings01', 'pricing-01': 'Pricing01', 'dashboard-01': 'Dashboard01',
+}
+
+// A page with every component example, every block, shadcn's own Button and the beside one.
+export function baseConsumerPage(framework: 'vite' | 'next') {
   const examples = supportedComponentIds.map(
     (id, i) => "import { Example as E" + i + " } from '@/ombelle-examples/" + id + "'",
   )
@@ -40,6 +46,7 @@ function page(framework: 'vite' | 'next') {
     "import { Button as ShadcnButton } from '@/components/ui/button'",
     "import { Button as OmbelleButton } from '@/components/ui/ombelle/button'",
     ...examples,
+    ...baseConsumerBlocks.map((id) => "import { " + blockExports[id] + " } from '@/components/blocks/" + id + "'"),
     '',
     (framework === 'next' ? 'export default function Page' : 'export default function App') + '() {',
     '  return (',
@@ -51,6 +58,7 @@ function page(framework: 'vite' | 'next') {
     ...supportedComponentIds.map(
       (id, i) => '      <section data-component="' + id + '"><E' + i + ' /></section>',
     ),
+    ...baseConsumerBlocks.map((id) => '      <div data-block-check="' + id + '"><' + blockExports[id] + ' /></div>'),
     '    </main>',
     '  )',
     '}',
@@ -76,9 +84,9 @@ export async function prepareBaseConsumer(spec: (typeof baseConsumers)[number]) 
     run(process.execPath, [path.join(repo, 'packages/cli/dist/main.js'), ...args, '--yes', '--json'], root)
   await cli(['theme', 'add', path.join(repo, 'packages/catalog/src/presets/flat.json')])
   const button = path.posix.join(spec.source, 'components/ui/button.tsx')
-  await cli(['add', ...supportedComponentIds, '--beside', button])
+  await cli(['add', ...supportedComponentIds, ...baseConsumerBlocks, '--beside', button])
   const entry = spec.framework === 'next' ? 'app/page.tsx' : 'src/App.tsx'
-  await fs.writeFile(path.join(root, entry), page(spec.framework))
+  await fs.writeFile(path.join(root, entry), baseConsumerPage(spec.framework))
   await run('pnpm', ['exec', spec.framework === 'next' ? 'next' : 'vite', 'build'], root)
   return { ...spec, root }
 }

@@ -15,7 +15,7 @@ export type Dependency = { name: string; version: string }
 export type PlannedDependency = Dependency & { current?: string }
 export type Artifact = {
   logicalPath: string
-  kind: 'component' | 'style' | 'usage' | 'utility'
+  kind: 'component' | 'style' | 'usage' | 'utility' | 'block'
   content: string
   sha256: string
 }

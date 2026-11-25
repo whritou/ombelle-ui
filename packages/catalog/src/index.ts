@@ -2,6 +2,7 @@ import { componentSlots } from './component-slots.js'
 import {
   FoundationError,
   isSupportedContractRelease,
+  type BlockId,
   type ComponentId,
   type Edition,
   type Preset,
@@ -11,6 +12,7 @@ import {
 import { catalogData } from './generated.js'
 import { getCatalogPresets, type StartingPresetId } from './presets.js'
 import { runtimeDependencies } from './manifest.js'
+export { blockImports, blockManifest, type BlockMeta } from './blocks/index.js'
 export { expansionExamples, baseToastExample } from './expansion-examples.js'
 export { knownShadcnUtilityHashes, shadcnBaseStyles, shadcnRadixStyles } from './shadcn.js'
 export { resolveRecipePreset } from './recipe-preset.js'
@@ -50,6 +52,11 @@ export type Catalog = {
   /** Base UI templates; components without primitive imports share their Radix template. */
   baseTemplates: Partial<Record<ComponentId, ComponentTemplate>>
   styles: Record<StyleFamily, string>
+  /** Block sources (Radix edition) and stylesheets, keyed by block id. */
+  blockTemplates: Partial<Record<BlockId, string>>
+  /** Base UI block sources; a block without one installs its Radix source in both editions. */
+  blockBaseTemplates: Partial<Record<BlockId, string>>
+  blockStyles: Partial<Record<BlockId, string>>
   /** Lab paint rules used by Liquid Glass presets with material settings. */
   glassLabStyle: string
   utility: string
@@ -188,6 +195,9 @@ function buildCatalog(release: string): Catalog {
     templates,
     baseTemplates,
     styles: { ...catalogData.styles },
+    blockTemplates: { ...catalogData.blockTemplates },
+    blockBaseTemplates: { ...catalogData.blockBaseTemplates },
+    blockStyles: { ...catalogData.blockStyles },
     glassLabStyle: catalogData.glassLabStyle,
     utility: catalogData.utility,
     glassFilter: catalogData.glassFilter,
@@ -205,6 +215,18 @@ function editionDependencies(id: ComponentId, edition: Edition): string[] {
     (baseDependencies.includes(name) || baseTemplate === undefined || baseTemplate.includes(`from '${name}`)))
   const baseUi = kept.length < names.length || /from '@base-ui\/react/.test(baseTemplate ?? '')
   return baseUi ? [...kept, '@base-ui/react'] : kept
+}
+/** A block's source and stylesheet: the Base UI file when the block has one, else the Radix file. */
+export function getBlockTemplate(
+  catalog: Catalog,
+  id: BlockId,
+  edition: Edition = 'radix',
+): { content: string; styles: string } {
+  const radix = catalog.blockTemplates[id]
+  const styles = catalog.blockStyles[id]
+  if (radix === undefined || styles === undefined)
+    throw new FoundationError('INVALID_DATA', 'Unknown block', '/componentIds')
+  return { content: (edition === 'base' ? catalog.blockBaseTemplates[id] : undefined) ?? radix, styles }
 }
 /** Editions a component can be installed in. */
 export function componentEditions(id: ComponentId): readonly Edition[] {

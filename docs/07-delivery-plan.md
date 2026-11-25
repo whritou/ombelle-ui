@@ -98,7 +98,7 @@ Web beta adds tested JSX output, more components, and explicit diff/update workf
 
 The next platform milestone is React Native discovery and a small native alpha. Share portable tokens and documentation but estimate the implementation independently after testing four components on iOS and Android. Do not give native a fixed delivery date based on the web component count.
 
-Then add a small set of blocks: login form, settings form, pricing section, and dashboard overview. Blocks reuse component IDs and the project preset and include responsive and accessible compositions. Clearly identify example-only authentication and data flows; do not make mock UI look like a production backend integration.
+Then add a small set of blocks: login form, settings form, pricing section, and dashboard overview. **Delivered** as `login-01`, `settings-01`, `pricing-01` and `dashboard-01` in CLI 1.1.0 (unreleased); see [Blocks](05-cli-specification.md#blocks). Blocks reuse component IDs and the project preset and include responsive and accessible compositions. Clearly identify example-only authentication and data flows; do not make mock UI look like a production backend integration.
 
 Finally add agent documentation and skills for discovering components, installing safely, applying presets, composing blocks, and checking accessibility. Publish machine-readable catalog metadata and `llms.txt` early, then add installable skills after CLI contracts stabilize. A new MCP service is optional; first evaluate compatibility with the existing shadcn registry tooling.
 

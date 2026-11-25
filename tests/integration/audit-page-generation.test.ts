@@ -2,7 +2,7 @@ import { afterEach, expect, it } from 'vitest'
 import fs from 'node:fs/promises'
 import os from 'node:os'
 import path from 'node:path'
-import { styleFamilies, supportedComponentIds } from '@ombelle/contracts'
+import { styleFamilies, supportedBlockIds, supportedComponentIds } from '@ombelle/contracts'
 import { glassPresetBackdrop } from '../../apps/www/src/site/glass-presets.js'
 import { writeAuditPages, type AuditData } from '../../scripts/generate-audit.js'
 
@@ -29,6 +29,9 @@ it('writes one deterministic audit page per family and edition', { timeout: 4800
       expect(data.family).toBe(family)
       expect(data.edition).toBe(edition)
       expect([...new Set(data.specimens.map(item => item.component))]).toEqual([...supportedComponentIds].sort())
+      // A section per block, in the contract's order, with the same id the block is installed under.
+      expect(data.blocks.map(block => block.id)).toEqual([...supportedBlockIds])
+      expect(data.specimens.map(item => item.id).filter(id => (supportedBlockIds as readonly string[]).includes(id))).toEqual([])
       expect(new Set(data.specimens.map(item => item.id)).size).toBe(data.specimens.length)
       for (const id of ['button~link-destructive', 'badge~soft', 'alert~dismissible', 'card~options', 'avatar~overflow', 'accordion~flush'])
         expect(data.specimens.map(item => item.id)).toContain(id)

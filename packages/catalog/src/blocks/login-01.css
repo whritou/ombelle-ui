@@ -1,0 +1,69 @@
+/* Layout only: the components carry each family's look. */
+[data-block="login-01"] {
+  display: grid;
+  justify-items: center;
+  padding: 1rem;
+  inline-size: 100%;
+  box-sizing: border-box;
+}
+
+[data-block="login-01"] [data-block-part="card"] {
+  inline-size: 100%;
+  max-inline-size: 26rem;
+}
+
+[data-block="login-01"] [data-block-part="form"] {
+  /* A flex column with no gap: spacing comes from the sibling rules below, so the
+     always-rendered live region adds no space while it is empty. */
+  display: flex;
+  flex-direction: column;
+}
+
+[data-block="login-01"] [data-block-part="form"] > :not([data-block-part="notice"]) + :not([data-block-part="notice"]) {
+  margin-block-start: 1rem;
+}
+
+[data-block="login-01"] [data-block-part="notice"]:not(:empty) {
+  margin-block-end: 1rem;
+}
+
+[data-block="login-01"] [data-block-part="label-row"] {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.25rem 1rem;
+}
+
+[data-block="login-01"] [data-block-part="remember"] {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+[data-block="login-01"] [data-block-part="footer"] {
+  display: grid;
+  gap: 1rem;
+  inline-size: 100%;
+}
+
+[data-block="login-01"] [data-block-part="footer"] p {
+  margin: 0;
+  text-align: center;
+}
+
+[data-block="login-01"] a {
+  color: var(--foreground);
+  font-weight: 500;
+  /* Tailwind's reset removes link underlines; the underline is what marks these as links. */
+  text-decoration-line: underline;
+  text-underline-offset: 0.2em;
+}
+
+@media (min-width: 768px) {
+  [data-block="login-01"] {
+    padding: 3rem 1.5rem;
+    min-block-size: 32rem;
+    align-content: center;
+  }
+}
