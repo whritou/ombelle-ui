@@ -155,7 +155,13 @@ function validateRequest(request: ParsedArgs): void {
   if (manager !== undefined && !['npm', 'pnpm', 'yarn', 'bun'].includes(manager))
     throw bad('Choose npm, pnpm, yarn, or bun for --package-manager', '--package-manager')
   // Component ids are checked against the catalog before any preset, project, or style-support work.
-  if (command === 'add' || command === 'update') assertKnownCatalogIds(operands)
+  if (command === 'add' || command === 'update') {
+    assertKnownCatalogIds(operands)
+    // TODO(Task 7): remove this refusal once add/update plan block ids.
+    const { blocks } = splitCatalogIds(operands)
+    if (blocks.length)
+      throw new FoundationError('INVALID_DATA', 'Blocks are not installable yet: ' + blocks.join(', '), '/componentIds')
+  }
   // Environment settings are read before planning, not after the first file is written (PUB-08).
   dependencyTimeoutMs(process.env)
 }
