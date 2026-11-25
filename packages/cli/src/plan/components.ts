@@ -6,6 +6,8 @@ import {
   type FileChange,
   type ProjectLock,
   type ProjectConfig,
+  type Artifact,
+  type BlockId,
   type ComponentId,
 } from '@ombelle/contracts'
 import { planDependencies } from './dependencies.js'
@@ -156,10 +158,27 @@ export async function appendState(
     )
 }
 export type { Resolution }
+/** The component a component source, component stylesheet or usage example belongs to. */
+function artifactComponent(artifact: Artifact): ComponentId | undefined {
+  const own =
+    artifact.kind === 'component' ||
+    artifact.kind === 'usage' ||
+    (artifact.kind === 'style' && artifact.logicalPath.startsWith('components/ui/'))
+  return own ? (path.basename(artifact.logicalPath).replace(/\.(tsx|css)$/, '') as ComponentId) : undefined
+}
+export type PlanAddOptions = {
+  /**
+   * Each component reached only through a block (not named on the command line), mapped to the blocks
+   * that need it. A managed file of such a component edited after install is kept as it is, with a
+   * notice, instead of conflicting (blocks spec, CLI).
+   */
+  viaBlocks?: ReadonlyMap<ComponentId, readonly BlockId[]>
+}
 export async function planAdd(
   context: ProjectContext,
   result: CompileResult,
   resolutions: Record<string, Resolution> = {},
+  options: PlanAddOptions = {},
 ): Promise<InstallPlan> {
   assertEdition(context)
   if (context.preset && context.lock) {
@@ -214,6 +233,11 @@ export async function planAdd(
   const overwrite = new Set<string>()
   // A resolution only ever applies to an existing file Ombelle doesn't own.
   for (const [file, resolution] of Object.entries(resolutions)) {
+    if (
+      resolution === 'beside' &&
+      artifacts.some((a) => a.kind === 'block' && resolutionKey(transformArtifact(context, a).path) === resolutionKey(file))
+    )
+      throw new FoundationError('INVALID_DATA', '--beside applies to component files, not block files', file)
     const match = artifacts.find(
       (a) =>
         resolutionKey(transformArtifact(context, a).path) === resolutionKey(file) &&
@@ -237,6 +261,7 @@ export async function planAdd(
   }
   for (const a of artifacts) {
     const target = transformArtifact(context, a, beside)
+    let kept = false
     const lower = target.path.toLowerCase()
     if (seen.has(lower))
       throw new FoundationError(
@@ -291,14 +316,23 @@ export async function planAdd(
     } else if (c.beforeHash !== null && record && (!matchesRecord(c, record.sha256) || c.action === 'update')) {
       // A managed file the plan would change, or one edited after install (PUB-01, INS-05): an unedited
       // file whose catalog source changed is refreshed; an edited one conflicts until --overwrite.
+      const owner = artifactComponent(a)
+      const blocks = owner && options.viaBlocks?.get(owner)
       if (managedOutcome(c, record.sha256) === 'refresh') plan.notices.push(refreshNotice(target.path))
-      else {
+      else if (blocks?.length) {
+        // Edited after install and needed only by a block: the block uses the user's version as is.
+        c.action = 'noop'
+        c.afterContent = (await readText(context.root, target.path))!
+        kept = true
+        plan.notices.push(target.path + ' was edited after install; ' + blocks.join(', ') + ' uses it as is')
+      } else {
         c.action = 'conflict'
         plan.diagnostics.push(editedConflict(target.path))
       }
     }
     plan.changes.push(c)
     const placedId = path.basename(a.logicalPath, '.tsx') as ComponentId
+    if (kept) continue
     if (c.action !== 'conflict' && a.kind === 'component' && beside.has(placedId))
       lock.placements = { ...lock.placements, [placedId]: 'beside' }
     if (c.action !== 'conflict')

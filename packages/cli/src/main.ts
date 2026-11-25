@@ -8,6 +8,7 @@ import {
   FoundationError,
   componentsWithStyleSupport,
   familyAccessibilityCaveat,
+  type BlockId,
   type CatalogId,
   type ComponentId,
   type Preset,
@@ -15,6 +16,7 @@ import {
   type InstallPlan,
 } from '@ombelle/contracts'
 import { compile, compileButtonPreset, compileInstallableRecipe, glassContrastWarning } from '@ombelle/compiler'
+import { blockManifest } from '@ombelle/catalog'
 import { cliVersion } from './version.js'
 import { resolveRecipeInput, type ResolvedRecipeInput } from './snapshots/recipe-input.js'
 import { applyRecipeSourceToPlan } from './snapshots/recipe-source.js'
@@ -157,10 +159,10 @@ function validateRequest(request: ParsedArgs): void {
   // Component ids are checked against the catalog before any preset, project, or style-support work.
   if (command === 'add' || command === 'update') {
     assertKnownCatalogIds(operands)
-    // TODO(Task 7): remove this refusal once add/update plan block ids.
+    // TODO(Task 8): remove this refusal once update plans block ids.
     const { blocks } = splitCatalogIds(operands)
-    if (blocks.length)
-      throw new FoundationError('INVALID_DATA', 'Blocks are not installable yet: ' + blocks.join(', '), '/componentIds')
+    if (command === 'update' && blocks.length)
+      throw new FoundationError('INVALID_DATA', 'update does not take block ids yet: ' + blocks.join(', ') + '; run add ' + blocks.join(' '), '/componentIds')
   }
   // Environment settings are read before planning, not after the first file is written (PUB-08).
   dependencyTimeoutMs(process.env)
@@ -225,13 +227,22 @@ async function runPlan(request: ParsedArgs, io: IO, json: boolean): Promise<numb
   } else {
     if (command === 'add' || command === 'update') requireProject()
     const preset: Preset = command === 'add' || command === 'update' ? context.preset! : presetInput!.preset
-    // TODO(Task 7): plan block ids through the block-aware add/update path; until then only components are planned.
-    const ids = splitCatalogIds(operands as CatalogId[]).components
+    // Only add and update take catalog ids; the other commands' operand is a preset file or code.
+    const { components: ids, blocks } =
+      command === 'add' || command === 'update'
+        ? splitCatalogIds(operands as CatalogId[])
+        : { components: [] as ComponentId[], blocks: [] as BlockId[] }
+    // Components reached only through a block, each with the blocks that need it.
+    const viaBlocks = new Map<ComponentId, BlockId[]>()
+    for (const block of [...new Set(blocks)])
+      for (const id of blockManifest[block].components)
+        if (!ids.includes(id)) viaBlocks.set(id, [...(viaBlocks.get(id) ?? []), block])
     const full = command === 'preset apply' && flags['--only'] !== 'theme'
-    const compileFor = (componentIds: readonly ComponentId[], chosen: Record<string, Resolution>) =>
+    const compileFor = (componentIds: readonly ComponentId[], chosen: Record<string, Resolution>, blockIds: readonly BlockId[] = []) =>
       compile({
         preset,
         componentIds,
+        ...(blockIds.length ? { blockIds } : {}),
         catalogRelease: preset.catalogRelease,
         compilerVersion: preset.compilerVersion,
         glassContrast: 'report',
@@ -240,7 +251,7 @@ async function runPlan(request: ParsedArgs, io: IO, json: boolean): Promise<numb
       })
     const planWith = async (chosen: Record<string, Resolution>) => {
       let planned: InstallPlan
-      if (command === 'add') planned = await planAdd(context, await compileFor(ids, chosen), chosen)
+      if (command === 'add') planned = await planAdd(context, await compileFor(ids, chosen, blocks), chosen, { viaBlocks })
       else if (command === 'update') planned = await planUpdate(context, ids, chosen)
       else if (full)
         planned = await planPresetApply(context, await compileFor([], chosen), await compileFor(installedComponentIds(context), chosen), chosen)
@@ -248,7 +259,7 @@ async function runPlan(request: ParsedArgs, io: IO, json: boolean): Promise<numb
       const writesComponents = command === 'add' || command === 'update' || (full && installedComponentIds(context).length > 0)
       planned.notices.push(...glassNotices(
         planned.preset.data,
-        command === 'add' ? ids : command === 'update' || full ? installedComponentIds(context) : undefined,
+        command === 'add' ? [...ids, ...viaBlocks.keys()] : command === 'update' || full ? installedComponentIds(context) : undefined,
         writesComponents && command !== 'update',
       ))
       planned.notices = [...new Set(planned.notices)]
