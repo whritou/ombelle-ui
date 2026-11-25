@@ -15,7 +15,7 @@
       "properties": {
         "logicalPath": {"type": "string", "minLength": 1, "description": "The catalog path, independent of where the project placed the file."},
         "sha256": {"$ref": "#/$defs/hash", "description": "The bytes Ombelle wrote (LF line endings). A file whose bytes differ was edited after install."},
-        "kind": {"enum": ["component", "style", "usage", "utility"]}
+        "kind": {"enum": ["component", "style", "usage", "utility", "block"]}
       }
     },
     "artifacts": {"type": "object", "additionalProperties": {"$ref": "#/$defs/artifact"}, "description": "Keyed by the project-relative path."},

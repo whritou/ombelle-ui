@@ -1,5 +1,7 @@
 export * from './types.js'
 export { supportedComponentIds } from './component-ids.js'
+export { supportedBlockIds, isBlockId } from './block-ids.js'
+export type { BlockId, CatalogId } from './block-ids.js'
 export * from './diagnostics.js'
 export * from './validate.js'
 export * from './fonts.js'
