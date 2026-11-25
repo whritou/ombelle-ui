@@ -160,7 +160,7 @@ for (const manager of ['pnpm', 'npm'] as const) {
     expect(jsonRecord(jsonRecord(refused.data).error)).toMatchObject({
       code: 'UNKNOWN_COMPONENT',
       path: '/componentIds',
-      message: 'Unknown components: unknown-component, buton (did you mean button?)',
+      message: 'Unknown components or blocks: unknown-component, buton (did you mean button?)',
     })
     const after = await snapshotTree(root)
     expect(after).toEqual(before)
