@@ -32,17 +32,17 @@ Workspaces (monorepo roots) and `npm-shrinkwrap.json` are refused; target the ap
 | Command | Writes | Behavior |
 | --- | --- | --- |
 | `init --preset <file\|code>` | yes | Validate the project, save the preset (`ui-preset.json`), write `ui-library.config.json` and the lock, merge the theme into the global stylesheet and write the shared `ui-style.css`. On an existing shadcn project it plans the same merge as `theme add`; it never reruns shadcn's init or resets `components.json`. On an initialized project it replaces the saved preset like `theme add`. |
-| `add <component...>` | yes | Install catalog components with the saved project preset: source, colocated CSS, usage example, the shared utility and stylesheet, and their dependencies. Requires `init`. An installed component is planned exactly as `update` plans it. |
+| `add <component\|block...>` | yes | Install catalog components, and blocks (composed sections such as `login-01`; see [Blocks](#blocks)), mixed in one command, with the saved project preset: source, colocated CSS, usage example, the shared utility and stylesheet, and their dependencies. Requires `init`. An installed component is planned exactly as `update` plans it. |
 | `add button --preset <file\|code>` | yes | Install one Button with its own preset under `<components>/presets/<id>/r<revision>/`, leaving the project preset and existing components unchanged. A registry body font in the preset is imported by the Button's scoped stylesheet and its pinned Fontsource package is installed; heading and mono fonts are ignored, since a Button shows neither. Radix edition only. |
 | `add --recipe <file\|code>` | yes | Install a recipe component under `<components>/recipes/<id>/r<revision>/` with scoped CSS and a usage example. Radix edition only. |
-| `update [<component...>]` | yes | Refresh managed source whose catalog bytes changed (see [Managed files](#managed-files-and-updates)). Without components: every installed component, the shared files, and every recipe and component-preset row. With components: those components and the shared files they use. A component that is not installed fails with `INVALID_DATA`. |
+| `update [<component\|block...>]` | yes | Refresh managed source whose catalog bytes changed (see [Managed files](#managed-files-and-updates)). Without operands: every installed component and block, the shared files, and every recipe and component-preset row. With operands: those components and blocks (a block with its components) and the shared files they use. A component or block that is not installed fails with `INVALID_DATA`. |
 | `preset apply <file\|code>` | yes | Switch the project preset: the theme merge of `theme add`, plus every installed component recompiled with the new preset under the update rules, in one transaction. A style-family switch therefore restyles installed components. |
 | `preset apply <file\|code> --only theme` | yes | Exactly `theme add <file\|code>`. |
 | `theme add <file\|code>` | yes | Merge the preset's palette and tokens into the global stylesheet, write `ui-style.css`, and save the preset, without touching component source. A family switch with installed component styles fails with `STYLE_UNAVAILABLE` at `/styleFamily`; use `preset apply`. |
 | `preset show` | no | Print the saved preset, its hash and whether it matches the lock, the catalog release and compiler version, its source code if any, and each component preset and recipe row with its source. |
 | `info` | no | Print the CLI version, framework, manager, edition, shadcn style, stylesheet paths, preset, installed components with placement and state, recipes, component presets, every managed file with its state, and a count per state. |
-| `doctor` | no | Check the CLI runtime, project support, the install runtime and manager, the preset against the lock, every managed file, the stylesheet import, installed components' declared dependencies, and a leftover operation lock. Exits 0 when no check fails and 3 when one does; a failed project check is reported as a check, not an error. |
-| `diff [<component...>]` | no | Print a unified diff (project bytes against today's catalog bytes) for every managed file that is not `current`. Without components: every managed file, including recipe and component-preset rows. Exits 0. |
+| `doctor` | no | Check the CLI runtime, project support, the install runtime and manager, the preset against the lock, every managed file, the stylesheet import, installed components' declared dependencies, that every installed block's components are installed, and a leftover operation lock. Exits 0 when no check fails and 3 when one does; a failed project check is reported as a check, not an error. |
+| `diff [<component\|block...>]` | no | Print a unified diff (project bytes against today's catalog bytes) for every managed file that is not `current`. Without operands: every managed file, including block, recipe and component-preset rows. Exits 0. |
 
 `--help` and `-h` print the usage, every command, the options and the support matrix. `--version` prints the CLI version (with `--json`: `{ "outputVersion": 1, "command": "version", "status": "success", "version": "<x.y.z>" }`).
 
@@ -52,10 +52,13 @@ Examples:
 ombelle init --preset ps_0123456789abcdef0123456789abcdef@1
 ombelle add button dialog --dry-run
 ombelle add button dialog --yes
+ombelle add login-01 --dry-run
+ombelle add button pricing-01 --yes
 ombelle add button --preset ./brand.preset.json
 ombelle add --recipe ./button.recipe.json
 ombelle update --dry-run
 ombelle update meter --overwrite src/components/ui/meter.tsx
+ombelle update dashboard-01 --dry-run
 ombelle preset apply ./minimalist.json --dry-run
 ombelle theme add ps_0123456789abcdef0123456789abcdef@1
 ombelle info --json
@@ -134,6 +137,23 @@ The shared `ui-style.css` and the shared utility are managed files like any othe
 
 The lock records provenance, not ownership of directories: nothing outside the planned files is ever deleted.
 
+## Blocks
+
+A block is a composed section built only from catalog components: `login-01` (sign-in card), `settings-01` (account settings), `pricing-01` (three plans) and `dashboard-01` (overview content area). Block ids and component ids share one namespace on the command line. Each block has its own page in [`docs/blocks/`](blocks/login-01.md). Blocks need `@ombelle-ui/cli` 1.1.0 or later.
+
+- **Grammar.** `add` and `update` accept block ids and component ids in one command (`ombelle add button pricing-01`). `diff` accepts them too.
+- **Files.** A block writes `<dirname of the components directory>/blocks/<id>.tsx` and `<id>.css`, by default `src/components/blocks/`. Its components install where they always do and the block imports them through the project alias (or from `<components>/ombelle/` for a component installed beside).
+- **Lock.** Block files are managed files recorded only in the lock's `artifacts`, with `kind: "block"` and the logical path `blocks/<id>.tsx` or `.css`. The lock has no block field and `lockVersion` stays 1; installed blocks are read from those records. `info` and `diff` list the files like any other.
+- **Planning.** The block's files follow the [managed file table](#managed-files-and-updates), and so do its components, with these differences:
+  - A component that Ombelle installed, that you edited and that the plan reaches only through a block is kept as it is, with the notice `BLOCK_COMPONENT_EDITED` (`<path> was edited after install; <block> uses it as is`). It is not a conflict.
+  - A component you named on the command line keeps the usual conflict when edited.
+  - A component file that exists but is not managed by Ombelle is a conflict, as for `add <component>`; resolve it with `--overwrite <path>` or `--beside <path>`. The block never imports a foreign component silently.
+  - `--beside` is refused for a block's own files. A component installed beside is used from there.
+  - An edited block file conflicts with `FILE_CONFLICT`; `--overwrite <path>` replaces it with the catalog source.
+- **`update`.** Without operands it refreshes installed blocks as well. `update <block>` refreshes that block and its components under the rules above.
+- **`doctor`.** The `blocks` check warns, and still exits 0, when an installed block's component is not installed: `<block> needs <component>; run ombelle add <block>`, with the notice code `BLOCK_COMPONENT_MISSING`.
+- **Older CLIs.** CLI 1.0 refuses `add login-01` with `UNKNOWN_COMPONENT`. In a project that has blocks, it keeps the block records when it rewrites the lock, its `doctor` warns that they are "no longer generated by the catalog" (exit 0), and its `update` leaves them alone. Use CLI 1.1 or later in such a project. `tests/integration/blocks-older-cli.test.ts` pins this; it needs registry access (`OMBELLE_REGISTRY_TESTS=1`, which `pnpm check:foundation` sets).
+
 ## Component editions and existing files
 
 Implemented per [decision 0005](decisions/0005-base-ui-edition.md).
@@ -207,9 +227,9 @@ Plan records (`status` `planned`, `success`, `conflict` or `cancelled`):
 | `notices` | `[{ code, message }]`; codes below. |
 | `networkAccess` | Whether resolving the input used the network. |
 
-Notice codes: `FILE_REFRESHED`, `SHADCN_UTILITY_ADOPTED`, `DEPENDENCY_KEPT`, `DEPENDENCY_RUNTIME_UNAVAILABLE` (dry run only), `REACT_UNTESTED_MAJOR`, `RUNTIME_UNTESTED_MAJOR`, `GLASS_ACCESSIBILITY_CAVEAT`, `GLASS_FILTER_MOUNT`, `GLASS_CONTRAST`, `FONT_CSS_MANUAL`, `FONT_PACKAGES_UNUSED`, `THEME_PALETTE_ONLY`, `INTERRUPTED_OPERATION`, `CATALOG_FILE_REMOVED`, and `NOTICE` for any other text.
+Notice codes: `FILE_REFRESHED`, `SHADCN_UTILITY_ADOPTED`, `DEPENDENCY_KEPT`, `DEPENDENCY_RUNTIME_UNAVAILABLE` (dry run only), `REACT_UNTESTED_MAJOR`, `RUNTIME_UNTESTED_MAJOR`, `GLASS_ACCESSIBILITY_CAVEAT`, `GLASS_FILTER_MOUNT`, `GLASS_CONTRAST`, `FONT_CSS_MANUAL`, `FONT_PACKAGES_UNUSED`, `THEME_PALETTE_ONLY`, `INTERRUPTED_OPERATION`, `CATALOG_FILE_REMOVED`, `BLOCK_COMPONENT_EDITED`, `BLOCK_COMPONENT_MISSING` (also the `code` of the `blocks` doctor check when it warns), and `NOTICE` for any other text.
 
-Report records: `preset show` adds `presetFile`, `preset`, `presetHash`, `matchesLock`, `catalogRelease`, `compilerVersion`, `source`?, `componentPresets` and `recipes`. `info` adds `cliVersion`, `initialized`, `framework`, `packageManager`, `edition`, `shadcnStyle`?, `shadcnStyleSupported`?, `cssEntry`, `componentsDirectory`, `styleFile`, `preset`?, `components` (`[{ id, placement, state }]`), `recipes`, `componentPresets`, `files` (`[{ path, kind, owner, state }]`) and `summary` (count per state). `diff` adds `files` (`[{ path, owner, state, diff }]`). `doctor` has `status` `success` or `failed` and `checks` (`[{ id, status: "pass" | "warn" | "fail", message, path?, nextAction? }]`).
+Report records: `preset show` adds `presetFile`, `preset`, `presetHash`, `matchesLock`, `catalogRelease`, `compilerVersion`, `source`?, `componentPresets` and `recipes`. `info` adds `cliVersion`, `initialized`, `framework`, `packageManager`, `edition`, `shadcnStyle`?, `shadcnStyleSupported`?, `cssEntry`, `componentsDirectory`, `styleFile`, `preset`?, `components` (`[{ id, placement, state }]`), `recipes`, `componentPresets`, `files` (`[{ path, kind, owner, state }]`) and `summary` (count per state). `diff` adds `files` (`[{ path, owner, state, diff }]`). `doctor` has `status` `success` or `failed` and `checks` (`[{ id, status: "pass" | "warn" | "fail", message, path?, nextAction?, code? }]`; `code` is set when a check carries a notice code, as `BLOCK_COMPONENT_MISSING`).
 
 Error records: `{ outputVersion, command, status: "error", error: { code, message, path?, nextAction?, recovery? } }`, where `recovery` is `{ sourceRestored, unrestoredPaths, transactionPath, packageStateMayHaveChanged, restoredPaths?, interrupted? }`.
 
@@ -221,7 +241,7 @@ Error records: `{ outputVersion, command, status: "error", error: { code, messag
 | `INTERNAL_ERROR` | 1 | Unexpected failure, including an interrupted apply after rollback. |
 | `INVALID_DATA` | 2 | Invalid arguments, flags, input files, environment values or resolutions. |
 | `INVALID_REFERENCE` | 2 | A malformed snapshot reference. |
-| `UNKNOWN_COMPONENT` | 2 | A component id outside the catalog, checked before any other work; the message suggests up to three close ids and the next action lists the catalog. |
+| `UNKNOWN_COMPONENT` | 2 | A component or block id outside the catalog, checked before any other work; the message ("Unknown component or block: <id> (did you mean …?)", plural "Unknown components or blocks: …") suggests up to three close ids, and the next action lists the components, then the blocks. |
 | `STYLE_UNAVAILABLE` | 2 | A component the preset's family cannot style, or a theme switch that would strand installed styles. |
 | `UNSUPPORTED_PROJECT` | 3 | Unsupported or ambiguous project, React, framework, manager evidence, runtime or style. |
 | `UNSUPPORTED_RELEASE` | 3 | A document, config or lock from a newer release, or an unsupported catalog or compiler release. |
@@ -233,4 +253,4 @@ The hosted service's HTTP error codes are documented in [snapshot service operat
 
 ## Verification
 
-The CLI tests live in `packages/cli/test` (planning, transactions, recovery, managers, inputs, the support matrix, the argument grammar and output) and `tests/integration` (built CLI runs, including `update-cli.test.ts` for upgrades from 0.9.x installs, `stock-projects-cli.test.ts` for projects as create-vite and create-next-app generate them, and `shadcn-theme-merge.test.ts` for genuine shadcn templates). Consumer and browser evidence is recorded in `docs/evidence/`; it uses Chromium only.
+The CLI tests live in `packages/cli/test` (planning, transactions, recovery, managers, inputs, the support matrix, the argument grammar and output) and `tests/integration` (built CLI runs, including `update-cli.test.ts` for upgrades from 0.9.x installs, `blocks-cli.test.ts` for blocks and `blocks-older-cli.test.ts` for a 1.0 CLI on a lock with blocks (it installs the 1.0 CLI from the npm registry, so the quality group needs registry access), `stock-projects-cli.test.ts` for projects as create-vite and create-next-app generate them, and `shadcn-theme-merge.test.ts` for genuine shadcn templates). Consumer and browser evidence is recorded in `docs/evidence/`; it uses Chromium only.
