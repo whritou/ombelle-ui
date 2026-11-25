@@ -40,7 +40,30 @@ export function Settings01() {
   )
 }
 
+/**
+ * Base UI hides an inactive panel with the hidden attribute (which Tailwind's reset enforces with !important)
+ * and makes it inert, so the CSS cannot stack the three panels on phones. Below 768px each section is a plain
+ * panel instead, always on screen and always usable.
+ */
+function Panel({ value, stacked, children }: { value: string; stacked: boolean; children: React.ReactNode }) {
+  return stacked ? (
+    <div data-block-part="panel">{children}</div>
+  ) : (
+    <TabsContent value={value} data-block-part="panel">
+      {children}
+    </TabsContent>
+  )
+}
+
 function Settings01Content() {
+  const [stacked, setStacked] = React.useState(false)
+  React.useEffect(() => {
+    const query = window.matchMedia('(max-width: 767.98px)')
+    const update = () => setStacked(query.matches)
+    update()
+    query.addEventListener('change', update)
+    return () => query.removeEventListener('change', update)
+  }, [])
   const toastManager = useToastManager()
   const titleId = React.useId()
   const timeZoneId = React.useId()
@@ -72,8 +95,8 @@ function Settings01Content() {
                 <TabsTrigger value="notifications">Notifications</TabsTrigger>
                 <TabsTrigger value="danger">Danger zone</TabsTrigger>
               </TabsList>
-              {/* Every panel stays mounted (Base UI keeps them by default): on phones the CSS shows them all, stacked. */}
-              <TabsContent value="profile" data-block-part="panel">
+              {/* From 768px the tabs show one panel; on phones every section is on screen, stacked (see Panel). */}
+              <Panel value="profile" stacked={stacked}>
                 <p data-block-part="panel-title">Profile</p>
                 <form data-block-part="form" onSubmit={save}>
                   <div data-block-part="identity">
@@ -121,8 +144,8 @@ function Settings01Content() {
                     <Button type="submit">Save changes</Button>
                   </div>
                 </form>
-              </TabsContent>
-              <TabsContent value="notifications" data-block-part="panel">
+              </Panel>
+              <Panel value="notifications" stacked={stacked}>
                 <p data-block-part="panel-title">Notifications</p>
                 <form data-block-part="form" onSubmit={save}>
                   <Field orientation="horizontal">
@@ -174,8 +197,8 @@ function Settings01Content() {
                     <Button type="submit">Save preferences</Button>
                   </div>
                 </form>
-              </TabsContent>
-              <TabsContent value="danger" data-block-part="panel">
+              </Panel>
+              <Panel value="danger" stacked={stacked}>
                 <p data-block-part="panel-title">Danger zone</p>
                 <div data-block-part="danger">
                   <div>
@@ -205,7 +228,7 @@ function Settings01Content() {
                     </AlertDialogContent>
                   </AlertDialog>
                 </div>
-              </TabsContent>
+              </Panel>
             </Tabs>
           </CardContent>
         </Card>

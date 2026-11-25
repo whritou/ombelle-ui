@@ -26,7 +26,7 @@
 [data-block="dashboard-01"] [data-block-part="intro"] h2 {
   font-family: var(--font-family);
   font-size: 1.5rem;
-  line-height: 1.2;
+  line-height: 1.3;
 }
 
 [data-block="dashboard-01"] [data-block-part="intro"] p {
@@ -70,6 +70,14 @@
 
 [data-block="dashboard-01"] [data-block-part="activity"] {
   min-inline-size: 0;
+  /* The card clips what is inside it, and a family's table shadow can fall below the table: room for it. */
+  padding-block-end: 1.75rem;
+}
+
+/* The table scrolls sideways on phones, and focus scrolls the row menu button flush to the box's edge:
+   this margin leaves room for its focus ring inside the box. */
+[data-block="dashboard-01"] [data-block-part="row-menu"] {
+  scroll-margin: 0.5rem;
 }
 
 [data-block="dashboard-01"] [data-block-part="person"] {

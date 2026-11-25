@@ -24,7 +24,7 @@
 [data-block="pricing-01"] [data-block-part="intro"] h2 {
   font-family: var(--font-family);
   font-size: 1.75rem;
-  line-height: 1.2;
+  line-height: 1.3;
 }
 
 [data-block="pricing-01"] [data-block-part="intro"] p {
@@ -68,7 +68,7 @@
 
 [data-block="pricing-01"] [data-block-part="price"] strong {
   font-size: 2rem;
-  line-height: 1.1;
+  line-height: 1.3;
 }
 
 [data-block="pricing-01"] [data-block-part="price"] span {

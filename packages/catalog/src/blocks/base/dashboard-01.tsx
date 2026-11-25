@@ -173,7 +173,7 @@ function Dashboard01Content() {
                     <TableCell>{row.when}</TableCell>
                     <TableCell>
                       <DropdownMenu>
-                        <DropdownMenuTrigger render={<Button variant="ghost" size="icon-sm" aria-label={`Actions for ${row.action}`} />}>
+                        <DropdownMenuTrigger render={<Button variant="ghost" size="icon-sm" data-block-part="row-menu" aria-label={`Actions for ${row.action}`} />}>
                             <svg aria-hidden="true" viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
                               <circle cx="3" cy="8" r="1.5" />
                               <circle cx="8" cy="8" r="1.5" />
