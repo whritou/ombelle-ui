@@ -37,8 +37,9 @@ const openings: [RegExp, NoticeCode][] = [
   [/^Palette only:/, 'THEME_PALETTE_ONLY'],
   [/^An interrupted operation left/, 'INTERRUPTED_OPERATION'],
   [/^no longer generated: /, 'CATALOG_FILE_REMOVED'],
-  [/^\S+ was edited after install; .+ uses it as is$/, 'BLOCK_COMPONENT_EDITED'],
-  [/^\S+ needs \S+; run ombelle add /, 'BLOCK_COMPONENT_MISSING'],
+  // `.+`, not `\S+`: a project path may contain spaces.
+  [/^.+ was edited after install; .+ uses it as is$/, 'BLOCK_COMPONENT_EDITED'],
+  [/^.+ needs .+; run ombelle add /, 'BLOCK_COMPONENT_MISSING'],
   [/^Dependency install unavailable: /, 'DEPENDENCY_RUNTIME_UNAVAILABLE'],
   [/^React .* is newer than the versions this release was tested with/, 'REACT_UNTESTED_MAJOR'],
   [/^(?:Node|Bun) \S+ is newer than the versions this release was tested with/, 'RUNTIME_UNTESTED_MAJOR'],

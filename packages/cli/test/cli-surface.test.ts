@@ -89,6 +89,13 @@ it('gives every notice the CLI writes a stable code (PUB-06)', () => {
   expect(noticeCode('login-01 needs card; run ombelle add login-01')).toBe('BLOCK_COMPONENT_MISSING')
 })
 
+it('codes block notices whose paths contain spaces', () => {
+  expect(noticeCode('my app/src/components/ui/button.tsx was edited after install; login-01, settings-01 uses it as is')).toBe(
+    'BLOCK_COMPONENT_EDITED',
+  )
+  expect(noticeCode('login-01 needs password field; run ombelle add login-01')).toBe('BLOCK_COMPONENT_MISSING')
+})
+
 // PUB-05: a document from a newer release is named as such, with the way forward, not a bare INVALID_DATA.
 it.each([
   ['an unknown style family', { styleFamily: 'aurora' }, '/styleFamily'],
