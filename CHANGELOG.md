@@ -4,9 +4,11 @@ Entries are written for someone upgrading a project. From 1.0 each release group
 
 ## Unreleased
 
-Targets CLI 1.1.0 (not yet released). Blocks are the first work after 1.0.
+## 1.1.0 — 25 November 2026
 
-The Yarn and Bun consumer fixture locks gain `@radix-ui/react-separator` 1.2.0, which `login-01` and the other blocks need: `fixtures/yarn/` was regenerated with Yarn 1.22.22 and 4.18.1, and `fixtures/bun/` (text and binary) with Bun 1.4.3. The Bun consumer and minimalist Bun cases pass on Windows with Bun 1.4.3.
+Blocks: composed sections you install with `ombelle add <block-id>`. Nothing breaks for a 1.0 project.
+
+**Upgrade.** Use CLI 1.1 or later in a project that has blocks. A 1.0 CLI keeps their lock records and files but cannot install, update or diff them, and its `doctor` warns about them.
 
 **Installed source**
 
@@ -27,6 +29,7 @@ The Yarn and Bun consumer fixture locks gain `@radix-ui/react-separator` 1.2.0, 
 - `--json`: `changes[].kind` and `info`'s `files[].kind` gain the value `block` (additive; `outputVersion` stays 1). Tools that switch on `kind` should accept values they do not know.
 - New notice codes `BLOCK_COMPONENT_EDITED` and `BLOCK_COMPONENT_MISSING`. `docs/05-cli-specification.md` has a Blocks section; `docs/1.0-public-contract.md` adds block ids and `add <block>` to the stable grammar once 1.1.0 is released.
 - Verification: the specimen audit covers each block in every family, edition and mode, and its evidence counts blocks apart from component specimens. Block toasts are measured over the bare page, which raises each of the four liquid glass advisory baselines by 2 (the example Toast's focus ring on the bare backdrop in light mode, in `settings-01` and `dashboard-01`). Base UI consumers render all four blocks and the npm and pnpm consumers include `login-01`. `tests/integration/blocks-older-cli.test.ts` runs the published 1.0 CLI against a lock with blocks; it needs npm registry access (`OMBELLE_REGISTRY_TESTS=1`, set by `pnpm check:foundation`), so the quality group now needs registry access.
+- The Yarn and Bun consumer fixture locks gain `@radix-ui/react-separator` 1.2.0, which `login-01` and the other blocks need: `fixtures/yarn/` was regenerated with Yarn 1.22.22 and 4.18.1, and `fixtures/bun/` (text and binary) with Bun 1.4.3.
 
 **Website**
 
