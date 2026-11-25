@@ -55,6 +55,8 @@
 [data-block="login-01"] a {
   color: var(--foreground);
   font-weight: 500;
+  /* Tailwind's reset removes link underlines; the underline is what marks these as links. */
+  text-decoration-line: underline;
   text-underline-offset: 0.2em;
 }
 

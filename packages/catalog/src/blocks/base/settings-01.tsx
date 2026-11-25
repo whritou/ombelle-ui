@@ -42,14 +42,26 @@ export function Settings01() {
 
 /**
  * Base UI hides an inactive panel with the hidden attribute (which Tailwind's reset enforces with !important)
- * and makes it inert, so the CSS cannot stack the three panels on phones. Below 768px each section is a plain
- * panel instead, always on screen and always usable.
+ * and makes it inert, so the CSS cannot stack the three panels on phones. Below 768px this panel drops hidden,
+ * inert and its tab role instead, so every section is on screen and usable. It is the same Tabs panel at every
+ * width, so what a person has typed survives a rotation.
  */
 function Panel({ value, stacked, children }: { value: string; stacked: boolean; children: React.ReactNode }) {
-  return stacked ? (
-    <div data-block-part="panel">{children}</div>
-  ) : (
-    <TabsContent value={value} data-block-part="panel">
+  return (
+    <TabsContent
+      value={value}
+      data-block-part="panel"
+      render={(panelProps, state) => {
+        const props = panelProps as Record<string, unknown>
+        const { hidden, inert, role, 'aria-labelledby': labelledBy, ...shown } = props
+        void [hidden, inert, role, labelledBy]
+        return stacked ? (
+          <div {...shown} data-state="active" data-orientation={state.orientation} />
+        ) : (
+          <div {...props} data-state={state.hidden ? 'inactive' : 'active'} data-orientation={state.orientation} />
+        )
+      }}
+    >
       {children}
     </TabsContent>
   )
