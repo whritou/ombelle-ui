@@ -130,12 +130,21 @@ export function findSpacing(roots: Locator[]): Promise<Finding[]> {
     for (const label of root.querySelectorAll('label[for]')) {
       const control = document.getElementById(label.getAttribute('for')!)
       if (!control || label.contains(control) || control.getClientRects().length === 0 || label.getClientRects().length === 0) continue
-      const a = label.getBoundingClientRect(), b = control.getBoundingClientRect()
-      // A Base UI Switch or Checkbox keeps a 1×1 form input that the label points at; the drawn control is a sibling.
-      if (b.width <= 1 && b.height <= 1) continue
+      const a = label.getBoundingClientRect()
+      let drawn: Element = control
+      let b = control.getBoundingClientRect()
+      // A Base UI Switch or Checkbox keeps a 1×1 form input that the label points at; the drawn control is the
+      // role=switch / checkbox / radio element beside it, and that is what the label must not touch.
+      if (b.width <= 1 && b.height <= 1) {
+        const candidates = [...(label.parentElement?.querySelectorAll('[role=switch], [role=checkbox], [role=radio]') ?? [])]
+          .filter(element => !label.contains(element) && element.getBoundingClientRect().width > 1)
+        if (!candidates.length) continue
+        drawn = candidates[0]!
+        b = drawn.getBoundingClientRect()
+      }
       const gap =Math.max(b.left - a.right, a.left - b.right, b.top - a.bottom, a.top - b.bottom)
       if (gap < 4)
-        findings.push({ check: 'spacing', target: describe(label), detail: `${Math.max(0, Math.round(gap))}px from ${describe(control)}, 4px needed` })
+        findings.push({ check: 'spacing', target: describe(label), detail: `${Math.max(0, Math.round(gap))}px from ${describe(drawn)}, 4px needed` })
     }
     return findings
   }, describeSource))

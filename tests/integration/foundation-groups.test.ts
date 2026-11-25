@@ -3,7 +3,7 @@ import os from 'node:os'
 import path from 'node:path'
 import { spawnSync } from 'node:child_process'
 import { afterEach, expect, test } from 'vitest'
-import { supportedComponentIds } from '@ombelle/contracts'
+import { supportedBlockIds, supportedComponentIds } from '@ombelle/contracts'
 // @ts-expect-error JavaScript gate entry point
 import { advisoryBaseline, aggregateFoundationEvidence, foundationSteps, specimenSpecCounts, validateBrowserResults, validateSpecimenAudit, validateTestResults } from '../../scripts/foundation-evidence.mjs'
 // @ts-expect-error JavaScript gate entry point
@@ -44,8 +44,8 @@ function specimenAudit() {
   return {
     schemaVersion: 1, sourceCommit: commit, node: 'v24.19.0', browser: { engine: 'chromium', version: '148.0.0.0', channel: 'bundled' },
     configurations: [...['flat', 'minimalist', 'neo-brutalism', 'ombelle', 'papier', 'organic', 'retro-futurism', 'liquid-glass'].flatMap(family => ['radix', 'base'].flatMap(edition =>
-      ['light', 'dark'].map(mode => ({ family, edition, mode, specimens: supportedComponentIds.length, checks: checks(mode), contrastAdvisoryFindings: 0 })))),
-      ...['radix', 'base'].flatMap(edition => ['light', 'dark'].map(mode => ({ family: 'liquid-glass', edition, mode, transparency: 'reduced', specimens: supportedComponentIds.length, checks: checks(mode), contrastAdvisoryFindings: 0 })))],
+      ['light', 'dark'].map(mode => ({ family, edition, mode, specimens: supportedComponentIds.length, blocks: supportedBlockIds.length, checks: checks(mode), contrastAdvisoryFindings: 0 })))),
+      ...['radix', 'base'].flatMap(edition => ['light', 'dark'].map(mode => ({ family: 'liquid-glass', edition, mode, transparency: 'reduced', specimens: supportedComponentIds.length, blocks: supportedBlockIds.length, checks: checks(mode), contrastAdvisoryFindings: 0 })))],
     failures: 0,
   }
 }
@@ -139,12 +139,15 @@ test.each(['quality', 'all'] as const)('%s generates the preview sources before 
   expect(order.indexOf('generate:preview')).toBeGreaterThan(order.indexOf('build:packages'))
   for (const stage of ['test:unit', 'test:integration']) expect(order.indexOf('generate:preview')).toBeLessThan(order.indexOf(stage))
 })
-test('accepts a complete specimen audit', () => {
+test('accepts a complete specimen audit, which counts the four blocks apart from the components', () => {
+  expect(specimenAudit().configurations.every((row: any) => row.blocks === supportedBlockIds.length)).toBe(true)
   expect(validateSpecimenAudit(specimenAudit())).toEqual({ configurations: 36, specimens: 36 * supportedComponentIds.length })
 })
 test.each([
   ['23 configurations', (audit: any) => { audit.configurations.pop() }],
   ['one specimen missing in one configuration', (audit: any) => { audit.configurations[3].specimens -= 1 }],
+  ['one block missing in one configuration', (audit: any) => { audit.configurations[3].blocks -= 1 }],
+  ['no block count (an audit from before blocks)', (audit: any) => { delete audit.configurations[5].blocks }],
   ['a failure', (audit: any) => { audit.failures = 1 }],
   ['a duplicated configuration', (audit: any) => { audit.configurations[1] = { ...audit.configurations[0] } }],
   ['a check that measured nothing', (audit: any) => { audit.configurations[0].checks['focus-visible'] = 0 }],

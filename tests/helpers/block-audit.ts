@@ -161,6 +161,14 @@ export async function expectBlockSwitchesAt768(page: Page, section: Locator, id:
   await page.setViewportSize({ width: 768, height })
   const wide = await paddingTop(section)
   expect(wide, `${id}: block padding at 768px matches 767px`).not.toBe(narrow)
+  // The grids change columns with the padding: one column at 767px, the desktop count at 768px.
+  const grid = id === 'pricing-01' ? '[data-block-part="plans"]' : id === 'dashboard-01' ? '[data-block-part="stats"]' : undefined
+  if (grid) {
+    expect(await columns((await visible(section.locator(grid)))[0]!), `${id}: columns at 768px`).toBe(id === 'pricing-01' ? 3 : 2)
+    await page.setViewportSize({ width: 767, height })
+    expect(await columns((await visible(section.locator(grid)))[0]!), `${id}: columns at 767px`).toBe(1)
+    await page.setViewportSize({ width: 768, height })
+  }
   if (id === 'settings-01') {
     expect(tabList, `${id}: tab list at 767px`).toBe(false)
     expect(await section.getByRole('tablist').first().isVisible(), `${id}: tab list at 768px`).toBe(true)
@@ -177,4 +185,17 @@ export async function expectLoginNotice(section: Locator): Promise<void> {
   const first = section.locator('[data-block-part="form"] [data-slot$="field"]').first()
   const gap = await first.evaluate((field, region) => field.getBoundingClientRect().top - region.getBoundingClientRect().top, await notice.elementHandle())
   expect(gap, 'the empty notice region adds no gap above the first field').toBe(0)
+}
+
+/** What a person typed survives the 768px breakpoint, in both directions (a phone turned on its side). */
+export async function expectSettingsKeepsInput(page: Page, section: Locator): Promise<void> {
+  const height = page.viewportSize()!.height
+  const width = page.viewportSize()!.width
+  const field = section.getByRole('textbox').first()
+  await field.fill('Typed before the resize', { timeout: 10000 })
+  for (const next of [320, width])
+    await expect.poll(async () => {
+      await page.setViewportSize({ width: next, height })
+      return field.inputValue()
+    }, { message: `settings-01: typed text after resizing to ${next}px` }).toBe('Typed before the resize')
 }

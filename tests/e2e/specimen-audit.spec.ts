@@ -8,7 +8,7 @@ import {
 } from '../helpers/specimen-audit.js'
 import { editions, modes, specimenArtifacts as artifacts, specimenRunIsPartial } from '../helpers/specimen-run.js'
 import { inShard, specimenShard } from '../helpers/specimen-shard.js'
-import { blockAuditActions, expectBlockLayout, expectBlockSwitchesAt768, expectLoginNotice } from '../helpers/block-audit.js'
+import { blockAuditActions, expectBlockLayout, expectBlockSwitchesAt768, expectLoginNotice, expectSettingsKeepsInput } from '../helpers/block-audit.js'
 
 const isBlock = (id: string): id is BlockId => (supportedBlockIds as readonly string[]).includes(id)
 // A block is page-sized: it is measured at a phone and at a desktop width, not in the specimen column.
@@ -104,6 +104,7 @@ async function auditBlocks(page: Page, blocks: BlockId[], run: BlockRun): Promis
       await expectBlockLayout(page, section, id, width)
       // Before the 1280px pass submits the form: later the Alert is in the region.
       if (id === 'login-01' && width === blockWidths[0]) await expectLoginNotice(section)
+      if (id === 'settings-01' && width === blockWidths[0]) await expectSettingsKeepsInput(page, section)
       if (width === blockWidths[0]) await expectBlockSwitchesAt768(page, section, id)
       await page.setViewportSize({ width, height })
       await section.screenshot({ path: path.join(shots, `${id}-${width}.png`), animations: 'disabled' })
@@ -304,7 +305,7 @@ for (const [index, { family, edition, mode, transparency }] of configurations.en
         const blocking = findings.filter(finding => !advisory.includes(finding))
         if (advisory.length)
           test.info().annotations.push({ type: 'contrast advisory findings', description: JSON.stringify(advisory) })
-        const part = { runId: process.env.OMBELLE_SPECIMEN_RUN_ID, family, edition, mode, ...(transparency ? { transparency } : {}), specimens: new Set(everySection.map(id => id.split('~')[0])).size, sections: everySection.length, checks: counts, failures: blocking.length + errors.length,
+        const part = { runId: process.env.OMBELLE_SPECIMEN_RUN_ID, family, edition, mode, ...(transparency ? { transparency } : {}), specimens: new Set(components.map(id => id.split('~')[0])).size, blocks: blocks.length, sections: everySection.length, checks: counts, failures: blocking.length + errors.length,
           contrastAdvisoryFindings: advisory.length,
           browser: { engine: 'chromium', version: browser.version(), channel: process.env.OMBELLE_BROWSER_CHANNEL || 'bundled' } }
         // A run limited to some components writes its findings apart and leaves the evidence file alone.

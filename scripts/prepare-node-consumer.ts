@@ -231,7 +231,7 @@ export async function prepareNodeConsumer(spec: ConsumerCase) {
         !reference ||
         content !== reference.content ||
         hash !== meta.sha256 ||
-        (meta.kind !== 'style' &&
+        (meta.kind !== 'style' && !file.endsWith('.css') &&
           (await collectModuleSpecifiers(content)).some((s) =>
             s.startsWith('@ombelle/'),
           ))

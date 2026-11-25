@@ -120,7 +120,7 @@ export async function prepareBunConsumer(
         !reference ||
         source !== reference.content ||
         hash !== meta.sha256 ||
-        (meta.kind !== 'style' &&
+        (meta.kind !== 'style' && !file.endsWith('.css') &&
           (await collectModuleSpecifiers(source)).some((s) =>
             s.startsWith('@ombelle/'),
           ))
