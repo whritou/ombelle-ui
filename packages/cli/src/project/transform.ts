@@ -21,6 +21,12 @@ export function transformArtifact(
         ...(beside.has(id) ? [besideDirectory] : []),
         path.basename(artifact.logicalPath),
       )
+    : artifact.kind === 'block'
+      ? path.join(
+          path.dirname(context.componentsDir),
+          'blocks',
+          path.basename(artifact.logicalPath),
+        )
     : artifact.kind === 'utility'
       ? context.utilsFile
       : artifact.logicalPath === 'styles/ui-style.css'
@@ -36,6 +42,12 @@ export function transformArtifact(
       "'@/components/ui/" + id + "'",
       "'@/components/ui/" + besideDirectory + '/' + id + "'",
     )
+  if (artifact.kind === 'block')
+    for (const c of beside)
+      content = content.replaceAll(
+        "'@/components/ui/" + c + "'",
+        "'@/components/ui/" + besideDirectory + '/' + c + "'",
+      )
   return {
     path: portable(target),
     content: content

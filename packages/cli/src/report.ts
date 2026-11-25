@@ -14,7 +14,7 @@ import { portable } from './project/paths.js'
 import { operationLockName } from './apply/recovery.js'
 import { checkInstallRuntime } from './apply/manager.js'
 import { supportedNodeVersion, runtimeNotice, runtimeRequirement } from './apply/executable.js'
-import { assertKnownComponentIds } from './component-ids.js'
+import { assertKnownCatalogIds } from './component-ids.js'
 import { unifiedDiff } from './diff.js'
 import { outputVersion } from './format.js'
 import { supportMatrix } from './support.js'
@@ -28,7 +28,7 @@ const states: FileState[] = ['current', 'update-available', 'edited', 'edited-up
 export async function runReport(request: ParsedArgs, io: IO, json: boolean): Promise<number> {
   const { command, operands, flags } = request
   if (command !== 'diff' && operands.length) throw new FoundationError('INVALID_DATA', command + ' takes no operands')
-  if (command === 'diff') assertKnownComponentIds(operands)
+  if (command === 'diff') assertKnownCatalogIds(operands)
   const root = path.resolve(flags['--cwd'] ?? process.cwd())
   const manager = flags['--package-manager'] as ProjectContext['manager'] | undefined
   if (command === 'doctor') return doctor(root, manager, io, json)

@@ -8,6 +8,7 @@ import {
   FoundationError,
   componentsWithStyleSupport,
   familyAccessibilityCaveat,
+  type CatalogId,
   type ComponentId,
   type Preset,
   type Recipe,
@@ -33,7 +34,7 @@ import { applyPlan } from './apply/transaction.js'
 import { operationLockName } from './apply/recovery.js'
 import { checkInstallRuntime, dependencyTimeoutMs } from './apply/manager.js'
 import { formatPlan, outputVersion, planOutput } from './format.js'
-import { assertKnownComponentIds } from './component-ids.js'
+import { assertKnownCatalogIds, splitCatalogIds } from './component-ids.js'
 import { parseArgs, usage, type ParsedArgs } from './args.js'
 import { runReport } from './report.js'
 import { asNewerDocument } from './compat.js'
@@ -154,7 +155,7 @@ function validateRequest(request: ParsedArgs): void {
   if (manager !== undefined && !['npm', 'pnpm', 'yarn', 'bun'].includes(manager))
     throw bad('Choose npm, pnpm, yarn, or bun for --package-manager', '--package-manager')
   // Component ids are checked against the catalog before any preset, project, or style-support work.
-  if (command === 'add' || command === 'update') assertKnownComponentIds(operands)
+  if (command === 'add' || command === 'update') assertKnownCatalogIds(operands)
   // Environment settings are read before planning, not after the first file is written (PUB-08).
   dependencyTimeoutMs(process.env)
 }
@@ -218,7 +219,8 @@ async function runPlan(request: ParsedArgs, io: IO, json: boolean): Promise<numb
   } else {
     if (command === 'add' || command === 'update') requireProject()
     const preset: Preset = command === 'add' || command === 'update' ? context.preset! : presetInput!.preset
-    const ids = operands as ComponentId[]
+    // TODO(Task 7): plan block ids through the block-aware add/update path; until then only components are planned.
+    const ids = splitCatalogIds(operands as CatalogId[]).components
     const full = command === 'preset apply' && flags['--only'] !== 'theme'
     const compileFor = (componentIds: readonly ComponentId[], chosen: Record<string, Resolution>) =>
       compile({

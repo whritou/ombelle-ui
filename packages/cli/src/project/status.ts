@@ -1,5 +1,7 @@
 import {
+  supportedBlockIds,
   supportedComponentIds,
+  type BlockId,
   type ComponentId,
   type CompileResult,
   type Dependency,
@@ -34,6 +36,7 @@ export type FileState =
   | 'not-generated'
 export type FileOwner =
   | { type: 'component'; id: ComponentId }
+  | { type: 'block'; id: BlockId }
   | { type: 'shared' }
   | { type: 'recipe'; key: string }
   | { type: 'component-preset'; key: string }
@@ -63,6 +66,16 @@ export function installedComponentIds(context: ProjectContext): ComponentId[] {
     if (match && (supportedComponentIds as readonly string[]).includes(match[1]!)) ids.add(match[1] as ComponentId)
   }
   return supportedComponentIds.filter((id) => ids.has(id))
+}
+
+/** Catalog blocks the lock records, from their block source or stylesheet. */
+export function installedBlockIds(context: ProjectContext): BlockId[] {
+  const ids = new Set<string>()
+  for (const record of Object.values(context.lock?.artifacts ?? {})) {
+    const match = /^blocks\/([a-z0-9-]+)\.(tsx|css)$/.exec(record.logicalPath)
+    if (match) ids.add(match[1]!)
+  }
+  return supportedBlockIds.filter((id) => ids.has(id))
 }
 
 const lf = (text: string) => text.replace(/\r\n/g, '\n')
@@ -152,6 +165,8 @@ export async function projectStatus(
 }
 
 function ownerOf(logicalPath: string): FileOwner {
+  const block = /^blocks\/([a-z0-9-]+)\.(tsx|css)$/.exec(logicalPath)
+  if (block && (supportedBlockIds as readonly string[]).includes(block[1]!)) return { type: 'block', id: block[1] as BlockId }
   const match = /^components\/ui\/([a-z0-9-]+)\.(tsx|css)$/.exec(logicalPath) ?? /^examples\/([a-z0-9-]+)\.tsx$/.exec(logicalPath)
   return match && (supportedComponentIds as readonly string[]).includes(match[1]!)
     ? { type: 'component', id: match[1] as ComponentId }
@@ -159,6 +174,6 @@ function ownerOf(logicalPath: string): FileOwner {
 }
 
 export const ownerLabel = (owner: FileOwner): string =>
-  owner.type === 'component' ? owner.id
+  owner.type === 'component' || owner.type === 'block' ? owner.id
     : owner.type === 'shared' ? 'shared'
       : (owner.type === 'recipe' ? 'recipe ' : 'component preset ') + owner.key
