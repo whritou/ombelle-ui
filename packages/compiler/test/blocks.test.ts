@@ -142,11 +142,28 @@ describe('block artifacts', () => {
     expect(content).not.toContain('Acme')
   })
 
-  it("leaves pricing-01 and dashboard-01 layout rules out of Tabs panel display overrides", () => {
+  it('never sets display on a dashboard-01 panel outside a visible-only selector', () => {
     const css = catalog.blockStyles['dashboard-01']!
     for (const [, selector, body] of css.matchAll(/([^{}]+)\{([^}]*)\}/g)) {
       if (!selector.includes('[data-block-part="panel"]') || !/(^|;|\s)display\s*:/.test(body)) continue
       expect(selector).toContain(':not([hidden]):not([data-state="inactive"])')
+    }
+  })
+
+  it.each(['radix', 'base'] as const)('keeps %s pricing-01 and dashboard-01 toast regions and styles clean', async (edition) => {
+    for (const id of ['pricing-01', 'dashboard-01'] as const) {
+      const result = await run(edition, [id])
+      expect(source(result, `blocks/${id}.tsx`).content).toContain('<ToastViewport')
+      const css = source(result, `blocks/${id}.css`).content
+      expect(css).not.toContain('data-slot')
+      expect(css).not.toMatch(/#[0-9a-fA-F]{3,8}|rgba?\(|hsla?\(|oklch\(/)
+    }
+  })
+
+  it('starts the dashboard-01 and pricing-01 desktop layout at 768px', () => {
+    for (const id of ['pricing-01', 'dashboard-01'] as const) {
+      const widths = [...catalog.blockStyles[id]!.matchAll(/min-width:\s*(\d+)px/g)].map((m) => Number(m[1]))
+      expect(Math.min(...widths)).toBe(768)
     }
   })
 

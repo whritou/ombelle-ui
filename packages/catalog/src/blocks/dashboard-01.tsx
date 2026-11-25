@@ -87,11 +87,13 @@ export function Dashboard01() {
       </div>
       <Card data-block-part="usage">
         <CardContent>
-          <Meter value={exampleData.ranges[key].usage.used} max={exampleData.ranges[key].usage.max}>
+          <Meter
+            value={exampleData.ranges[key].usage.used}
+            max={exampleData.ranges[key].usage.max}
+            aria-valuetext={`${exampleData.ranges[key].usage.used}% used`}
+          >
             <MeterLabel>Storage used</MeterLabel>
-            <MeterValue>
-              {exampleData.ranges[key].usage.used}% of {exampleData.ranges[key].usage.max}%
-            </MeterValue>
+            <MeterValue>{exampleData.ranges[key].usage.used}% used</MeterValue>
           </Meter>
         </CardContent>
       </Card>
