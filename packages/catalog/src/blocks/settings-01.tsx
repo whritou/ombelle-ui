@@ -66,7 +66,7 @@ export function Settings01() {
               </TabsList>
               {/* Every panel stays mounted: on phones the CSS shows them all, stacked. */}
               <TabsContent value="profile" forceMount data-block-part="panel">
-                <p data-block-part="panel-title">Profile</p>
+                <h3 data-block-part="panel-title">Profile</h3>
                 <form data-block-part="form" onSubmit={save}>
                   <div data-block-part="identity">
                     <Avatar size="lg">
@@ -115,7 +115,7 @@ export function Settings01() {
                 </form>
               </TabsContent>
               <TabsContent value="notifications" forceMount data-block-part="panel">
-                <p data-block-part="panel-title">Notifications</p>
+                <h3 data-block-part="panel-title">Notifications</h3>
                 <form data-block-part="form" onSubmit={save}>
                   <Field orientation="horizontal">
                     <FieldLabel>Product updates by email</FieldLabel>
@@ -168,7 +168,7 @@ export function Settings01() {
                 </form>
               </TabsContent>
               <TabsContent value="danger" forceMount data-block-part="panel">
-                <p data-block-part="panel-title">Danger zone</p>
+                <h3 data-block-part="panel-title">Danger zone</h3>
                 <div data-block-part="danger">
                   <div>
                     <p>

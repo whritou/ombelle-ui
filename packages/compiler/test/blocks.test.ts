@@ -17,6 +17,32 @@ const run = (edition: 'radix' | 'base', blockIds: readonly ('login-01' | 'settin
 const source = (result: Awaited<ReturnType<typeof run>>, path: string) =>
   result.artifacts.find((artifact) => artifact.logicalPath === path)!
 
+/**
+ * Counts the headings a block writes, by level. A bare `<CardTitle` (no level) is an h3, because
+ * CardTitle defaults to level 3. Dialog titles are not counted: they head their own dialog.
+ */
+const headingLevels = (content: string) => {
+  const count = (pattern: RegExp) => (content.match(pattern) ?? []).length
+  const levels: Record<number, number> = {}
+  for (let level = 1; level <= 6; level += 1) {
+    levels[level] =
+      count(new RegExp(String.raw`<h${level}\b`, 'g')) +
+      count(new RegExp(String.raw`<CardTitle\b[^>]*\blevel=\{${level}\}`, 'g'))
+  }
+  levels[3] += count(/<CardTitle(?![^>]*\blevel=)[\s>]/g)
+  return levels
+}
+
+/** The block heading policy: one h2, no h1, h3 only for section titles, nothing deeper, no value as a heading. */
+const expectHeadingPolicy = (content: string, sectionTitles: number) => {
+  const levels = headingLevels(content)
+  expect(levels[1]).toBe(0)
+  expect(levels[2]).toBe(1)
+  expect(levels[3]).toBe(sectionTitles)
+  expect(levels[4] + levels[5] + levels[6]).toBe(0)
+  expect(content).not.toMatch(/<(CardTitle|h[1-6])\b[^>]*>\s*\{[^}]*\bvalue\}/)
+}
+
 describe('block artifacts', () => {
   it('emits the block files and every component the block imports', async () => {
     const result = await run('radix')
@@ -39,9 +65,7 @@ describe('block artifacts', () => {
     const content = source(await run(edition), 'blocks/login-01.tsx').content
     if (edition === 'base') expect(content).not.toContain('asChild')
     // The heading is the Card title rendered as an h2; no other heading is written.
-    expect(content.match(/level=\{2\}/g) ?? []).toHaveLength(1)
-    expect(content.match(/<h[1-6]|level=\{[13-6]\}/g) ?? []).toHaveLength(0)
-    expect(content).not.toContain('<h1')
+    expectHeadingPolicy(content, 0)
     expect(content).toContain('showExampleNotice')
     expect(content).toContain("Example only: this form doesn't sign anyone in")
     expect(content).not.toContain('fetch(')
@@ -61,8 +85,9 @@ describe('block artifacts', () => {
     expect(content).toContain('export function Settings01')
     expect(content).toContain('<Tabs')
     expect(content).toContain('<AlertDialog')
-    expect(content.match(/level=\{2\}/g) ?? []).toHaveLength(1)
-    expect(content.match(/<h[1-6]|level=\{[13-6]\}/g) ?? []).toHaveLength(0)
+    // The Card title is the h2; the three panel titles are h3 section titles.
+    expectHeadingPolicy(content, 3)
+    expect(content.match(/<h3 data-block-part="panel-title">/g) ?? []).toHaveLength(3)
     expect(content).toContain('showExampleNotice')
     expect(content).toContain('Example only: nothing was saved')
     expect(content).toContain('Example only: no account was deleted')
@@ -104,9 +129,8 @@ describe('block artifacts', () => {
     expect(content).toContain('Example prices')
     expect(content).toContain('showExampleNotice')
     expect(content).toContain('Example only:')
-    expect((content.match(/<h2|level=\{2\}/g) ?? []).length).toBe(1)
-    expect(content.match(/<h[13-6]|level=\{[13-6]\}/g) ?? []).toHaveLength(0)
-    expect(content).not.toContain('<h1')
+    // The plan name (one CardTitle in the plans map) is the only h3.
+    expectHeadingPolicy(content, 1)
     expect(content).not.toContain('fetch(')
     expect(content).not.toContain('Acme')
   })
@@ -135,9 +159,9 @@ describe('block artifacts', () => {
     expect(content).toContain('exampleData')
     expect(content).toContain('showExampleNotice')
     expect(content).toContain('Example only:')
-    expect((content.match(/<h2|level=\{2\}/g) ?? []).length).toBe(1)
-    expect(content.match(/<h[13-6]|level=\{[13-6]\}/g) ?? []).toHaveLength(0)
-    expect(content).not.toContain('<h1')
+    // "Recent activity" is the only h3; stat values are styled text, never headings.
+    expectHeadingPolicy(content, 1)
+    expect(content).toContain('<p data-block-part="stat-value">{stat.value}</p>')
     expect(content).not.toContain('fetch(')
     expect(content).not.toContain('Acme')
   })
@@ -156,7 +180,7 @@ describe('block artifacts', () => {
       expect(source(result, `blocks/${id}.tsx`).content).toContain('<ToastViewport')
       const css = source(result, `blocks/${id}.css`).content
       expect(css).not.toContain('data-slot')
-      expect(css).not.toMatch(/#[0-9a-fA-F]{3,8}|rgba?\(|hsla?\(|oklch\(/)
+      expect(css).not.toMatch(/#[0-9a-fA-F]{3,8}\b|rgba?\(|hsla?\(|oklch\(/)
     }
   })
 

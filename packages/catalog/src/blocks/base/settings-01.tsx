@@ -109,7 +109,7 @@ function Settings01Content() {
               </TabsList>
               {/* From 768px the tabs show one panel; on phones every section is on screen, stacked (see Panel). */}
               <Panel value="profile" stacked={stacked}>
-                <p data-block-part="panel-title">Profile</p>
+                <h3 data-block-part="panel-title">Profile</h3>
                 <form data-block-part="form" onSubmit={save}>
                   <div data-block-part="identity">
                     <Avatar size="lg">
@@ -158,7 +158,7 @@ function Settings01Content() {
                 </form>
               </Panel>
               <Panel value="notifications" stacked={stacked}>
-                <p data-block-part="panel-title">Notifications</p>
+                <h3 data-block-part="panel-title">Notifications</h3>
                 <form data-block-part="form" onSubmit={save}>
                   <Field orientation="horizontal">
                     <FieldLabel>Product updates by email</FieldLabel>
@@ -211,7 +211,7 @@ function Settings01Content() {
                 </form>
               </Panel>
               <Panel value="danger" stacked={stacked}>
-                <p data-block-part="panel-title">Danger zone</p>
+                <h3 data-block-part="panel-title">Danger zone</h3>
                 <div data-block-part="danger">
                   <div>
                     <p>

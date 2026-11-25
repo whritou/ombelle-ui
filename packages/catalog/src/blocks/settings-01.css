@@ -30,10 +30,14 @@
 }
 
 /* On desktop the tab names each panel, so a panel's own title only appears when stacked. */
+/* Each panel title is an h3, shown only when the panels stack on phones. On wider screens the
+   tab names the panel, so the title is hidden from everyone, assistive technology included. */
 [data-block="settings-01"] [data-block-part="panel-title"] {
   display: none;
   margin: 0;
+  font-size: 1rem;
   font-weight: 600;
+  line-height: 1.4;
 }
 
 [data-block="settings-01"] [data-block-part="form"] {

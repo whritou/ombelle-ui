@@ -85,7 +85,7 @@ function Dashboard01Content() {
           <Card key={stat.label} data-block-part="stat">
             <CardHeader>
               <CardDescription>{stat.label}</CardDescription>
-              <CardTitle>{stat.value}</CardTitle>
+              <p data-block-part="stat-value">{stat.value}</p>
             </CardHeader>
             <CardContent>
               <p data-block-part="change">{stat.change}</p>
