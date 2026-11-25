@@ -13,13 +13,18 @@
 }
 
 [data-block="login-01"] [data-block-part="form"] {
-  display: grid;
-  gap: 1rem;
+  /* A flex column with no gap: spacing comes from the sibling rules below, so the
+     always-rendered live region adds no space while it is empty. */
+  display: flex;
+  flex-direction: column;
 }
 
-[data-block="login-01"] [data-block-part="notice"]:empty {
-  /* Stays rendered so the live region is announced; cancels the form gap while empty. */
-  margin-block-end: -1rem;
+[data-block="login-01"] [data-block-part="form"] > :not([data-block-part="notice"]) + :not([data-block-part="notice"]) {
+  margin-block-start: 1rem;
+}
+
+[data-block="login-01"] [data-block-part="notice"]:not(:empty) {
+  margin-block-end: 1rem;
 }
 
 [data-block="login-01"] [data-block-part="label-row"] {
