@@ -1,13 +1,18 @@
 import fs from 'node:fs/promises'
 import path from 'node:path'
 import { expect, test, type Locator, type Page } from '@playwright/test'
-import { familyAccessibilityCaveat, styleFamilies, supportedComponentIds } from '../../packages/contracts/src/index.js'
+import { familyAccessibilityCaveat, styleFamilies, supportedBlockIds, supportedComponentIds, type BlockId } from '../../packages/contracts/src/index.js'
 import {
   checkFocusVisible, findClipping, findForcedColors, findOverflow, findSpacing, findTargetSize, installClock, listFocusables, markSurfaces, pauseClock, markBorders, runAxe,
   type AuditCheck, type Finding,
 } from '../helpers/specimen-audit.js'
 import { editions, modes, specimenArtifacts as artifacts, specimenRunIsPartial } from '../helpers/specimen-run.js'
 import { inShard, specimenShard } from '../helpers/specimen-shard.js'
+import { blockAuditActions, expectBlockLayout, expectBlockSwitchesAt768, expectLoginNotice } from '../helpers/block-audit.js'
+
+const isBlock = (id: string): id is BlockId => (supportedBlockIds as readonly string[]).includes(id)
+// A block is page-sized: it is measured at a phone and at a desktop width, not in the specimen column.
+const blockWidths = [1280, 320] as const
 
 const checks: AuditCheck[] = ['overflow', 'clipping', 'spacing', 'focus-visible', 'target-size', 'forced-colors', 'axe']
 // Contrast findings: a focus ring short of 3:1 and axe's color-contrast rule. A focus finding for any other
@@ -71,6 +76,98 @@ async function measure(page: Page, roots: Locator[], stop: Locator, prefix: stri
   return findings
 }
 
+type BlockRun = {
+  edition: (typeof editions)[number]; mode: (typeof modes)[number]; shots: string
+  counts: Record<AuditCheck, number>; record: (id: string, list: Finding[]) => void
+}
+
+/**
+ * Each block at 1280px and at 320px: every check on the block, then (at desktop width) each step that puts an
+ * overlay on screen, with focus, contrast and axe run again on the overlay. The layout promises are asserted too.
+ */
+async function auditBlocks(page: Page, blocks: BlockId[], run: BlockRun): Promise<number> {
+  if (!blocks.length) return 0
+  const { edition, mode, shots, counts, record } = run
+  const body = page.locator('body')
+  const height = page.viewportSize()!.height
+  const toasts = page.locator('[data-slot$="toast-viewport"]')
+  const setToasts = (display: string) => toasts.evaluateAll((list, value) => list.forEach(element => { (element as HTMLElement).style.display = value }), display)
+  let steps = 0
+  for (const width of blockWidths) {
+    await page.setViewportSize({ width, height })
+    for (const id of blocks) {
+      const section = page.locator(`section[data-audit="${id}"]`)
+      const label = `${id}@${width}`
+      // Components' toasts were measured already; their fixed viewports must not cover the block.
+      await setToasts('none')
+      await section.scrollIntoViewIfNeeded()
+      await expectBlockLayout(page, section, id, width)
+      // Before the 1280px pass submits the form: later the Alert is in the region.
+      if (id === 'login-01' && width === blockWidths[0]) await expectLoginNotice(section)
+      if (width === blockWidths[0]) await expectBlockSwitchesAt768(page, section, id)
+      await page.setViewportSize({ width, height })
+      await section.screenshot({ path: path.join(shots, `${id}-${width}.png`), animations: 'disabled' })
+      // The page is the block's stop: a block fills it, so clipping is judged against the block itself.
+      const findings: Finding[] = [...await findOverflow([section]), ...await findClipping([section], section), ...await findSpacing([section]), ...await findTargetSize([section])]
+      counts.overflow++; counts.clipping++; counts.spacing++; counts['target-size']++
+      for (const control of await listFocusables(section, label)) {
+        findings.push(...await checkFocusVisible(page, control), ...await findClipping([control], section))
+        counts['focus-visible']++
+      }
+      findings.push(...await markSurfaces(page, await runAxe(page, [`section[data-audit="${id}"]`])))
+      counts.axe++
+      record(label, findings)
+      if (width !== blockWidths[0]) continue
+      for (const action of blockAuditActions[id]) {
+        const named = `${id}: ${action.label}`
+        let paused = false, covered = false
+        try {
+          await setToasts('none')
+          await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur())
+          await action.open(section)
+          // The block's own toast viewport is fixed to a corner and was hidden with the others; the other sections' stay hidden.
+          await section.locator('[data-slot$="toast-viewport"]').evaluateAll(list => list.forEach(element => { (element as HTMLElement).style.display = '' }))
+          const content = action.overlay(page, section).first()
+          await expect(content, `${named}: the overlay is on screen`).toBeVisible()
+          if (action.closes === 'timer') {
+            await pauseClock(page); paused = true
+            // A toast is always laid over something. Measure it over the plain page, as a component's toast is,
+            // so what the ring is judged against is the toast's own doing and not the block under it.
+            await section.locator('[data-block] > :not(:has([data-slot$="toast-viewport"]), [data-slot$="toast-viewport"])').evaluateAll(list => list.forEach(element => { (element as HTMLElement).style.visibility = 'hidden' }))
+            covered = true
+          }
+          await content.evaluate((element, name) => element.setAttribute('data-audit-open', name), label)
+          await page.screenshot({ path: path.join(shots, `${id}-${steps}-open.png`), animations: 'disabled' })
+          const inside = await content.evaluate((element, owner) => element.closest(`section[data-audit="${owner}"]`) !== null, id)
+          const overlayFindings = await measure(page, [content], inside ? section : body, `${label}-open-${steps}`, counts)
+          overlayFindings.push(...await markSurfaces(page, await runAxe(page, [`[data-audit-open="${label}"]`])))
+          counts.axe++
+          if (mode === 'light') {
+            await markBorders([content])
+            await page.emulateMedia({ forcedColors: 'active' })
+            overlayFindings.push(...await findForcedColors([content], await listFocusables(content, `${label}-forced-${steps}`)))
+            counts['forced-colors']++
+            await page.emulateMedia({ forcedColors: 'none' })
+          }
+          record(`${named} (${edition})`, overlayFindings)
+          if (action.closes === 'escape') {
+            await page.keyboard.press('Escape')
+            await page.clock.runFor(500)
+            await expect(content, `${named}: closes on Escape`).toBeHidden()
+          }
+        } finally {
+          if (paused) await page.clock.resume()
+          if (covered) await section.locator('[data-block] > :not(:has([data-slot$="toast-viewport"]), [data-slot$="toast-viewport"])').evaluateAll(list => list.forEach(element => { (element as HTMLElement).style.visibility = '' }))
+        }
+        steps++
+      }
+    }
+  }
+  await page.setViewportSize({ width: 1100, height })
+  await setToasts('none')
+  return steps
+}
+
 // Every configuration, in a fixed order: a shard takes its share by index, before any filter.
 // Liquid glass is measured a second time with reduced transparency, the setting its accessibility
 // caveat says restores the full guarantee: those configurations are held to every check, contrast included.
@@ -99,10 +196,13 @@ for (const [index, { family, edition, mode, transparency }] of configurations.en
         })), 'reduced transparency rules are applied').toBe(true)
         const sections = page.locator('section[data-audit]')
         // Toast first: the Radix toast is open from page load and its timer must not run out before it is measured.
-        const components = (await sections.evaluateAll(list => list.map(section => section.getAttribute('data-audit')!)))
+        const everySection = (await sections.evaluateAll(list => list.map(section => section.getAttribute('data-audit')!)))
           // A variant section is component~variant; the filter and the count go by component.
           .filter(id => !onlyComponents?.length || onlyComponents.includes(id.split('~')[0]!))
           .sort((a, b) => Number(b.split('~')[0] === 'toast') - Number(a.split('~')[0] === 'toast'))
+        // Blocks are measured after the components, at their own widths.
+        const components = everySection.filter(id => !isBlock(id))
+        const blocks = everySection.filter(isBlock)
         const shots = path.join(artifacts, family, edition, mode)
         await fs.mkdir(shots, { recursive: true })
         const body = page.locator('body')
@@ -182,10 +282,11 @@ for (const [index, { family, edition, mode, transparency }] of configurations.en
           }
           } finally { if (paused) await page.clock.resume() }
         }
+        await auditBlocks(page, blocks, { edition, mode, shots, counts, record: (id, list) => findings.push(...list.map(finding => ({ ...finding, component: id }))) })
         if (mode === 'light') {
           await markBorders([sections])
           await page.emulateMedia({ forcedColors: 'active' })
-          for (const component of components) {
+          for (const component of [...components, ...blocks]) {
             const section = page.locator(`section[data-audit="${component}"]`)
             const list = await findForcedColors([section], await listFocusables(section, `${component}-forced`))
             findings.push(...list.map(finding => ({ ...finding, component })))
@@ -203,7 +304,7 @@ for (const [index, { family, edition, mode, transparency }] of configurations.en
         const blocking = findings.filter(finding => !advisory.includes(finding))
         if (advisory.length)
           test.info().annotations.push({ type: 'contrast advisory findings', description: JSON.stringify(advisory) })
-        const part = { runId: process.env.OMBELLE_SPECIMEN_RUN_ID, family, edition, mode, ...(transparency ? { transparency } : {}), specimens: new Set(components.map(id => id.split('~')[0])).size, sections: components.length, checks: counts, failures: blocking.length + errors.length,
+        const part = { runId: process.env.OMBELLE_SPECIMEN_RUN_ID, family, edition, mode, ...(transparency ? { transparency } : {}), specimens: new Set(everySection.map(id => id.split('~')[0])).size, sections: everySection.length, checks: counts, failures: blocking.length + errors.length,
           contrastAdvisoryFindings: advisory.length,
           browser: { engine: 'chromium', version: browser.version(), channel: process.env.OMBELLE_BROWSER_CHANNEL || 'bundled' } }
         // A run limited to some components writes its findings apart and leaves the evidence file alone.
@@ -215,7 +316,8 @@ for (const [index, { family, edition, mode, transparency }] of configurations.en
         if (!partial) await fs.writeFile(path.join(partsDirectory, `${name}.json`), JSON.stringify(part, null, 2) + '\n')
         const fontTag = auditFonts ? '.' + auditFonts.replaceAll(',', '_') : ''
         await fs.writeFile(path.join(partsDirectory, `${name}${fontTag}.findings.json`), JSON.stringify(findings, null, 2) + '\n')
-        expect(new Set(components.map(id => id.split('~')[0]))).toHaveProperty('size', onlyComponents?.length ? onlyComponents.length : supportedComponentIds.length)
+        // Every component and every block has a section on the page.
+        expect(new Set(everySection.map(id => id.split('~')[0]))).toHaveProperty('size', onlyComponents?.length ? onlyComponents.length : supportedComponentIds.length + supportedBlockIds.length)
         expect(errors, 'page errors').toEqual([])
         expect(blocking, JSON.stringify(blocking, null, 2)).toEqual([])
       })

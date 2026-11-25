@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test'
 import fs from 'node:fs'
 import { supportedComponentIds } from '../../packages/contracts/src/component-ids.js'
+import { supportedBlockIds } from '../../packages/contracts/src/block-ids.js'
 
 // Production builds of genuine shadcn base-nova apps with every Ombelle
 // component, shadcn's own Button and Ombelle's Button installed beside it.
@@ -33,6 +34,13 @@ for (const consumer of consumers)
         await page.locator('[data-component="' + id + '"] :is([data-slot], button, [role])').count(),
         id,
       ).toBeGreaterThan(0)
+
+    // Every block rendered in the production build, once, with its one heading.
+    for (const id of supportedBlockIds) {
+      const block = page.locator('[data-block-check="' + id + '"] [data-block="' + id + '"]')
+      expect(await block.count(), id).toBe(1)
+      expect(await block.locator('h2').count(), id + ' headings').toBe(1)
+    }
 
     // Selectors of rules that style an element through a named data-slot. The
     // family's reduced-motion rule targets every [data-slot] and is not counted.

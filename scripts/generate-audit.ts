@@ -4,8 +4,8 @@ import path from 'node:path'
 import { compileComponentRecipe, describeComponentRecipe, type RecipeSpecimen } from '@ombelle/compiler'
 import { getCatalog } from '@ombelle/catalog'
 import {
-  componentRecipeComponents, componentRecipeFields, defaultRecipeFields, styleFamilies, supportedComponentIds,
-  validateComponentRecipe, type ComponentId, type ComponentRecipe, type StyleFamily,
+  componentRecipeComponents, componentRecipeFields, defaultRecipeFields, styleFamilies, supportedBlockIds, supportedComponentIds,
+  validateComponentRecipe, type BlockId, type ComponentId, type ComponentRecipe, type StyleFamily,
 } from '@ombelle/contracts'
 import { glassPresetBackdrop } from '../apps/www/src/site/glass-presets.js'
 import type { PresetBackdrop } from '../apps/www/src/preset-editor/preview-protocol.js'
@@ -13,11 +13,15 @@ import type { PresetBackdrop } from '../apps/www/src/preset-editor/preview-proto
 export type AuditEdition = 'radix' | 'base'
 /** id is the component, or component~variant for a variant specimen of it. */
 export type AuditSpecimen = { id: string; component: ComponentId; scope: string | null; css: string | null; specimen: RecipeSpecimen }
+/** A block section: the block itself, rendered whole from the files an install writes. */
+export type AuditBlock = { id: BlockId }
 export type AuditData = {
   family: StyleFamily
   edition: AuditEdition
   backdrop: { light: PresetBackdrop | null; dark: PresetBackdrop | null }
   specimens: AuditSpecimen[]
+  /** One section per block, after the component specimens. */
+  blocks: AuditBlock[]
 }
 
 /** Button has no catalog recipe; its audit specimen is the ordinary component with the default variant. */
@@ -114,10 +118,11 @@ async function familyData(family: StyleFamily): Promise<Record<AuditEdition, Aud
       base.push({ id, component, scope: null, css: null, specimen })
     }
   }
+  const blocks = supportedBlockIds.map((id): AuditBlock => ({ id }))
   const backdrop = family === 'liquid-glass'
     ? { light: glassPresetBackdrop('builtin-liquid-glass', 'light'), dark: glassPresetBackdrop('builtin-liquid-glass', 'dark') }
     : { light: null, dark: null }
-  return { radix: { family, edition: 'radix', backdrop, specimens: radix }, base: { family, edition: 'base', backdrop, specimens: base } }
+  return { radix: { family, edition: 'radix', backdrop, specimens: radix, blocks }, base: { family, edition: 'base', backdrop, specimens: base, blocks } }
 }
 
 export async function writeAuditPages(root: string): Promise<void> {

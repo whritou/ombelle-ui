@@ -110,7 +110,8 @@ export function findOverflow(roots: Locator[]): Promise<Finding[]> {
     for (let node = walker.nextNode(); node; node = walker.nextNode()) {
       const parent = node.parentElement
       // Text nodes inside SVG are never painted.
-      if (!parent || parent.closest('svg') || !node.textContent?.trim() || !visible(parent) || ellipsis(parent)) continue
+      // A textarea's default value is its text child, which has no layout box of its own: the control paints it.
+      if (!parent || parent.closest('svg') || parent instanceof HTMLTextAreaElement || !node.textContent?.trim() || !visible(parent) || ellipsis(parent)) continue
       const range = document.createRange()
       range.selectNodeContents(node)
       const text = range.getBoundingClientRect(), box = parent.getBoundingClientRect()
@@ -130,7 +131,9 @@ export function findSpacing(roots: Locator[]): Promise<Finding[]> {
       const control = document.getElementById(label.getAttribute('for')!)
       if (!control || label.contains(control) || control.getClientRects().length === 0 || label.getClientRects().length === 0) continue
       const a = label.getBoundingClientRect(), b = control.getBoundingClientRect()
-      const gap = Math.max(b.left - a.right, a.left - b.right, b.top - a.bottom, a.top - b.bottom)
+      // A Base UI Switch or Checkbox keeps a 1×1 form input that the label points at; the drawn control is a sibling.
+      if (b.width <= 1 && b.height <= 1) continue
+      const gap =Math.max(b.left - a.right, a.left - b.right, b.top - a.bottom, a.top - b.bottom)
       if (gap < 4)
         findings.push({ check: 'spacing', target: describe(label), detail: `${Math.max(0, Math.round(gap))}px from ${describe(control)}, 4px needed` })
     }

@@ -15,6 +15,7 @@ import { startReducedTransparencyMirror } from './reduced-transparency-mirror'
 type Module = Record<string, unknown>
 const stylesheets = import.meta.glob('./generated/editions/*/preview.css')
 const editionModules = import.meta.glob<Module>('./generated/editions/*/components/ui/*.tsx')
+const blockModules = import.meta.glob<Module>('./generated/editions/*/blocks/*.tsx')
 
 // Base UI parts are forwardRef or memo objects, not plain functions.
 const isComponent = (value: unknown) => typeof value === 'function' ||
@@ -66,8 +67,8 @@ function OrdinarySpecimen({ item, primitives, edition }: { item: AuditSpecimen; 
   return renderSpecimen(item.specimen, primitives, id)
 }
 
-function AuditPage({ data, mode, ordinary, factories, fontCss }: {
-  data: AuditData; mode: 'light' | 'dark'; ordinary: Primitives; factories: Record<string, Module>; fontCss?: string
+function AuditPage({ data, mode, ordinary, factories, blocks, fontCss }: {
+  data: AuditData; mode: 'light' | 'dark'; ordinary: Primitives; factories: Record<string, Module>; blocks: Record<string, React.ComponentType>; fontCss?: string
 }) {
   const main = React.useRef<HTMLElement>(null)
   const glass = data.family === 'liquid-glass'
@@ -83,6 +84,8 @@ function AuditPage({ data, mode, ordinary, factories, fontCss }: {
   return <main ref={main} data-audit-page="" style={{ display: 'grid', gap: '2rem', padding: '2rem', position: 'relative' }}>
     {scene && <GlassBackdropArt scene={scene} />}
     {glass && OrdinaryFilter && <OrdinaryFilter />}
+    {/* A phone shows a block edge to edge: the page gutter is not part of what the block promises at 320px. */}
+    <style>{`@media (max-width: 480px) { main[data-audit-page] { padding: 0 !important } section[data-audit-block] { max-inline-size: 100vw !important } }`}</style>
     <h1>Specimen audit: {data.family} / {data.edition} / {mode}</h1>
     {data.specimens.map(item => <section key={item.id} data-audit={item.id} data-audit-component={item.component}
       style={{ display: 'grid', gap: '0.75rem', inlineSize: 'min(100%, 40rem)', position: 'relative' }}>
@@ -96,6 +99,11 @@ function AuditPage({ data, mode, ordinary, factories, fontCss }: {
           : <OrdinarySpecimen item={item} primitives={ordinary} edition={data.edition} />}
       </div>
     </section>)}
+    {/* A block is page-sized: its section takes the page's full width, so its own 768px breakpoint is measured at the viewport. It brings its own h2. */}
+    {data.blocks.map(({ id }) => {
+      const Block = blocks[id]
+      return Block ? <section key={id} data-audit={id} data-audit-component={id} data-audit-block="" style={{ position: 'relative', maxInlineSize: 'calc(100vw - 4rem)' }}><Block /></section> : null
+    })}
     {fontCss && <style data-audit-fonts="">{fontCss}</style>}
   </main>
 }
@@ -108,7 +116,7 @@ export async function mountAuditPage(root: HTMLElement, family: string, edition:
   const full = (await load()).default
   // `?only=sidebar,menubar` shows just those components, for demos; the audit never sets it.
   const only = new URLSearchParams(window.location.search).get('only')?.split(',').map(id => id.trim()).filter(Boolean)
-  const data = only?.length ? { ...full, specimens: full.specimens.filter(item => only.includes(item.component)) } : full
+  const data = only?.length ? { ...full, specimens: full.specimens.filter(item => only.includes(item.component)), blocks: full.blocks.filter(block => only.includes(block.id)) } : full
   const folder = `./generated/editions/${family}-${edition}`
   // `?transparency=reduced` renders as prefers-reduced-transparency: reduce does: every rule under that
   // feature is mirrored under html[data-reduced-transparency]. The specimen audit holds it to every check.
@@ -132,7 +140,13 @@ export async function mountAuditPage(root: HTMLElement, family: string, edition:
     await loadPresetFonts(audit.ids)
     await document.fonts.ready
   }
+  // Each block is the one exported component of its file, rendered as an install would use it.
+  const blocks = Object.fromEntries(await Promise.all(data.blocks.map(async ({ id }) => {
+    const load = blockModules[`${folder}/blocks/${id}.tsx`]
+    const exported = load ? Object.values(await load()).find(value => typeof value === 'function') : undefined
+    return [id, exported as React.ComponentType | undefined] as const
+  })))
   document.documentElement.classList.toggle('dark', mode === 'dark')
   setGlassBackdrop(document.documentElement, data.backdrop[mode] ?? undefined)
-  page.render(<AuditPage data={data} mode={mode} ordinary={ordinary} factories={factories} fontCss={audit?.css} />)
+  page.render(<AuditPage data={data} mode={mode} ordinary={ordinary} factories={factories} blocks={blocks as Record<string, React.ComponentType>} fontCss={audit?.css} />)
 }
