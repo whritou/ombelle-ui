@@ -27,14 +27,16 @@ const exampleData = {
 }
 
 export function Login01() {
-  const [noticeShown, setNoticeShown] = React.useState(false)
+  // Counts example notices. Each one mounts a fresh Alert inside the live region, so a repeated
+  // submit is announced again rather than ignored as unchanged text.
+  const [noticeCount, setNoticeCount] = React.useState(0)
   const titleId = React.useId()
   const passwordId = React.useId()
   const rememberId = React.useId()
 
   // Replace with your sign-in call. It is the only example-only code in this block.
   function showExampleNotice() {
-    setNoticeShown(true)
+    setNoticeCount((count) => count + 1)
   }
 
   return (
@@ -54,9 +56,10 @@ export function Login01() {
               showExampleNotice()
             }}
           >
+            {/* Always rendered, so the live region exists before the first notice. */}
             <div data-block-part="notice" aria-live="polite">
-              {noticeShown ? (
-                <Alert role="none">
+              {noticeCount > 0 ? (
+                <Alert key={noticeCount} role="none">
                   <AlertTitle>Nothing was sent</AlertTitle>
                   <AlertDescription>{exampleData.notice}</AlertDescription>
                 </Alert>
@@ -83,7 +86,7 @@ export function Login01() {
               </div>
               <PasswordField>
                 <PasswordFieldControl>
-                  <PasswordFieldInput id={passwordId} name="password" required />
+                  <PasswordFieldInput id={passwordId} name="password" autoComplete="current-password" required />
                   <PasswordFieldToggle />
                 </PasswordFieldControl>
               </PasswordField>

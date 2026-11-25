@@ -66,6 +66,11 @@ describe('block artifacts', () => {
     if (edition === 'base') expect(content).not.toContain('asChild')
     // The heading is the Card title rendered as an h2; no other heading is written.
     expectHeadingPolicy(content, 0)
+    expect(content).toContain('autoComplete="email"')
+    expect(content).toContain('autoComplete="current-password"')
+    // The live region is always rendered; each notice remounts the Alert so a repeat is announced.
+    expect(content).toContain('<div data-block-part="notice" aria-live="polite">')
+    expect(content).toContain('<Alert key={noticeCount}')
     expect(content).toContain('showExampleNotice')
     expect(content).toContain("Example only: this form doesn't sign anyone in")
     expect(content).not.toContain('fetch(')
