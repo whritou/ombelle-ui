@@ -13,6 +13,7 @@
     "types": ["node"],
     "lib": ["ES2023", "DOM"],
     "paths": {
+      "@/components/ui/*": ["./packages/catalog/src/templates/*"],
       "@ombelle/contracts": ["./packages/contracts/src/index.ts"],
       "@ombelle/catalog": ["./packages/catalog/src/index.ts"],
       "@ombelle/compiler": ["./packages/compiler/src/index.ts"]

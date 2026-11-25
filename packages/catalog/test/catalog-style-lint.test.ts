@@ -1,6 +1,6 @@
 import fs from 'node:fs'
 import { describe, expect, it } from 'vitest'
-import { lintCatalogStyles, templateSlots } from '../../../scripts/catalog-style-lint.ts'
+import { lintBlockStyles, lintCatalogStyles, templateSlots } from '../../../scripts/catalog-style-lint.ts'
 import { componentSlots } from '../src/component-slots.js'
 import { previewSlots } from '../../../scripts/catalog-style-lint.ts'
 import { styleFamilies, styleSupport, supportedComponentIds } from '@ombelle/contracts'
@@ -53,5 +53,29 @@ describe('catalog style lint', () => {
     const familyStyles = { ...Object.fromEntries(styleFamilies.map(family => [family, read('styles/' + family + '.css')])),
       'liquid-glass-lab': read('styles/liquid-glass-lab.css') }
     expect(lintCatalogStyles({ componentStyles, familyStyles, slots, previewSlots })).toEqual([])
+  })
+})
+
+describe('block style lint', () => {
+  it('reports a rule that names no block root or part', () => {
+    const messages = lintBlockStyles('login-01', '[data-slot="button"]{gap:1rem}')
+    expect(messages).toHaveLength(1)
+    expect(messages[0]).toContain('names no login-01 block root or part')
+  })
+
+  it('accepts block roots, parts and keyframes', () => {
+    expect(lintBlockStyles('login-01', '[data-block="login-01"] [data-block-part="fields"]{gap:var(--space-4)}')).toEqual([])
+    expect(lintBlockStyles('login-01', '[data-block="login-01"]{padding:var(--space-6)}@keyframes spin{from{opacity:0}to{opacity:1}}')).toEqual([])
+  })
+
+  it('reports a root that belongs to another block', () => {
+    expect(lintBlockStyles('login-01', '[data-block="pricing-01"]{gap:var(--space-4)}')).toHaveLength(1)
+  })
+
+  it('reports colour literals and allows tokens', () => {
+    expect(lintBlockStyles('login-01', '[data-block="login-01"]{color:#fff}')).toHaveLength(1)
+    expect(lintBlockStyles('login-01', '[data-block="login-01"]{background:rgb(0 0 0 / .5)}')).toHaveLength(1)
+    expect(lintBlockStyles('login-01', '[data-block="login-01"]{border:1px solid red}')).toHaveLength(1)
+    expect(lintBlockStyles('login-01', '[data-block="login-01"]{color:var(--foreground);border:1px solid currentColor;background:transparent;fill:inherit}')).toEqual([])
   })
 })

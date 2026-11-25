@@ -6,7 +6,9 @@ import {
 } from '../packages/contracts/src/style-families.ts'
 import { supportedComponentIds } from '../packages/contracts/src/component-ids.ts'
 import { componentSlots } from '../packages/catalog/src/component-slots.ts'
-import { lintCatalogStyles, previewSlots, templateSlots } from './catalog-style-lint.ts'
+import { supportedBlockIds } from '../packages/contracts/src/block-ids.ts'
+import { blockImports, blockManifest } from '../packages/catalog/src/blocks/index.ts'
+import { lintBlockStyles, lintCatalogStyles, previewSlots, templateSlots } from './catalog-style-lint.ts'
 const base = 'packages/catalog/src/'
 const readText = (file) => fs.readFileSync(file, 'utf8').replace(/\r\n?/g, '\n')
 const templates = Object.fromEntries(
@@ -70,6 +72,32 @@ const retiredPresets = fs
     return preset
   })
 const glassLabStyle = readText(base + 'styles/liquid-glass-lab.css')
+// Blocks: composed sections installed from @/components/ui imports; Base UI files are optional overrides.
+const blockTemplates = Object.fromEntries(
+  supportedBlockIds.map((id) => [id, readText(base + 'blocks/' + id + '.tsx')]),
+)
+const blockBaseTemplates = Object.fromEntries(
+  supportedBlockIds
+    .filter((id) => fs.existsSync(base + 'blocks/base/' + id + '.tsx'))
+    .map((id) => [id, readText(base + 'blocks/base/' + id + '.tsx')]),
+)
+const blockStyles = Object.fromEntries(
+  supportedBlockIds.map((id) => [id, readText(base + 'blocks/' + id + '.css')]),
+)
+const blockMessages = supportedBlockIds.flatMap((id) => {
+  const expected = [...blockManifest[id].components].sort()
+  const sources = { radix: blockTemplates[id], ...(blockBaseTemplates[id] ? { base: blockBaseTemplates[id] } : {}) }
+  return [
+    ...lintBlockStyles(id, blockStyles[id]),
+    ...Object.entries(sources).flatMap(([edition, source]) => {
+      const actual = blockImports(source)
+      return actual.join() === expected.join()
+        ? []
+        : [`${id} ${edition} template imports [${actual.join(', ')}] but the manifest lists [${expected.join(', ')}]`]
+    }),
+  ]
+})
+if (blockMessages.length) throw new Error('Block check failed:\n' + blockMessages.join('\n'))
 const lintMessages = lintCatalogStyles({
   componentStyles,
   familyStyles: { ...styles, 'liquid-glass-lab': glassLabStyle },
@@ -89,6 +117,9 @@ writeFileAtomicSync(
       styles,
       glassLabStyle,
       componentStyles,
+      blockTemplates,
+      blockBaseTemplates,
+      blockStyles,
       utility: readText(base + 'templates/utils.ts'),
       glassFilter: readText(base + 'templates/liquid-glass-filter.tsx'),
     }) +

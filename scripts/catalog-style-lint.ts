@@ -58,3 +58,45 @@ export function lintCatalogStyles(input: {
       if (!selector.anySlot && !selector.slots.some(slot => known.has(slot))) messages.push(`${family}.css: "${selector.text}" names no catalog slot`)
   return messages.sort()
 }
+
+// Properties whose values paint something; a colour literal in any of them bypasses the preset's tokens.
+const paintProperty = /^(color|background(-color|-image)?|fill|stroke|outline(-color)?|caret-color|accent-color|text-decoration(-color)?|box-shadow|text-shadow|border(-(top|right|bottom|left|block|inline)(-(start|end))?)?(-color)?)$/
+const colourFunction = /\b(rgba?|hsla?|hwb|lab|lch|oklab|oklch|color)\(/i
+// The common CSS named colours. currentColor, transparent and inherit stay allowed.
+const namedColours = new Set(('aliceblue antiquewhite aqua aquamarine azure beige bisque black blue brown chocolate coral crimson cyan fuchsia gold gray grey green hotpink indigo ivory khaki lavender lime magenta maroon navy olive orange orchid pink plum purple red salmon silver tan teal tomato turquoise violet white yellow').split(' '))
+
+function colourLiteral(value: string): string | undefined {
+  const bare = value.replace(/var\((?:[^()]|\([^()]*\))*\)/g, ' ')
+  const hex = bare.match(/#[0-9a-f]{3,8}\b/i)
+  if (hex) return hex[0]
+  const fn = bare.match(colourFunction)
+  if (fn) return fn[0] + '…)'
+  return bare.toLowerCase().split(/[^a-z]+/).find(word => namedColours.has(word))
+}
+
+/**
+ * Lints a block stylesheet: every rule (keyframes aside) must name the block root (`[data-block="<id>"]`)
+ * or one of its parts (`[data-block-part]`), and paint properties must take `var(--…)` tokens, not colour
+ * literals (hex, rgb/hsl/oklch… functions, named colours). Returns messages; empty means clean.
+ */
+export function lintBlockStyles(id: string, css: string): string[] {
+  const messages: string[] = []
+  for (const selector of selectors(css)) {
+    const where = `${id}.css: "${selector.text}"`
+    const roots: string[] = []
+    selectorParser(list => list.each(item => item.walkAttributes(attribute => {
+      if (attribute.attribute === 'data-block' && attribute.value) roots.push(attribute.value)
+    }))).processSync(selector.text)
+    const foreign = roots.find(root => root !== id)
+    if (foreign) messages.push(`${where} names the ${foreign} block root, not ${id}`)
+    else if (!selector.attributes.some(name => name === 'data-block' || name === 'data-block-part'))
+      messages.push(`${where} names no ${id} block root or part`)
+  }
+  postcss.parse(css).walkDecls(decl => {
+    if (decl.parent?.parent?.type === 'atrule' && (decl.parent.parent as postcss.AtRule).name.endsWith('keyframes')) return
+    if (!paintProperty.test(decl.prop)) return
+    const literal = colourLiteral(decl.value)
+    if (literal) messages.push(`${id}.css: "${decl.prop}: ${decl.value}" uses the colour literal "${literal}"; use a var(--…) token`)
+  })
+  return messages.sort()
+}

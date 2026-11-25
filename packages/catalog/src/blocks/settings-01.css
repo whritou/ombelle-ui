@@ -1,0 +1,6 @@
+/* Placeholder: replaced by the real settings-01 styles. */
+[data-block="settings-01"] {
+  display: grid;
+  gap: var(--space-4);
+  padding: var(--space-6);
+}
