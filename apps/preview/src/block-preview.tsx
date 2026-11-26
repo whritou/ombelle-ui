@@ -16,8 +16,11 @@ import { blockStylesOrigin } from '../../www/src/editor/preview-url'
 
 const modeOf = (): 'light' | 'dark' => (window.location.hash === '#dark' ? 'dark' : 'light')
 
-/** The website's origin, which serves the stylesheets: '' (this origin) unless a loopback dev site framed this page. */
-const siteOrigin = () => blockStylesOrigin(document.referrer, window.location.origin)
+/**
+ * The website's origin, which serves the stylesheets: '' (this origin) unless a loopback dev site framed this page.
+ * The frame's URL is passed, not `self.origin`, which the sandbox makes the opaque "null".
+ */
+const siteOrigin = () => blockStylesOrigin(document.referrer, window.location.href)
 
 function BlockPage({ Block, Filter, family }: { Block: React.ComponentType; Filter: React.ComponentType | null; family: StyleFamily }) {
   const [mode, setMode] = React.useState(modeOf)

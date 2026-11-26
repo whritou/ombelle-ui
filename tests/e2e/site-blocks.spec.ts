@@ -30,6 +30,17 @@ test('the header links to the blocks, and the gallery shows one card per block',
 })
 
 test.describe('a block page', () => {
+  test('loads the block stylesheet from the site, not from the preview app', async ({ page }) => {
+    // In this config the site (port 3000) frames the preview app (port 4173): the stylesheet must come from the site.
+    const requested: string[] = []
+    page.on('request', (request) => { if (request.url().includes('/blocks/login-01.css')) requested.push(request.url()) })
+    await page.goto(`${site}/blocks/login-01`)
+    const inside = page.frameLocator('iframe[data-block-preview]')
+    await expect(inside.locator('[data-block="login-01"]')).toBeVisible({ timeout: 60000 })
+    expect(requested).toEqual([`${site}/previews/ombelle/blocks/login-01.css`])
+    await expect(inside.locator('link[data-block-styles]')).toHaveAttribute('href', `${site}/previews/ombelle/blocks/login-01.css`)
+  })
+
   test('switches the preview family and width', async ({ page }) => {
     await page.goto(`${site}/blocks/login-01`)
     await expect(page.getByRole('heading', { level: 1, name: 'Sign in' })).toBeVisible()
