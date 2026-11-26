@@ -178,12 +178,17 @@ const configurations: Configuration[] = [
   ...styleFamilies.flatMap(family => editions.flatMap(edition => modes.map(mode => ({ family, edition, mode })))),
   ...editions.flatMap(edition => modes.map(mode => ({ family: 'liquid-glass' as const, edition, mode, transparency: 'reduced' as const }))),
 ]
-// One configuration measures every specimen: 3.6 to 5.2 minutes each on a CI runner (22 November nightly).
+// Each configuration is two tests on its own page: the component specimens, then the blocks. Together they took
+// up to 15.5 minutes for liquid-glass/base/light on a CI runner (Foundation run of 1.1.0, 26 November), over
+// the 15-minute limit; apart, neither carries the other's time. The teardown merges the two halves into the
+// configuration's one evidence row (specimens from one, blocks from the other), so a missing half fails the gate.
 const configurationTimeout = 900000
+const halves = ['components', 'blocks'] as const
 
 for (const [index, { family, edition, mode, transparency }] of configurations.entries())
   if (inShard(index) && (!onlyFamilies || onlyFamilies.includes(family)))
-      test(`${family}/${edition}/${mode}${transparency ? '/reduced-transparency' : ''}: every specimen passes the measured checks`, async ({ page, browser }) => {
+    for (const half of halves)
+      test(`${family}/${edition}/${mode}${transparency ? '/reduced-transparency' : ''}: every ${half === 'components' ? 'specimen' : 'block'} passes the measured checks`, async ({ page, browser }) => {
         test.setTimeout(configurationTimeout)
         const counts = Object.fromEntries(checks.map(check => [check, 0])) as Record<AuditCheck, number>
         const findings: (Finding & { component: string })[] = []
@@ -202,9 +207,9 @@ for (const [index, { family, edition, mode, transparency }] of configurations.en
           // A variant section is component~variant; the filter and the count go by component.
           .filter(id => !onlyComponents?.length || onlyComponents.includes(id.split('~')[0]!))
           .sort((a, b) => Number(b.split('~')[0] === 'toast') - Number(a.split('~')[0] === 'toast'))
-        // Blocks are measured after the components, at their own widths.
-        const components = everySection.filter(id => !isBlock(id))
-        const blocks = everySection.filter(isBlock)
+        // Each half measures its own sections; blocks are measured at their own widths.
+        const components = half === 'components' ? everySection.filter(id => !isBlock(id)) : []
+        const blocks = half === 'blocks' ? everySection.filter(isBlock) : []
         const shots = path.join(artifacts, family, edition, mode)
         await fs.mkdir(shots, { recursive: true })
         const body = page.locator('body')
@@ -308,7 +313,7 @@ for (const [index, { family, edition, mode, transparency }] of configurations.en
         const blocking = findings.filter(finding => !advisory.includes(finding))
         if (advisory.length)
           test.info().annotations.push({ type: 'contrast advisory findings', description: JSON.stringify(advisory) })
-        const part = { runId: process.env.OMBELLE_SPECIMEN_RUN_ID, family, edition, mode, ...(transparency ? { transparency } : {}), specimens: new Set(components.map(id => id.split('~')[0])).size, blocks: blocks.length, sections: everySection.length, checks: counts, failures: blocking.length + errors.length,
+        const part = { runId: process.env.OMBELLE_SPECIMEN_RUN_ID, family, edition, mode, ...(transparency ? { transparency } : {}), half, specimens: new Set(components.map(id => id.split('~')[0])).size, blocks: blocks.length, sections: components.length + blocks.length, checks: counts, failures: blocking.length + errors.length,
           contrastAdvisoryFindings: advisory.length,
           browser: { engine: 'chromium', version: browser.version(), channel: process.env.OMBELLE_BROWSER_CHANNEL || 'bundled' } }
         // A run limited to some components writes its findings apart and leaves the evidence file alone.
@@ -317,9 +322,10 @@ for (const [index, { family, edition, mode, transparency }] of configurations.en
         const partsDirectory = path.join(artifacts, partial ? 'partial' : 'parts')
         await fs.mkdir(partsDirectory, { recursive: true })
         const name = `${family}-${edition}-${mode}${transparency ? '-reduced-transparency' : ''}`
-        if (!partial) await fs.writeFile(path.join(partsDirectory, `${name}.json`), JSON.stringify(part, null, 2) + '\n')
+        // One part per half: the teardown merges a configuration's two halves into its evidence row.
+        if (!partial) await fs.writeFile(path.join(partsDirectory, `${name}.${half}.json`), JSON.stringify(part, null, 2) + '\n')
         const fontTag = auditFonts ? '.' + auditFonts.replaceAll(',', '_') : ''
-        await fs.writeFile(path.join(partsDirectory, `${name}${fontTag}.findings.json`), JSON.stringify(findings, null, 2) + '\n')
+        await fs.writeFile(path.join(partsDirectory, `${name}${fontTag}.${half}.findings.json`), JSON.stringify(findings, null, 2) + '\n')
         // Every component and every block has a section on the page.
         expect(new Set(everySection.map(id => id.split('~')[0]))).toHaveProperty('size', onlyComponents?.length ? onlyComponents.length : supportedComponentIds.length + supportedBlockIds.length)
         expect(errors, 'page errors').toEqual([])

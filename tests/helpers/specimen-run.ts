@@ -13,7 +13,25 @@ export function specimenRunIsPartial(): boolean {
   return Boolean(process.env.OMBELLE_AUDIT_COMPONENTS?.trim() || process.env.OMBELLE_AUDIT_FONTS || process.env.OMBELLE_AUDIT_FAMILIES?.trim())
 }
 
-type Part = { runId: string; family: string; edition: string; mode: string; transparency?: 'reduced'; specimens: number; blocks: number; sections: number; checks: Record<string, number>; failures: number; contrastAdvisoryFindings: number; browser: unknown }
+type Part = { runId: string; family: string; edition: string; mode: string; transparency?: 'reduced'; half?: 'components' | 'blocks'; specimens: number; blocks: number; sections: number; checks: Record<string, number>; failures: number; contrastAdvisoryFindings: number; browser: unknown }
+
+const partKey = (part: Part) => [part.family, part.edition, part.mode, part.transparency ?? ''].join('/')
+/**
+ * A configuration is measured in two tests, its components and its blocks: one row adds them up. A missing half
+ * leaves its count at 0 (no specimens or no blocks), which the gate rejects as an incomplete audit.
+ */
+export function combineSpecimenHalves(parts: Part[]): Part[] {
+  const rows = new Map<string, Part>()
+  for (const part of parts) {
+    const { half: _half, ...rest } = part
+    const row = rows.get(partKey(part))
+    if (!row) { rows.set(partKey(part), { ...rest, checks: { ...part.checks } }); continue }
+    for (const [check, count] of Object.entries(part.checks)) row.checks[check] = (row.checks[check] ?? 0) + count
+    row.specimens += part.specimens; row.blocks += part.blocks; row.sections += part.sections
+    row.failures += part.failures; row.contrastAdvisoryFindings += part.contrastAdvisoryFindings
+  }
+  return [...rows.values()]
+}
 
 /**
  * Merge this run's configuration parts into the evidence file the Foundation gate validates, stamped with
@@ -23,8 +41,8 @@ export async function mergeSpecimenParts(runId: string) {
   if (specimenRunIsPartial()) return
   const directory = path.join(specimenArtifacts, 'parts')
   const names = (await fs.readdir(directory).catch(() => [] as string[])).filter(name => name.endsWith('.json') && !name.endsWith('.findings.json'))
-  const parts = (await Promise.all(names.map(async name => JSON.parse(await fs.readFile(path.join(directory, name), 'utf8')) as Part)))
-    .filter(part => part.runId === runId)
+  const parts = combineSpecimenHalves((await Promise.all(names.map(async name => JSON.parse(await fs.readFile(path.join(directory, name), 'utf8')) as Part)))
+    .filter(part => part.runId === runId))
   if (!parts.length) return
   const order = (part: Part) => [part.transparency ? 1 : 0, styleFamilies.indexOf(part.family as never), editions.indexOf(part.edition as never), modes.indexOf(part.mode as never)]
   parts.sort((a, b) => { const x = order(a), y = order(b); return x[0]! - y[0]! || x[1]! - y[1]! || x[2]! - y[2]! || x[3]! - y[3]! })
