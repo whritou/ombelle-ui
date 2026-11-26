@@ -383,7 +383,7 @@
   "minimalist/compile/examples/toolbar.tsx": "7891f48f391f19e405a6fea6feee11b319e1223d75ada32fb980483ea20bab5d",
   "minimalist/compile/examples/tooltip.tsx": "829d5930ea33c0bbfa5b9b7d504db1202b42f2eacf81bcb4d6a0e8dbaed5f14a",
   "minimalist/compile/lib/utils.ts": "352c1b01069ec8a78b65062328bb86fbbfa223c0b0344d6149f30717c42c48fb",
-  "minimalist/compile/styles/ui-style.css": "2b95604e37b52713afafc55b67a1719ab4b5eb085efd6648463486c3eb7ebea6",
+  "minimalist/compile/styles/ui-style.css": "d70202bea8b7e6748db12efe80cbf78feda62a4fb32e3621286bf9678d4b29a7",
   "minimalist/compile/styles/ui-tokens.css": "73cf90a069cc34ad3f45d4634982efb3850b4b07f8875a0e6e5dbd23e85ec9f6",
   "minimalist/component-preset/examples/scoped-presets/builtin-minimalist/r1.tsx": "662b9fcffe33e260f5458572d20637fdef40f2b391cd604f1bd317d0fa0352ff",
   "minimalist/component-preset/lib/utils.ts": "352c1b01069ec8a78b65062328bb86fbbfa223c0b0344d6149f30717c42c48fb",
