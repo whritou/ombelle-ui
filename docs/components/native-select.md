@@ -77,6 +77,8 @@ The `select` uses `appearance: none` and Textarea's treatment: border token (`--
 | Disabled | `[data-slot="native-select-wrapper"]:has(select:disabled)` | Opacity 0.5 dims the select and icon together, including a select disabled by a surrounding `fieldset`; the select uses `cursor: not-allowed` |
 | Multiple | `[multiple]` | The chevron is hidden and the inline-end padding returns to `1rem` |
 
+The open option list is drawn by the browser. Chromium paints it with the select's background and each option's own colours; a transparent select (minimalist) leaves it the light-scheme white list, so minimalist paints the options and optgroups of a single select with `--popover` and `--popover-foreground` (a `multiple` select shows its options in place and keeps the field's colours), as liquid glass does for every select. Firefox and Safari draw the list with their own rules; only Chromium is measured.
+
 Under forced colors the select uses `Field`/`FieldText` with a system-color border and no shadow. The icon's SVG uses `currentColor` and becomes `ButtonText`. The invalid border becomes `double`, so the state does not rely on color. Minimalist also sets the focus outline to `Highlight`. The shared `[data-slot]` reduced-motion rule removes transitions. Native Select uses the saved global preset; a later theme operation can change semantic tokens but does not rewrite the installed `native-select.css`.
 
 ## Generated files and ownership
