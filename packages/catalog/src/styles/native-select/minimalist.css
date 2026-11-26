@@ -67,6 +67,13 @@
 select[multiple] + [data-slot='native-select-icon'] {
   display: none;
 }
+/* The select is transparent, so the browser draws its open list on the light-scheme white with the theme's text
+   colour: light text on white in dark mode. Paint the options the popover. A multiple select lists them in place. */
+[data-slot='native-select']:not([multiple]) option,
+[data-slot='native-select']:not([multiple]) optgroup {
+  background-color: var(--popover);
+  color: var(--popover-foreground);
+}
 @media (forced-colors: active) {
   [data-slot='native-select'] {
     background: Field;
