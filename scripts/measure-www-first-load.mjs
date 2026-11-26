@@ -16,6 +16,8 @@ const routes = [
   'docs/getting-started',
   'components',
   'components/accordion',
+  'blocks',
+  'blocks/login-01',
 ]
 
 const kb = (bytes) => (bytes / 1024).toFixed(1)
