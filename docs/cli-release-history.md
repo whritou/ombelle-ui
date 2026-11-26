@@ -2,6 +2,18 @@
 
 This is the dated record of every `@ombelle-ui/cli` release: what changed, what the website gates on, and what was verified after publication. It is append-only history. Statements about a "current" or "published" installer inside an entry describe that release's day, not today. The procedure for making a release is [cli-release.md](cli-release.md), and the version npm serves is `npm view @ombelle-ui/cli dist-tags`.
 
+The 1.1.0 release adds managed blocks: `login-01`, `settings-01`, `pricing-01` and `dashboard-01`, installed with
+`ombelle add <block-id>` as managed files under `<components parent>/blocks/` and recorded in the lock's `artifacts`
+with `kind: "block"` (no new lock field, `lockVersion` stays 1). `add`, `update` and `diff` accept block ids, `doctor`
+gains a `blocks` check, and the notice codes `BLOCK_COMPONENT_EDITED` and `BLOCK_COMPONENT_MISSING` are new. Installed
+source also changes for minimalist Input, whose focus is now a 3px rule. A 1.0 CLI keeps block records but cannot
+install or update blocks. `@ombelle-ui/cli@1.1.0` was published on 2026-11-26 from `ab266f92`, where Foundation run
+45790840319 passed, and is the `latest` tag, again through `publish-cli.yml` with npm trusted publishing and a
+provenance attestation (run 45818392080). No install command on the website needs a newer installer (`installRules` is
+empty); the website's blocks gallery ships after this release. Published first, then `pnpm version:set --published
+1.1.0` (and `--check --published`) and deploy from `main`. Known issue: a hovered pressed Toolbar toggle in flat and
+neo-brutalism dark mode shows about 1.21:1 text contrast. See [release evidence](evidence/npm-1.1.0-2026-11-26.md).
+
 The 1.0.0 release freezes the 1.0 public contract and ships the 1.0 audit fixes (see the 1.0.0 CHANGELOG entry and
 the [upgrade guide](upgrading-to-1.0.md)). The CLI gains `update`, `preset apply`, `preset show`, `info`, `doctor` and
 `diff`, versioned `--json` output with coded notices, React 19 ranges, and recovery for interrupted applies; installed
