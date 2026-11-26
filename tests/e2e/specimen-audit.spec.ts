@@ -128,6 +128,47 @@ async function auditPressedHover(page: Page, section: Locator, id: string, mode:
   return findings
 }
 
+/**
+ * The open list of a Native Select is drawn by the browser, outside the page, so axe and screenshots never see it.
+ * Measure what drives it instead. Chromium paints each option's own background, else the select's background
+ * (blended over white), else the canvas of the select's color-scheme, and writes the option's colour on it. A
+ * minimalist select is transparent, so in dark mode its light text was drawn on a white list.
+ */
+async function auditOptionList(section: Locator, id: string): Promise<void> {
+  const selects = section.locator('select[data-slot$="native-select"]:not([multiple])')
+  expect(await selects.count(), `${id}: a Native Select is on screen`).toBeGreaterThan(0)
+  for (const select of await selects.all()) {
+    const options = await select.evaluate((element) => {
+      const channels = (value: string) => {
+        const context = document.createElement('canvas').getContext('2d')!
+        context.fillStyle = value
+        context.fillRect(0, 0, 1, 1)
+        return [...context.getImageData(0, 0, 1, 1).data].map(channel => channel / 255)
+      }
+      const over = (top: number[], bottom: number[]) => top.slice(0, 3).map((channel, index) => channel * top[3]! + bottom[index]! * (1 - top[3]!)).concat(1)
+      const luminance = (rgb: number[]) => {
+        const [r, g, b] = rgb.slice(0, 3).map(c => c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4)
+        return 0.2126 * r! + 0.7152 * g! + 0.0722 * b!
+      }
+      const selectStyle = getComputedStyle(element)
+      // Chromium's list canvas: dark only when the select itself uses a dark color-scheme.
+      const canvas = /\bdark\b/.test(selectStyle.colorScheme) && !/\blight\b/.test(selectStyle.colorScheme) ? [0.23, 0.23, 0.23, 1] : [1, 1, 1, 1]
+      const selectFill = channels(selectStyle.backgroundColor)
+      const list = selectFill[3]! > 0 ? over(selectFill, [1, 1, 1, 1]) : canvas
+      return [...(element as HTMLSelectElement).options].map((option) => {
+        const style = getComputedStyle(option)
+        const fill = channels(style.backgroundColor)
+        const background = fill[3]! > 0 ? over(fill, list) : list
+        const text = over(channels(style.color), background)
+        const [light, dark] = [luminance(text), luminance(background)].sort((a, b) => b - a)
+        return { option: option.textContent!.trim(), ratio: (light! + 0.05) / (dark! + 0.05), color: style.color, background: style.backgroundColor, select: selectStyle.backgroundColor }
+      })
+    })
+    for (const option of options)
+      expect.soft(option.ratio, `${id}: option "${option.option}" in the open list is readable (${JSON.stringify(option)})`).toBeGreaterThanOrEqual(4.5)
+  }
+}
+
 type BlockRun = {
   edition: (typeof editions)[number]; mode: (typeof modes)[number]; shots: string
   counts: Record<AuditCheck, number>; record: (id: string, list: Finding[]) => void
@@ -290,6 +331,7 @@ for (const [index, { family, edition, mode, transparency }] of configurations.en
           record(await markSurfaces(page, await runAxe(page, [`section[data-audit="${id}"]`])))
           counts.axe++
           // Recorded under its own name, so a finding says the pressed item was hovered.
+          if (component === 'native-select') await auditOptionList(section, id)
           if (component === 'toolbar') findings.push(...(await auditPressedHover(page, section, id, mode, counts)).map(finding => ({ ...finding, component: `${id} (pressed item hovered)` })))
           const listed = overlays[component]
           const overlay = component === 'accordion' && !await section.locator('[aria-expanded="false"][aria-controls]').count()

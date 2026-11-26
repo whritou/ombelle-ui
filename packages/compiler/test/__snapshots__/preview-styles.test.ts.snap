@@ -16,7 +16,7 @@ exports[`compile output is unchanged > liquid-glass material on 1`] = `"09d30345
 
 exports[`compile output is unchanged > liquid-glass prefixed dialog 1`] = `"747cb02c5aa644290a27267950eba06cbaa5667009f307f3c319a78b12b2f463"`;
 
-exports[`compile output is unchanged > minimalist 1`] = `"5389a99dd574389b6f06b286eea68409e61aa2d57fd157aa4d6166d02df9f0d9"`;
+exports[`compile output is unchanged > minimalist 1`] = `"0568eeccd10fa4252e541dd0549a1c73712979ce9013722ede6033598f20752e"`;
 
 exports[`compile output is unchanged > neo-brutalism 1`] = `"c9684f4de7947ff04e951e2935133263e6f45f172b68ada52e287ecd5bfe273b"`;
 
