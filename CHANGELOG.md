@@ -4,6 +4,10 @@ Entries are written for someone upgrading a project. From 1.0 each release group
 
 ## Unreleased
 
+**Website**
+
+- Block previews load much faster. The block frame used to import the compiler and the contracts package for a font list and an origin check, so every `/blocks` page downloaded and parsed about 5.6 MB of JavaScript before showing a block. The frame now loads about 0.4 MB, mostly React and the block itself. The frame and its viewport widths are unchanged.
+
 ## 1.1.1 — 26 November 2026
 
 A patch release: it fixes the 1.1.0 known issue (Toolbar) and a Native Select contrast defect. Nothing breaks.
