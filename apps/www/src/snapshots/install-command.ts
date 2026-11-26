@@ -1,7 +1,7 @@
 import { officialSnapshotOrigin, publicCliPackageName, validateRecipeSnapshotSource, validateSnapshotSource, type InstallableRecipe, type Preset, type RecipeSnapshotSource, type SnapshotSource, type StyleFamily } from '@ombelle/contracts'
 
 /** Verified public npm release shown on code pages. */
-export const publishedInstaller = { packageName: publicCliPackageName, version: '1.1.0' } as const
+export const publishedInstaller = { packageName: publicCliPackageName, version: '1.1.1' } as const
 
 /** What a code page offers to install: a preset (with its contrast state) or a recipe. */
 export type InstallSubject =

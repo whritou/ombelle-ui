@@ -2,6 +2,18 @@
 
 This is the dated record of every `@ombelle-ui/cli` release: what changed, what the website gates on, and what was verified after publication. It is append-only history. Statements about a "current" or "published" installer inside an entry describe that release's day, not today. The procedure for making a release is [cli-release.md](cli-release.md), and the version npm serves is `npm view @ombelle-ui/cli dist-tags`.
 
+The 1.1.1 release is a patch that changes installed source only. Toolbar keeps readable text when a pressed item is
+hovered, which fixes the 1.1.0 known issue (`toolbar.css` in flat, liquid glass, minimalist, neo-brutalism, ombelle
+and papier), and the minimalist Native Select option list is readable in dark mode (`native-select.css` in minimalist).
+No command, flag, `--json` field, lock field or schema changes; `ombelle update` refreshes unedited files.
+`@ombelle-ui/cli@1.1.1` was published on 2026-11-26 from `c68d5618`, where Foundation run 45869029914 passed, and is
+the `latest` tag, through `publish-cli.yml` with npm trusted publishing and a provenance attestation (run
+45910380946). An earlier Foundation run on `937f1fbb` failed on a preset editor keyboard test race, fixed in the
+release commit. No install command on the website needs a newer installer (`installRules` is empty). Published first,
+then `pnpm version:set --published 1.1.1` (and `--check --published`) and deploy from `main`. The registry tarball,
+its integrity, a fresh registry install and a production dry-run `init` were verified after publication. See
+[release evidence](evidence/npm-1.1.1-2026-11-27.md).
+
 The 1.1.0 release adds managed blocks: `login-01`, `settings-01`, `pricing-01` and `dashboard-01`, installed with
 `ombelle add <block-id>` as managed files under `<components parent>/blocks/` and recorded in the lock's `artifacts`
 with `kind: "block"` (no new lock field, `lockVersion` stays 1). `add`, `update` and `diff` accept block ids, `doctor`
