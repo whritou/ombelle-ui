@@ -2,14 +2,20 @@
 // per family a base stylesheet and one scoped stylesheet per component, plus the compiled components,
 // the shared specimens and a registry that loads each specimen on demand, and Ombelle's self-hosted fonts
 // with the faces each specimen preloads. Nothing compiles at request time.
+// It also writes the block previews (generateWwwBlockPreviews): per family one complete stylesheet per block under
+// public/previews/<family>/blocks/, the compiled blocks for the preview app's /block-preview/ route, and each
+// block's installed source per edition for the block pages' Code tab.
 import fs from 'node:fs/promises'
 import { createRequire } from 'node:module'
 import path from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
+import postcss from 'postcss'
 import { compile, stripFontImports } from '@ombelle/compiler'
-import { fontById } from '@ombelle/catalog'
-import { componentsWithStyleSupport, supportedStyleFamilies } from '@ombelle/contracts'
-import { createPresetDraft, materializePreset, previewComponentIds } from '../apps/www/src/preset-editor/model.js'
+import { blockManifest, fontById } from '@ombelle/catalog'
+import { defaultGlassPresetId } from '../packages/catalog/src/presets.js'
+import { componentsWithStyleSupport, styleFamilies, supportedBlockIds, supportedStyleFamilies, type StyleFamily } from '@ombelle/contracts'
+import { applyStartingPreset, createPresetDraft, materializePreset, previewComponentIds } from '../apps/www/src/preset-editor/model.js'
+import { glassPresetBackdrop } from '../apps/www/src/site/glass-presets.js'
 import { familyFontIds, fontLoaders } from '../apps/www/src/inline-preview/family-fonts.js'
 import { specimenIndex } from '../fixtures/shared/specimens/index.js'
 import { previewTokensCss, relativeToStage, scopePreviewCss, stageContainerCss, unsetTokensCss, type BuiltInFamily } from './www-previews/scope-css.js'
@@ -64,9 +70,14 @@ async function compileFamily(family: BuiltInFamily): Promise<Compiled> {
 }
 
 export async function generateWwwPreviews(
-  out: { src: string; public: string } = {
+  out: { src: string; public: string; blocks?: BlockPreviewOut } = {
     src: path.join(repo, 'apps/www/src/generated/previews'),
     public: path.join(repo, 'apps/www/public/previews'),
+    blocks: {
+      public: path.join(repo, 'apps/www/public/previews'),
+      preview: path.join(repo, 'apps/preview/src/generated/block-preview'),
+      sources: path.join(repo, 'apps/www/src/generated/previews/blocks.ts'),
+    },
   },
 ): Promise<void> {
   const families = [...supportedStyleFamilies] as BuiltInFamily[]
@@ -206,6 +217,129 @@ export async function generateWwwPreviews(
       '}',
       '',
     ].join('\n'),
+  )
+  // Last: the removals above would delete block files written under the same folders.
+  if (out.blocks) await generateWwwBlockPreviews(out.blocks)
+}
+
+export type BlockPreviewOut = {
+  /** public/previews: each family's block stylesheets go to <family>/blocks/<id>.css. */
+  public: string
+  /** The preview app's generated folder for its /block-preview/ route. */
+  preview: string
+  /** The TypeScript module holding each block's installed source per edition. */
+  sources: string
+}
+
+/** The preset a block preview shows for a family: the catalog preset, or for liquid glass its default starting preset. */
+const blockPreset = (family: StyleFamily) => {
+  const draft = createPresetDraft(family)
+  return materializePreset(family === 'liquid-glass' ? applyStartingPreset(draft, defaultGlassPresetId) : draft)
+}
+const cssImport = /^import '\.\/[\w-]+\.css'\r?\n/gm
+const glassFilterPath = 'components/ui/liquid-glass-filter.tsx'
+
+/**
+ * Writes what the block pages show. The block preview frame renders the compiled block from the preview app and links
+ * `/previews/<family>/blocks/<id>.css`, which holds everything the block needs in that family: Tailwind (preflight and
+ * the utilities the components use), the preset's tokens and shared styles, the CSS of the block's components and the
+ * block's own layout CSS. Switching family swaps that one stylesheet: the TSX is the same in every family.
+ */
+export async function generateWwwBlockPreviews(out: BlockPreviewOut): Promise<void> {
+  const write = async (file: string, content: string) => {
+    await fs.mkdir(path.dirname(file), { recursive: true })
+    await fs.writeFile(file, content)
+  }
+  const blocks = [...supportedBlockIds]
+  const compiled = new Map<StyleFamily, Map<string, string>>()
+  for (const family of styleFamilies) {
+    const result = await compile({ preset: blockPreset(family), componentIds: [], blockIds: blocks, catalogRelease: '0.1.0', compilerVersion: '0.1.0' })
+    compiled.set(family, new Map(result.artifacts.map((artifact) => [artifact.logicalPath, artifact.content])))
+  }
+
+  // The frame's modules: one copy, without their CSS imports, which the family stylesheet replaces.
+  const reference = compiled.get('ombelle')!
+  const modules = [...reference.keys()]
+    .filter((file) => /^(?:blocks|components\/ui)\/[\w-]+\.tsx$/.test(file) || file === 'lib/utils.ts')
+    .sort(byName)
+  for (const family of styleFamilies)
+    for (const file of modules)
+      if (compiled.get(family)!.get(file) !== reference.get(file))
+        throw new Error(`${file} compiles differently in ${family}; the block preview shares one copy across families`)
+  const glassFilter = compiled.get('liquid-glass')!.get(glassFilterPath)
+  if (!glassFilter) throw new Error('The liquid glass compile has no glass filter')
+  await fs.rm(out.preview, { recursive: true, force: true })
+  for (const file of [...modules, glassFilterPath]) {
+    const content = (file === glassFilterPath ? glassFilter : reference.get(file)!)
+      .replace(cssImport, '')
+      .replaceAll('@/lib/utils', '../../lib/utils')
+      .replaceAll('@/components/ui/', '../components/ui/')
+    if (/\.css['"]/.test(content)) throw new Error(`${file} imports CSS the block preview does not strip`)
+    await write(path.join(out.preview, file), content)
+  }
+  const fonts: Record<string, string[]> = {}
+  for (const family of styleFamilies) {
+    const { design } = blockPreset(family)
+    const ids: (string | undefined)[] = [design.fontFamilyId, design.headingFontFamilyId, design.monoFontFamilyId]
+    fonts[family] = [...new Set(ids)].filter((id): id is string => id !== undefined && fontById(id) !== undefined)
+  }
+  const backdrop = { light: glassPresetBackdrop(defaultGlassPresetId, 'light'), dark: glassPresetBackdrop(defaultGlassPresetId, 'dark') }
+  await write(
+    path.join(out.preview, 'index.ts'),
+    [
+      '// Generated by scripts/generate-www-previews.ts. The compiled blocks the /block-preview/ route renders, and what each family loads.',
+      "import type { ComponentType } from 'react'",
+      '',
+      'export const blockModules: Record<string, () => Promise<Record<string, unknown>>> = {',
+      ...blocks.map((id) => `  '${id}': () => import('./blocks/${id}'),`),
+      '}',
+      '',
+      '/** The registry fonts each family uses: its stylesheet names them, and the frame loads their files. */',
+      `export const blockFamilyFonts: Record<string, readonly string[]> = ${JSON.stringify(fonts, null, 2)}`,
+      '',
+      '/** The liquid glass backdrop by mode, the default of the component pages. */',
+      `export const blockGlassBackdrop = ${JSON.stringify(backdrop)} as const`,
+      '',
+      "export const loadGlassFilter = () => import('./components/ui/liquid-glass-filter').then((m) => m.LiquidGlassFilter as ComponentType)",
+      '',
+    ].join('\n'),
+  )
+
+  // One complete stylesheet per family and block. Tailwind scans the frame's modules written above.
+  const requireFromWww = createRequire(path.join(repo, 'apps/www/package.json'))
+  const tailwind = (await import(pathToFileURL(requireFromWww.resolve('@tailwindcss/postcss')).href)).default as (options: object) => postcss.AcceptedPlugin
+  // By path: the output folder may sit outside the repository (tests write to a temporary one).
+  const tailwindCss = requireFromWww.resolve('tailwindcss/index.css').replaceAll('\\', '/')
+  for (const family of styleFamilies) {
+    const files = compiled.get(family)!
+    const shared = [files.get('styles/ui-tokens.css') ?? '', files.get('styles/ui-style.css') ?? ''].map(stripFontImports).join('\n')
+    if (/@import\b/.test(shared)) throw new Error(`Family ${family} has a non-font @import, which preview CSS cannot load`)
+    for (const id of blocks) {
+      const input = [
+        `@import "${tailwindCss}";`,
+        '@custom-variant dark (&:where(.dark, .dark *));',
+        '@source "./";',
+        shared,
+        ...blockManifest[id].components.flatMap((component) => files.get(`components/ui/${component}.css`) ?? []),
+        files.get(`blocks/${id}.css`)!,
+      ].join('\n')
+      const result = await postcss([tailwind({ base: out.preview, optimize: false })]).process(input, { from: path.join(out.preview, 'block.css') })
+      await write(path.join(out.public, family, 'blocks', `${id}.css`), result.css)
+    }
+  }
+
+  // The Code tab: each block's files as `add <block>` writes them, per edition (the same in every family).
+  const sources: Record<string, Record<string, { tsx: string; css: string }>> = {}
+  for (const edition of ['radix', 'base'] as const) {
+    const result = await compile({ preset: blockPreset('ombelle'), componentIds: [], blockIds: blocks, catalogRelease: '0.1.0', compilerVersion: '0.1.0', edition })
+    const files = new Map(result.artifacts.map((artifact) => [artifact.logicalPath, artifact.content]))
+    for (const id of blocks) (sources[id] ??= {})[edition] = { tsx: files.get(`blocks/${id}.tsx`)!, css: files.get(`blocks/${id}.css`)! }
+  }
+  await write(
+    out.sources,
+    "// Generated by scripts/generate-www-previews.ts. Each block's files as `add <block>` installs them, per edition.\n" +
+      "import type { BlockId } from '@ombelle/contracts'\n\n" +
+      `export const blockSources: Record<BlockId, Record<'radix' | 'base', { tsx: string; css: string }>> = ${JSON.stringify(sources, null, 2)}\n`,
   )
 }
 

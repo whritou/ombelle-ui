@@ -1,7 +1,7 @@
 import { normalizeSnapshotOrigin } from '@ombelle/contracts'
 
 /** Production uses deployment-local static files; dev overrides are loopback only. */
-export function previewFrameUrl(kind: 'editor' | 'preset', override?: string): string {
+export function previewFrameUrl(kind: 'editor' | 'preset' | 'block', override?: string): string {
   if (!override) return `/ombelle-preview/${kind}-preview/`
   try {
     // Inspect the supplied authority before URL parsing rewrites numeric aliases.

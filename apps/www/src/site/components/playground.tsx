@@ -1,13 +1,11 @@
 'use client'
 
 import * as Tabs from '@radix-ui/react-tabs'
-import * as Tooltip from '@radix-ui/react-tooltip'
-import { Code, Eye, Moon, Sun } from 'lucide-react'
+import { Code, Eye } from 'lucide-react'
 import { Component, startTransition, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { preload } from 'react-dom'
 import { defaultGlassPresetId, type StartingPresetId } from '@ombelle/catalog/presets'
 import { accessibilityCaveatLabel, styleSupport, type ComponentId, type StyleFamily } from '@ombelle/contracts'
-import { offeredStyleFamilies } from '../../snapshots/install-command'
 import { applyStartingPreset, createPresetDraft, materializePreset, type PresetEditorDraft } from '../../preset-editor/model'
 import { labInkFor, pickGlassScene } from '../glass-backdrops'
 import { usePresetCompiler } from '../../preset-editor/use-preset-compiler'
@@ -21,39 +19,15 @@ import { loadFamilyFonts } from '../../inline-preview/family-fonts'
 import { previewPath, previewStylesheets, type BuiltInFamily } from '../../inline-preview/routing'
 import { useSiteDark } from '../theme'
 import { CodeBlock } from '../../generated/ui/components/ui/code-block'
-import { Toggle } from '../../generated/ui/components/ui/toggle'
 import { codeLanguage } from './code-language'
-import sampleStyles from './playground.module.css'
+import { FamilySample, ModeToggle, familyOptions, familyTile, familyTrack, glassDocs, pillTrack, tabClass, toggleItem } from './preview-controls'
 
-// Exhaustive by type: adding a style family fails the typecheck until it has a label.
-const familyLabels: Record<StyleFamily, string> = {
-  flat: 'Flat',
-  minimalist: 'Minimalist',
-  'neo-brutalism': 'Neo-Brutalism',
-  ombelle: 'Ombelle',
-  papier: 'Papier',
-  organic: 'Organic',
-  'retro-futurism': 'Retro futurism',
-  'liquid-glass': 'Liquid Glass',
-}
-// Same gate as the editors: only families the published installer can install.
-export const familyOptions: { value: StyleFamily; label: string }[] = offeredStyleFamilies().map((value) => ({
-  value,
-  label: familyLabels[value],
-}))
-const glassDocs = '/docs/style-families#liquid-glass'
+export { familyOptions }
+
 // Previews whose examples (and their extra appearances) need more room than the default frame.
 const tallPreviews: Partial<Record<ComponentId, number>> = { alert: 620, card: 560, table: 600, 'input-group': 520, carousel: 760 }
 type PreviewMode = 'auto' | 'light' | 'dark'
 type PreviewStatus = 'connecting' | 'ready' | 'failed'
-// Segmented pills, like the rest of the site: a quiet track and a filled primary pill for the choice.
-const pillTrack = 'inline-flex items-center gap-1 rounded-full border border-border bg-background p-1'
-const pillItem = 'inline-flex min-h-9 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full px-3.5 text-sm font-semibold text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:line-through disabled:hover:text-muted-foreground'
-// Each style family is a tile with a sample of its look, as in the editors; four to a row, or one row that scrolls on a phone.
-const familyTrack = 'flex gap-2 overflow-x-auto p-0.5 sm:grid sm:grid-cols-4 sm:overflow-visible'
-const familyTile = 'flex min-w-[7.5rem] shrink-0 flex-col items-start gap-2 rounded-xl border border-border bg-background px-3 py-2.5 text-left text-sm font-semibold text-foreground transition-colors hover:border-foreground/40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:cursor-not-allowed disabled:opacity-60 disabled:line-through data-[state=on]:border-primary data-[state=on]:bg-accent data-[state=on]:ring-1 data-[state=on]:ring-primary sm:min-w-0 sm:shrink'
-const toggleItem = pillItem + ' data-[state=on]:bg-primary data-[state=on]:text-primary-foreground data-[state=on]:hover:bg-primary data-[state=on]:hover:text-primary-foreground'
-const tabClass = pillItem + ' data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:hover:bg-primary data-[state=active]:hover:text-primary-foreground'
 
 /**
  * Live preview of one catalog component, compiled in the browser from the
@@ -121,7 +95,7 @@ export function ComponentPlayground({ id, name, source, styles }: {
   useEffect(() => preloadOtherFamilies(id, family, preloaded.current), [id])
   const height = tallPreviews[id] ?? 420
   const families = familyOptions.map(option => {
-    const tile = { ...option, icon: <span className={sampleStyles.sample} data-family={option.value} aria-hidden="true"><i /><i /></span> }
+    const tile = { ...option, icon: <FamilySample family={option.value} /> }
     return option.value === 'liquid-glass'
       ? glass === 'unavailable'
         ? { ...tile, disabled: true, title: `${name} is not available in liquid glass` }
@@ -245,26 +219,4 @@ function preloadOtherFamilies(id: ComponentId, current: StyleFamily, done: Set<S
 /** A source file, highlighted in the language its title names. */
 function SourceBlock({ code, title, maxHeight }: { code: string; title: string; maxHeight: string }) {
   return <CodeBlock code={code} title={title} language={codeLanguage(title)} maxHeight={maxHeight} />
-}
-
-/** One button for the preview's light or dark mode: its icon is the mode it switches to, as in the header. */
-function ModeToggle({ mode, onChange }: { mode: 'light' | 'dark'; onChange: (mode: 'light' | 'dark') => void }) {
-  const dark = mode === 'dark'
-  return (
-    <Tooltip.Provider delayDuration={150}>
-      <Tooltip.Root>
-        <Tooltip.Trigger asChild>
-          <Toggle variant="outline" size="sm" aria-label="Dark preview" pressed={dark} onPressedChange={next => onChange(next ? 'dark' : 'light')}>
-            {dark ? <Sun className="size-4" aria-hidden="true" /> : <Moon className="size-4" aria-hidden="true" />}
-          </Toggle>
-        </Tooltip.Trigger>
-        <Tooltip.Portal>
-          <Tooltip.Content sideOffset={8} className="z-50 rounded-md bg-foreground px-2.5 py-1.5 text-xs font-semibold text-background shadow-md">
-            {dark ? 'Switch to the light preview' : 'Switch to the dark preview'}
-            <Tooltip.Arrow className="fill-foreground" />
-          </Tooltip.Content>
-        </Tooltip.Portal>
-      </Tooltip.Root>
-    </Tooltip.Provider>
-  )
 }

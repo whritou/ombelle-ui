@@ -334,7 +334,7 @@ test.describe('support matrix without JavaScript', () => {
 for (const width of [1440, 375]) {
   test.describe(`axe at ${width} px`, () => {
     test.use({ viewport: { width, height: 900 } })
-    for (const path of ['/', '/docs', '/docs/getting-started', '/components', '/components/data-table', '/editor/preset', '/editor/component/button']) {
+    for (const path of ['/', '/docs', '/docs/getting-started', '/components', '/components/data-table', '/blocks', '/blocks/login-01', '/editor/preset', '/editor/component/button']) {
       test(`${path} has no violations`, async ({ page }) => {
         await page.goto(`${site}${path}`)
         await page.waitForLoadState('load')

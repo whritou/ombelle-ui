@@ -3,7 +3,7 @@ import { headerRules } from './src/security-headers'
 
 const nextConfig: NextConfig = {
   async rewrites() {
-    return ['editor', 'preset'].map(kind => ({
+    return ['editor', 'preset', 'block'].map(kind => ({
       source: `/ombelle-preview/${kind}-preview`,
       destination: `/ombelle-preview/${kind}-preview/index.html`,
     }))

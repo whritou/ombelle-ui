@@ -34,6 +34,14 @@ it('titles a catalog component editor by its component', async () => {
   expect(await generateMetadata(params({ id: 'no-such-component' }))).toEqual({})
 })
 
+it('titles the blocks gallery and each block page by its block', async () => {
+  expect((await import('./blocks/page')).metadata.title).toBe('Blocks · Ombelle UI')
+  const { generateMetadata, generateStaticParams } = await import('./blocks/[id]/page')
+  expect(generateStaticParams()).toEqual([{ id: 'login-01' }, { id: 'settings-01' }, { id: 'pricing-01' }, { id: 'dashboard-01' }])
+  expect(await generateMetadata(params({ id: 'login-01' }))).toMatchObject({ title: 'Sign in block · Ombelle UI' })
+  expect(await generateMetadata(params({ id: 'button' }))).toEqual({})
+})
+
 it('titles a published preset by its name, and an unavailable one by its state', async () => {
   const { generateMetadata } = await import('./presets/[id]/[revision]/page')
   store.read = async () => ({ preset: { name: 'Harbor' } })
