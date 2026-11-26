@@ -4,6 +4,10 @@ Entries are written for someone upgrading a project. From 1.0 each release group
 
 ## Unreleased
 
+**Installed source**
+
+- Toolbar keeps readable text when a pressed item is hovered. The hover background used to win over the pressed background and leave the pressed text colour on it (about 1.21:1 in flat and neo-brutalism dark mode); in the other families the hovered pressed item lost its pressed fill. A hovered pressed item now keeps `--accent-foreground` on a deeper accent (`--accent` mixed with 12% `--accent-foreground`), and under forced colours keeps `Highlight`. This changes `toolbar.css` in flat, liquid glass, minimalist, neo-brutalism, ombelle and papier projects; organic and retro-futurism already kept a readable pressed ring and are unchanged. `update` refreshes unedited files.
+
 ## 1.1.0 — 25 November 2026
 
 Blocks: composed sections you install with `ombelle add <block-id>`. Nothing breaks for a 1.0 project.

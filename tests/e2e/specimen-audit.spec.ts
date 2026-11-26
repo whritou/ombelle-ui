@@ -76,6 +76,58 @@ async function measure(page: Page, roots: Locator[], stop: Locator, prefix: stri
   return findings
 }
 
+/**
+ * A pressed Toolbar item measured hovered, on purpose: its hover background once beat the pressed background and
+ * left the pressed text at 1.21:1 (flat and neo-brutalism, dark). Axe runs on the hovered section, and the hovered
+ * pressed item must keep a fill or ring that a hovered item that is not pressed does not have.
+ */
+async function auditPressedHover(page: Page, section: Locator, id: string, mode: (typeof modes)[number], counts: Record<AuditCheck, number>): Promise<Finding[]> {
+  const items = section.locator('[data-slot$="toolbar-toggle-item"]').filter({ visible: true })
+  const pressed = items.and(section.locator('[data-state="on"], [aria-pressed="true"]')).first()
+  const unpressed = items.and(section.locator('[data-state="off"], [aria-pressed="false"]')).first()
+  await expect(pressed, `${id}: a pressed toggle item is on screen`).toBeVisible()
+  await expect(unpressed, `${id}: an unpressed toggle item is on screen`).toBeVisible()
+  // The hovered fill and ring, without waiting for the colour transition. Text colour alone does not show a state.
+  const hoverLook = async (item: Locator) => {
+    await item.hover()
+    return item.evaluate((element) => {
+      element.getAnimations().forEach(animation => animation.finish())
+      const style = getComputedStyle(element)
+      return `background ${style.backgroundColor}, box-shadow ${style.boxShadow}`
+    })
+  }
+  const hoveredOff = await hoverLook(unpressed)
+  const hoveredOn = await hoverLook(pressed)
+  const findings = await markSurfaces(page, await runAxe(page, [`section[data-audit="${id}"]`]))
+  counts.axe++
+  expect.soft(hoveredOn, `${id}: a hovered pressed item looks different from a hovered unpressed one`).not.toBe(hoveredOff)
+  // Under forced colors the pressed item is Highlight with HighlightText; hovered, it must not lose its Highlight
+  // fill and leave HighlightText on the plain button face. Measured once, with the light pass.
+  if (mode === 'light') {
+    await page.emulateMedia({ forcedColors: 'active' })
+    const ratio = await pressed.evaluate((element) => {
+      element.getAnimations().forEach(animation => animation.finish())
+      const style = getComputedStyle(element)
+      const channels = (value: string) => {
+        const context = document.createElement('canvas').getContext('2d')!
+        context.fillStyle = value
+        context.fillRect(0, 0, 1, 1)
+        return [...context.getImageData(0, 0, 1, 1).data].slice(0, 3)
+      }
+      const luminance = (value: string) => {
+        const [r, g, b] = channels(value).map(channel => channel / 255).map(c => c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4)
+        return 0.2126 * r! + 0.7152 * g! + 0.0722 * b!
+      }
+      const [light, dark] = [luminance(style.color), luminance(style.backgroundColor)].sort((a, b) => b - a)
+      return (light! + 0.05) / (dark! + 0.05)
+    })
+    await page.emulateMedia({ forcedColors: 'none' })
+    expect.soft(ratio, `${id}: a hovered pressed item keeps 4.5:1 text under forced colors`).toBeGreaterThanOrEqual(4.5)
+  }
+  await parkPointer(page)
+  return findings
+}
+
 type BlockRun = {
   edition: (typeof editions)[number]; mode: (typeof modes)[number]; shots: string
   counts: Record<AuditCheck, number>; record: (id: string, list: Finding[]) => void
@@ -237,6 +289,8 @@ for (const [index, { family, edition, mode, transparency }] of configurations.en
           record(await measure(page, [section], section, id, counts))
           record(await markSurfaces(page, await runAxe(page, [`section[data-audit="${id}"]`])))
           counts.axe++
+          // Recorded under its own name, so a finding says the pressed item was hovered.
+          if (component === 'toolbar') findings.push(...(await auditPressedHover(page, section, id, mode, counts)).map(finding => ({ ...finding, component: `${id} (pressed item hovered)` })))
           const listed = overlays[component]
           const overlay = component === 'accordion' && !await section.locator('[aria-expanded="false"][aria-controls]').count()
             ? undefined
