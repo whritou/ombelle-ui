@@ -4,6 +4,12 @@ Entries are written for someone upgrading a project. From 1.0 each release group
 
 ## Unreleased
 
+## 1.1.1 — 26 November 2026
+
+A patch release: it fixes the 1.1.0 known issue (Toolbar) and a Native Select contrast defect. Nothing breaks.
+
+**Upgrade.** Run `ombelle update` with CLI 1.1.1 to refresh unedited Toolbar and Native Select files; an edited file conflicts and `--overwrite <path>` replaces it.
+
 **Installed source**
 
 - Toolbar keeps readable text when a pressed item is hovered. The hover background used to win over the pressed background and leave the pressed text colour on it (about 1.21:1 in flat and neo-brutalism dark mode); in the other families the hovered pressed item lost its pressed fill. A hovered pressed item now keeps `--accent-foreground` on a deeper accent (`--accent` mixed with 12% `--accent-foreground`), and under forced colours keeps `Highlight`. This changes `toolbar.css` in flat, liquid glass, minimalist, neo-brutalism, ombelle and papier projects; organic and retro-futurism already kept a readable pressed ring and are unchanged. `update` refreshes unedited files.

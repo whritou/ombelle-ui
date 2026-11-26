@@ -3,13 +3,13 @@
 How to publish `@ombelle-ui/cli`. It is a procedure, not a log: the dated record of past releases is
 [CLI release history](cli-release-history.md), and the evidence for each is in `docs/evidence/npm-<version>-<date>.md`.
 
-`pnpm pack:cli` generates `.artifacts/cli-release/ombelle-ui-cli-1.1.0.tgz` and a separate `release.json` containing its SHA-512 integrity, source commit, dirty-tree status, whether the version already exists on the registry, the file inventory and the bundled package inventory. The package contains bundled JavaScript, its manifest, README, MIT license and third-party notices. It has no workspace dependencies or installation scripts. Packing does not publish anything or enable public website commands.
+`pnpm pack:cli` generates `.artifacts/cli-release/ombelle-ui-cli-1.1.1.tgz` and a separate `release.json` containing its SHA-512 integrity, source commit, dirty-tree status, whether the version already exists on the registry, the file inventory and the bundled package inventory. The package contains bundled JavaScript, its manifest, README, MIT license and third-party notices. It has no workspace dependencies or installation scripts. Packing does not publish anything or enable public website commands.
 
-All six workspace packages use software version 1.1.0. This is the workspace version, not necessarily a published one: the version npm serves is `npm view @ombelle-ui/cli dist-tags`, and the version the website tells people to install is `publishedInstaller` in `apps/www/src/snapshots/install-command.ts`. They are updated by different commands (`version:set` and `version:set --published`) and are deliberately separate.
+All six workspace packages use software version 1.1.1. This is the workspace version, not necessarily a published one: the version npm serves is `npm view @ombelle-ui/cli dist-tags`, and the version the website tells people to install is `publishedInstaller` in `apps/www/src/snapshots/install-command.ts`. They are updated by different commands (`version:set` and `version:set --published`) and are deliberately separate.
 
 ## Version in this tree
 
-The workspace and the published installer are both 1.1.0 (26 November 2026, from `ab266f92`, published by `publish-cli.yml` with provenance). The next release bumps first with `pnpm version:set <next>`; every number is final once published, and `pnpm pack:cli -- --release` refuses a version the registry already has.
+The workspace is 1.1.1 (prepared 26 November 2026, not yet published). The published installer is 1.1.0 (26 November 2026, from `ab266f92`, published by `publish-cli.yml` with provenance). The next release bumps first with `pnpm version:set <next>`; every number is final once published, and `pnpm pack:cli -- --release` refuses a version the registry already has.
 
 ## Rules
 
