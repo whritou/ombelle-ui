@@ -48,7 +48,7 @@ describe('published installer commands', () => {
         name="Breadcrumb" result={null}
       />,
     )
-    expect(html).toContain('npx @ombelle-ui/cli@1.0.0 add --recipe')
+    expect(html).toContain('npx @ombelle-ui/cli@1.1.0 add --recipe')
     expect(html).toContain('Copy install command')
     expect(html).toContain('Download recipe JSON')
     expect(html).toContain('aria-label="Recipe JSON"')
@@ -62,7 +62,7 @@ describe('published installer commands', () => {
       <PublishedRecipe snapshot={recipeSnapshot(recipe)} origin="https://presets.example.test" name="Input" result={null} />,
     )
     expect(html).not.toContain('This recipe uses fonts and requires CLI 0.8.0')
-    expect(html).toContain('npx @ombelle-ui/cli@1.0.0 add --recipe')
+    expect(html).toContain('npx @ombelle-ui/cli@1.1.0 add --recipe')
     expect(html).toContain('Download recipe JSON')
   })
 
@@ -100,7 +100,7 @@ describe('published installer commands', () => {
         origin="https://presets.example.test" contrastWarning={false} frame={Promise.resolve({ kind: 'tokens' } as const)}
       />,
     )
-    expect(html).toContain('npx @ombelle-ui/cli@1.0.0')
+    expect(html).toContain('npx @ombelle-ui/cli@1.1.0')
     expect(html).toContain('Download preset JSON')
     expect(html).toContain('id="snapshot-json"')
   })
@@ -132,7 +132,7 @@ describe('published installer commands', () => {
     )
     expect(html).toContain('data-testid="preset-install-command"')
     expect(html).not.toContain('data-testid="preset-install-held"')
-    expect(html).toContain('1.0.0')
+    expect(html).toContain('1.1.0')
     expect(html).toContain(
       '<button type="button">Download preset JSON</button>',
     )
@@ -164,7 +164,7 @@ describe('published installer commands', () => {
       <PublishedPreset snapshot={snapshot} origin="https://presets.example.test" contrastWarning={false} frame={Promise.resolve({ kind: 'tokens' } as const)} />,
     )
     expect(html).not.toContain('requires CLI 0.7.8')
-    expect(html).toContain('npx @ombelle-ui/cli@1.0.0')
+    expect(html).toContain('npx @ombelle-ui/cli@1.1.0')
     expect(html).toContain('Download preset JSON')
   })
 
@@ -186,6 +186,6 @@ describe('published installer commands', () => {
     )
     expect(html).not.toContain('data-testid="preset-install-held"')
     expect(html).toContain('data-testid="preset-install-command"')
-    expect(html).toContain('1.0.0')
+    expect(html).toContain('1.1.0')
   })
 })
