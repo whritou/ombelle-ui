@@ -1,7 +1,7 @@
 import { createElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { afterEach, expect, it, vi } from 'vitest'
-import { previewFrameUrl } from './preview-url'
+import { blockStylesOrigin, previewFrameUrl } from './preview-url'
 import { PreviewFrame } from './components/preview-frame'
 import { PresetPreviewFrame } from '../preset-editor/components/preset-preview-frame'
 afterEach(() => vi.unstubAllEnvs())
@@ -24,4 +24,15 @@ it('keeps both hosted iframes opaque with scripts as their only sandbox privileg
     expect(html).toContain('sandbox="allow-scripts"')
     expect(html).not.toContain('allow-same-origin')
   }
+})
+it('lets a block preview take its stylesheets only from its own origin or a loopback dev site', () => {
+  // Hosted: the site frames the preview on its own origin, so the stylesheet path stays relative.
+  expect(blockStylesOrigin('https://ombelle.example/blocks/login-01', 'https://ombelle.example')).toBe('')
+  // Development: the site on one loopback port frames the preview app on another.
+  expect(blockStylesOrigin('http://127.0.0.1:3000/blocks/login-01', 'http://127.0.0.1:4173')).toBe('http://127.0.0.1:3000')
+  expect(blockStylesOrigin('http://[::1]:3000/', 'http://[::1]:4173')).toBe('http://[::1]:3000')
+  // Anything else falls back to the frame's own origin.
+  for (const referrer of ['https://evil.example/', 'http://localhost:3000/', 'http://127.0.0.1:3000/', '', 'not a url'])
+    expect(blockStylesOrigin(referrer, 'https://ombelle.example')).toBe('')
+  expect(blockStylesOrigin('https://evil.example/', 'http://127.0.0.1:4173')).toBe('')
 })

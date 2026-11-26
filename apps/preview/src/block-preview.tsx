@@ -7,6 +7,7 @@ import { blockFamilyFonts, blockGlassBackdrop, blockModules, loadGlassFilter } f
 import './glass-backdrop.css'
 import { GlassBackdropArt, setGlassBackdrop } from './glass-backdrop-art'
 import { loadPresetFonts } from './preset-fonts'
+import { blockStylesOrigin } from '../../www/src/editor/preview-url'
 
 // One block on its own page, for the website's block pages: /block-preview/?block=<id>&family=<family>#<light|dark>.
 // The block is the compiled file `add <block>` installs; its family's look is one stylesheet the website serves,
@@ -15,13 +16,8 @@ import { loadPresetFonts } from './preset-fonts'
 
 const modeOf = (): 'light' | 'dark' => (window.location.hash === '#dark' ? 'dark' : 'light')
 
-/** The website's origin, which serves the stylesheets: the page that framed this one, or this origin. */
-function siteOrigin(): string {
-  try {
-    if (document.referrer) return new URL(document.referrer).origin
-  } catch {}
-  return ''
-}
+/** The website's origin, which serves the stylesheets: '' (this origin) unless a loopback dev site framed this page. */
+const siteOrigin = () => blockStylesOrigin(document.referrer, window.location.origin)
 
 function BlockPage({ Block, Filter, family }: { Block: React.ComponentType; Filter: React.ComponentType | null; family: StyleFamily }) {
   const [mode, setMode] = React.useState(modeOf)

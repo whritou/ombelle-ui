@@ -19,7 +19,7 @@ it('writes one complete stylesheet per family and block', async () => {
     for (const id of supportedBlockIds) {
       const css = await read('public', family, 'blocks', `${id}.css`)
       // The block's own layout, the family's tokens in both modes, Tailwind's utilities, and no import a browser cannot load.
-      expect(css, `${family}/${id}`).toContain(`[data-block='${id}']`)
+      expect(css, `${family}/${id}`).toContain(`[data-block=${id}]`)
       expect(css).toMatch(/:root\s*\{[^}]*--primary:/)
       expect(css).toMatch(/\.dark\s*\{[^}]*--primary:/)
       expect(css).toContain('.bg-primary')

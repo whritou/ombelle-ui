@@ -13,8 +13,8 @@ export function blockFrameSrc(id: BlockId, family: StyleFamily, mode: 'light' | 
   return `${page}?block=${id}&family=${family}#${mode}`
 }
 
-/** The height a block page reports, within these bounds; it keeps room for the block's dialogs. */
-const minHeight = 560, maxHeight = 2400
+/** The height a block page reports, within these bounds: room for its dialogs, and far above the tallest block (dashboard-01 at 375 px, about 1540 px). */
+const minHeight = 560, maxHeight = 4000
 
 /**
  * A block rendered at a real viewport width in the sandboxed preview frame. The frame reports its content height,

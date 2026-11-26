@@ -323,7 +323,7 @@ export async function generateWwwBlockPreviews(out: BlockPreviewOut): Promise<vo
         ...blockManifest[id].components.flatMap((component) => files.get(`components/ui/${component}.css`) ?? []),
         files.get(`blocks/${id}.css`)!,
       ].join('\n')
-      const result = await postcss([tailwind({ base: out.preview, optimize: false })]).process(input, { from: path.join(out.preview, 'block.css') })
+      const result = await postcss([tailwind({ base: out.preview, optimize: { minify: true } })]).process(input, { from: path.join(out.preview, 'block.css') })
       await write(path.join(out.public, family, 'blocks', `${id}.css`), result.css)
     }
   }

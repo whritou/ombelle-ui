@@ -56,6 +56,19 @@ test.describe('a block page', () => {
     await expect.poll(width).toBeGreaterThan(768)
   })
 
+  test('sizes the frame to the whole block, even the dashboard at 375 px', async ({ page }) => {
+    await page.goto(`${site}/blocks/dashboard-01`)
+    const frame = page.locator('iframe[data-block-preview]')
+    const content = page.frameLocator('iframe[data-block-preview]').locator('main[data-block-preview-page]')
+    await expect(content.locator('[data-block="dashboard-01"]')).toBeVisible({ timeout: 60000 })
+    await expect(async () => {
+      await page.getByRole('group', { name: 'Preview width' }).getByRole('button', { name: /375/ }).click()
+      await expect.poll(() => frame.evaluate(element => Math.round(element.getBoundingClientRect().width)), { timeout: 1000 }).toBe(375)
+    }).toPass()
+    const tall = () => content.evaluate(element => Math.ceil(element.getBoundingClientRect().height))
+    await expect.poll(async () => (await frame.evaluate(element => element.clientHeight)) - (await tall())).toBeGreaterThanOrEqual(0)
+  })
+
   test('shows the block source in the Code tab', async ({ page }) => {
     await page.goto(`${site}/blocks/login-01`)
     await expect(async () => {

@@ -36,8 +36,8 @@ export function SiteHeader() {
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-5">
         <div className="flex items-center gap-3">
           <Logo />
-          {/* From 1024 px: between 768 and 1024 px the header needs its room for the links. */}
-          <span className="hidden rounded-full border border-border px-2 py-0.5 font-mono text-[10px] uppercase tracking-wider text-muted-foreground lg:inline">alpha</span>
+          {/* Hidden from 768 to 1023 px, where the inline navigation needs the room. */}
+          <span className="hidden rounded-full border border-border px-2 py-0.5 font-mono text-[10px] uppercase tracking-wider text-muted-foreground sm:inline md:hidden lg:inline">alpha</span>
         </div>
         {/* The breakpoint sits on a wrapper: the catalog stylesheet sets the menu's own display. */}
         <div className="hidden md:block">
