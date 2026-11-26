@@ -6,8 +6,8 @@ import { blockFamilyFonts, blockGlassBackdrop, blockModules, loadGlassFilter } f
 // The glass scenes are page backdrop: the kit gradient exists only in this stylesheet.
 import './glass-backdrop.css'
 import { GlassBackdropArt, setGlassBackdrop } from './glass-backdrop-art'
-import { loadPresetFonts } from './preset-fonts'
-import { blockStylesOrigin } from '../../www/src/editor/preview-url'
+import { loadPresetFonts } from './font-loaders'
+import { blockStylesOrigin } from '../../www/src/editor/block-styles-origin'
 
 // One block on its own page, for the website's block pages: /block-preview/?block=<id>&family=<family>#<light|dark>.
 // The block is the compiled file `add <block>` installs; its family's look is one stylesheet the website serves,
