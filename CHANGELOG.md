@@ -10,6 +10,8 @@ Blocks: composed sections you install with `ombelle add <block-id>`. Nothing bre
 
 **Upgrade.** Use CLI 1.1 or later in a project that has blocks. A 1.0 CLI keeps their lock records and files but cannot install, update or diff them, and its `doctor` warns about them.
 
+**Known issue.** Hovering a pressed Toolbar toggle in flat and neo-brutalism dark mode shows its text at about 1.21:1: the hover background wins over the pressed text colour. The specimen audit measures each section at rest, so it does not catch this; a fix would change installed Toolbar bytes and is tracked for the next release.
+
 **Installed source**
 
 - Add four blocks, composed sections built only from catalog components: `login-01`, `settings-01`, `pricing-01` and `dashboard-01` (exports `Login01`, `Settings01`, `Pricing01`, `Dashboard01`). Each follows the project preset in every family, both editions and both modes, and installs to `<components parent>/blocks/<id>.tsx` with a layout stylesheet `<id>.css` (by default `src/components/blocks/`). Example-only actions (sign-in, save, delete, plan choice, row menu) show an "Example only: ..." notice and contact nothing. See `docs/blocks/`.
