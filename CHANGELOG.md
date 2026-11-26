@@ -9,6 +9,12 @@ Entries are written for someone upgrading a project. From 1.0 each release group
 - Toolbar keeps readable text when a pressed item is hovered. The hover background used to win over the pressed background and leave the pressed text colour on it (about 1.21:1 in flat and neo-brutalism dark mode); in the other families the hovered pressed item lost its pressed fill. A hovered pressed item now keeps `--accent-foreground` on a deeper accent (`--accent` mixed with 12% `--accent-foreground`), and under forced colours keeps `Highlight`. This changes `toolbar.css` in flat, liquid glass, minimalist, neo-brutalism, ombelle and papier projects; organic and retro-futurism already kept a readable pressed ring and are unchanged. `update` refreshes unedited files.
 - Minimalist: the open list of a Native Select is readable in dark mode. The select is transparent, so the browser drew the list on its light-scheme white with the theme's light text (about 1.12:1 in Chromium); the options and optgroups of a single select now use `--popover` and `--popover-foreground`, as liquid glass already did. This changes `native-select.css` in minimalist projects only; the other families paint the list with their opaque field colour and are unchanged. `update` refreshes unedited files.
 
+**Website**
+
+- Add the `/blocks` gallery: one card per block with a live preview in the style family you pick, its description and the components it uses.
+- Add a page per block (`/blocks/login-01`, `/blocks/settings-01`, `/blocks/pricing-01`, `/blocks/dashboard-01`). The preview renders the compiled block in a sandboxed frame, with switchers for the style family, light or dark mode, and width (phone 375 px, tablet 768 px, desktop). Liquid glass is labelled "Accessibility not guaranteed". The Code tab shows the block's `.tsx` and `.css` with a Radix or Base UI edition switch. The page shows the install command for the published CLI (`@ombelle-ui/cli@1.1.0 add <id>`), the components the block installs and its example-only flows.
+- The header gains a Blocks link after Components. Between 768 and 1023 px the "alpha" badge is hidden to give the links room.
+
 ## 1.1.0 — 25 November 2026
 
 Blocks: composed sections you install with `ombelle add <block-id>`. Nothing breaks for a 1.0 project.

@@ -12,7 +12,7 @@ if (!origin) throw new Error('Usage: node scripts/measure-www-vitals.mjs <origin
 const out = process.argv[3]
 const runs = Number(process.argv[4] ?? 3)
 const routes = process.env.ROUTES ? process.env.ROUTES.split(',') : [
-  '/', '/components', '/components/button', '/editor/preset', '/editor/component/button',
+  '/', '/components', '/components/button', '/blocks', '/blocks/login-01', '/editor/preset', '/editor/component/button',
 ]
 const network = { offline: false, latency: 150, downloadThroughput: (1.6 * 1024 * 1024) / 8, uploadThroughput: (750 * 1024) / 8 }
 const channel = process.env.CHANNEL ?? 'msedge'

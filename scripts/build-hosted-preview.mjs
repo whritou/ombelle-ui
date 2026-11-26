@@ -30,7 +30,7 @@ try {
     build: { outDir: staging, emptyOutDir: true },
   })
   const html = await fs.readFile(path.join(staging, 'index.html'))
-  for (const kind of ['editor', 'preset']) {
+  for (const kind of ['editor', 'preset', 'block']) {
     const directory = path.join(staging, `${kind}-preview`)
     await fs.mkdir(directory)
     await fs.writeFile(path.join(directory, 'index.html'), html)

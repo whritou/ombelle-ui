@@ -9,6 +9,10 @@ if (previewPath === '/preset-preview/' || previewPath === '/preset-preview') {
 } else if (previewPath === '/editor-preview/' || previewPath === '/editor-preview') {
   const { mountEditorPreview } = await import('./editor-preview')
   mountEditorPreview(document.getElementById('root')!)
+} else if (previewPath === '/block-preview/' || previewPath === '/block-preview') {
+  // One block for the website's block pages: /block-preview/?block=<id>&family=<family>#<light|dark>
+  const { mountBlockPreview } = await import('./block-preview')
+  await mountBlockPreview(document.getElementById('root')!)
 } else if (previewPath === '/glass-scene/' || previewPath === '/glass-scene') {
   const { mountGlassScenePage } = await import('./glass-scene-page')
   mountGlassScenePage(document.getElementById('root')!)

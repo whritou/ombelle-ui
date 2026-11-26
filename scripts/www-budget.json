@@ -4,6 +4,8 @@
     "/docs": 270,
     "/components": 300,
     "/components/button": 330,
+    "/blocks": 270,
+    "/blocks/login-01": 280,
     "/editor/preset": 400,
     "/editor/component/button": 380,
     "/presets/[id]/[revision]": 270,

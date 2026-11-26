@@ -30,6 +30,15 @@ it('adds a skip link outside the header in the editors, shown only where the hea
   expect(inside).not.toContain('min-[1200px]:hidden')
 })
 
+it('links to the blocks after Components in the primary navigation', () => {
+  navigation.pathname = '/blocks/login-01'
+  const html = renderToStaticMarkup(<SiteHeader />)
+  const blocks = html.indexOf('href="/blocks"')
+  expect(blocks).toBeGreaterThan(html.indexOf('>Components<'))
+  expect(blocks).toBeLessThan(html.indexOf('href="/editor/preset"'))
+  expect(html).toMatch(/<a[^>]*href="\/blocks"[^>]*>Blocks<\/a>/)
+})
+
 it('makes the page main landmark the focusable skip-link target', () => {
   const html = renderToStaticMarkup(<DocPage eyebrow="E" title="T">body</DocPage>)
   expect(html).toMatch(/^<main id="main" tabindex="-1"/)

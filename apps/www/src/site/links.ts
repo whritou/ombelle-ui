@@ -6,6 +6,7 @@ export const primaryLinks = [
   { href: '/#get-started', label: 'Get started' },
   { href: '/docs', label: 'Docs' },
   { href: '/components', label: 'Components' },
+  { href: '/blocks', label: 'Blocks' },
   { href: '/editor/preset', label: 'Preset editor' },
   componentEditorLink,
 ] as const

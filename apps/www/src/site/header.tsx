@@ -17,7 +17,7 @@ const skipLinkClass = 'sr-only focus:not-sr-only focus:absolute focus:left-4 foc
 export function SiteHeader() {
   const pathname = usePathname()
   const current = (href: string) => {
-    const section = href === '/docs' || href === '/components' || href === componentEditorLink.href
+    const section = href === '/docs' || href === '/components' || href === '/blocks' || href === componentEditorLink.href
     return href === pathname || (section && pathname.startsWith(`${href}/`)) ? 'page' : undefined
   }
   // Pages that embed preview iframes scroll the header away: a pinned header
@@ -36,7 +36,8 @@ export function SiteHeader() {
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-5">
         <div className="flex items-center gap-3">
           <Logo />
-          <span className="hidden rounded-full border border-border px-2 py-0.5 font-mono text-[10px] uppercase tracking-wider text-muted-foreground sm:inline">alpha</span>
+          {/* Hidden from 768 to 1023 px, where the inline navigation needs the room. */}
+          <span className="hidden rounded-full border border-border px-2 py-0.5 font-mono text-[10px] uppercase tracking-wider text-muted-foreground sm:inline md:hidden lg:inline">alpha</span>
         </div>
         {/* The breakpoint sits on a wrapper: the catalog stylesheet sets the menu's own display. */}
         <div className="hidden md:block">
@@ -61,6 +62,7 @@ export function SiteHeader() {
                 ))}
               </NavigationMenuContent>
             </NavigationMenuItem>
+            <NavigationMenuItem><NavigationMenuLink href="/blocks" variant="trigger" active={current('/blocks') === 'page'}>Blocks</NavigationMenuLink></NavigationMenuItem>
             <NavigationMenuItem><NavigationMenuLink href="/editor/preset" variant="trigger" active={current('/editor/preset') === 'page'}>Preset editor</NavigationMenuLink></NavigationMenuItem>
             <NavigationMenuItem><NavigationMenuLink href={componentEditorLink.href} variant="trigger" active={current(componentEditorLink.href) === 'page'}>{componentEditorLink.label}</NavigationMenuLink></NavigationMenuItem>
             <NavigationMenuItem>
