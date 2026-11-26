@@ -3,7 +3,7 @@ import path from 'node:path'
 import { expect, test, type Locator, type Page } from '@playwright/test'
 import { familyAccessibilityCaveat, styleFamilies, supportedBlockIds, supportedComponentIds, type BlockId } from '../../packages/contracts/src/index.js'
 import {
-  checkFocusVisible, findClipping, findForcedColors, findOverflow, findSpacing, findTargetSize, installClock, listFocusables, markSurfaces, pauseClock, markBorders, runAxe,
+  checkFocusVisible, findClipping, findForcedColors, findOverflow, findSpacing, findTargetSize, installClock, listFocusables, markSurfaces, parkPointer, pauseClock, markBorders, runAxe,
   type AuditCheck, type Finding,
 } from '../helpers/specimen-audit.js'
 import { editions, modes, specimenArtifacts as artifacts, specimenRunIsPartial } from '../helpers/specimen-run.js'
@@ -100,6 +100,7 @@ async function auditBlocks(page: Page, blocks: BlockId[], run: BlockRun): Promis
       const label = `${id}@${width}`
       // Components' toasts were measured already; their fixed viewports must not cover the block.
       await setToasts('none')
+      await parkPointer(page)
       await section.scrollIntoViewIfNeeded()
       await expectBlockLayout(page, section, id, width)
       // Before the 1280px pass submits the form: later the Alert is in the region.
@@ -215,6 +216,8 @@ for (const [index, { family, edition, mode, transparency }] of configurations.en
           // Toasts are measured first and stay open; once done, their fixed viewports must not cover later overlays.
           if (component !== 'toast') await page.locator('[data-slot$="toast-viewport"]').evaluateAll(list => list.forEach(element => { (element as HTMLElement).style.display = 'none' }))
           try {
+          // Every section is measured at rest: an earlier section's click must not leave the pointer over this one.
+          await parkPointer(page)
           await section.scrollIntoViewIfNeeded()
           // Radix Toast is open from the start; a closed toast would leave nothing to measure.
           if (component === 'toast' && edition === 'radix') {

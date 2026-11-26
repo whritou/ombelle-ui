@@ -398,6 +398,14 @@ export async function withFrozenClock<T>(page: Page, measure: () => Promise<T>):
   try { return await measure() } finally { await page.clock.resume() }
 }
 
+/**
+ * Move the pointer off the page. A click leaves it where it was; a later scroll can then slide a control under it,
+ * and that control is measured hovered instead of at rest (a pressed Toolbar item took its hover background).
+ */
+export async function parkPointer(page: Page): Promise<void> {
+  await page.mouse.move(-1, -1)
+}
+
 /** Pause page time about a second from now (pauseAt cannot target the past); resume with page.clock.resume(). */
 export async function pauseClock(page: Page): Promise<void> {
   await page.clock.pauseAt(new Date(await page.evaluate(() => Date.now()) + 1000))
