@@ -39,7 +39,7 @@ export function EmailField() {
 Input has no stylesheet of its own: its rules are in the family stylesheet, `styles/ui-style.css`, beside Button and Dialog. Each family draws the field its own way:
 
 - **Flat**: a filled field in `--muted` with a 2px `--input` bottom line and top corners rounded; focus fills it with `--card` inside a 2px ring.
-- **Minimalist**: an underlined field on a transparent background, with no side or top border; focus thickens the underline to 2px in `--ring`.
+- **Minimalist**: an underlined field on a transparent background, with no side or top border; focus thickens the underline to a 3px `--ring` rule (a 2px border and a 1px inset line), so a narrow field still changes over at least its 1px perimeter.
 - **Neo-brutalism**: a `--card` field with the preset border and offset shadow and semibold text; focus tints it with `--primary` under a 3px dashed outline.
 - **Ombelle**: a `--card` field with the preset border and an inset top shade; focus draws the ring outline and an offset shadow in `--ring`.
 - **Papier**: a ruled `--card` field with an inset bottom line; the border turns `--primary` on hover, and focus draws a 2px ring.

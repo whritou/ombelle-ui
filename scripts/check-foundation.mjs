@@ -36,8 +36,10 @@ const shard = specimenShard ?? consumerShard
 if (shard) report.shard = shard
 try {
   // The gate has registry access, so tests/integration/blocks-older-cli.test.ts runs against the published 1.0 CLI
-  // instead of skipping (the gate fails on skipped assertions).
-  const env = { ...process.env, NEXT_TELEMETRY_DISABLED: '1', OMBELLE_REGISTRY_TESTS: '1' }
+  // instead of skipping (the gate fails on skipped assertions). Set it on this process too: evidence validation
+  // lists the expected tests with `vitest list`, which must collect that file's tests as the measured run did.
+  process.env.OMBELLE_REGISTRY_TESTS = '1'
+  const env = { ...process.env, NEXT_TELEMETRY_DISABLED: '1' }
   delete env.NO_COLOR
   // Only clear owned result files. Consumer roots remain owned by their preparation
   // lifecycle. A successful group must produce fresh evidence during this run.

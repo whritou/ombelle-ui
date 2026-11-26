@@ -9,6 +9,7 @@ import { advisoryBaseline, aggregateFoundationEvidence, foundationSteps, specime
 // @ts-expect-error JavaScript gate entry point
 import { consumerShardFiles } from '../../scripts/consumer-shards.mjs'
 import { consumerFixture, presetMeasurements, recipeMeasurements, minimalistMeasurements } from '../helpers/foundation-evidence-fixture.js'
+import { combineSpecimenHalves } from '../helpers/specimen-run.js'
 
 const roots: string[] = []
 const commit = 'a'.repeat(40)
@@ -157,6 +158,29 @@ test.each([
   const audit = specimenAudit()
   mutate(audit)
   expect(() => validateSpecimenAudit(audit)).toThrow('Incomplete specimen audit')
+})
+/** One configuration as its two audit tests write it: the components half and the blocks half. */
+function halves(row: any) {
+  const components: Record<string, number> = { overflow: 30, clipping: 30, spacing: 30, 'focus-visible': 30, 'target-size': 30, 'forced-colors': row.mode === 'light' ? 25 : 0, axe: 30 }
+  const blocks = Object.fromEntries(Object.entries(row.checks as Record<string, number>).map(([check, count]) => [check, count - components[check]!]))
+  const base = { runId: 'r', family: row.family, edition: row.edition, mode: row.mode, ...(row.transparency ? { transparency: row.transparency } : {}), failures: 0, browser: {} }
+  return [
+    { ...base, half: 'components' as const, specimens: row.specimens, blocks: 0, sections: 100, checks: components, contrastAdvisoryFindings: 0 },
+    { ...base, half: 'blocks' as const, specimens: 0, blocks: row.blocks, sections: row.blocks, checks: blocks, contrastAdvisoryFindings: 0 },
+  ]
+}
+test('merges each configuration\'s components and blocks halves into the row the gate validates', () => {
+  const audit = specimenAudit()
+  const merged = combineSpecimenHalves(audit.configurations.flatMap(halves))
+  expect(merged.map(({ family, edition, mode, transparency, specimens, blocks, checks, contrastAdvisoryFindings }) =>
+    ({ family, edition, mode, ...(transparency ? { transparency } : {}), specimens, blocks, checks, contrastAdvisoryFindings }))).toEqual(audit.configurations)
+  expect(validateSpecimenAudit({ ...audit, configurations: merged })).toEqual({ configurations: 36, specimens: 36 * supportedComponentIds.length })
+})
+test.each(['components', 'blocks'])('rejects a configuration whose %s half is missing', (missing) => {
+  const audit = specimenAudit()
+  const parts = audit.configurations.flatMap(halves)
+  parts.splice(parts.findIndex(part => part.half === missing), 1)
+  expect(() => validateSpecimenAudit({ ...audit, configurations: combineSpecimenHalves(parts) })).toThrow('Incomplete specimen audit')
 })
 
 test('accepts complete browser evidence including edition parity and glass backdrops', () => {
