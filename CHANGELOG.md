@@ -14,6 +14,7 @@ Blocks: composed sections you install with `ombelle add <block-id>`. Nothing bre
 
 - Add four blocks, composed sections built only from catalog components: `login-01`, `settings-01`, `pricing-01` and `dashboard-01` (exports `Login01`, `Settings01`, `Pricing01`, `Dashboard01`). Each follows the project preset in every family, both editions and both modes, and installs to `<components parent>/blocks/<id>.tsx` with a layout stylesheet `<id>.css` (by default `src/components/blocks/`). Example-only actions (sign-in, save, delete, plan choice, row menu) show an "Example only: ..." notice and contact nothing. See `docs/blocks/`.
 - Block bytes are installed bytes: they may change in a minor release, and `update` refreshes unedited block files.
+- Minimalist: Input focus is now a 3px `--ring` rule (the 2px underline plus a 1px inset line), so the focus indicator meets the audit at narrow widths such as a block at 320px. This changes `styles/ui-style.css` in minimalist projects; `update` refreshes unedited files.
 
 **CLI**
 
