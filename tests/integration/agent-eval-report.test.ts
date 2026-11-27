@@ -7,6 +7,7 @@ import {
   agentInvocation,
   aggregateRuns,
   hasResultEvent,
+  parseTimeoutMs,
   skillFolders,
   diffTrees,
   lockIdsFromLock,
@@ -125,5 +126,13 @@ describe('skillFolders', () => {
     } finally {
       await fs.rm(dir, { recursive: true, force: true })
     }
+  })
+})
+
+describe('parseTimeoutMs', () => {
+  it('uses a positive finite number and otherwise the 15 minute default', () => {
+    expect(parseTimeoutMs('5000')).toBe(5000)
+    for (const bad of [undefined, '', 'abc', '0', '-5', 'Infinity', 'NaN'])
+      expect(parseTimeoutMs(bad)).toBe(15 * 60 * 1000)
   })
 })

@@ -16,7 +16,7 @@
  *   --allowedTools Bash,Read,Write,Edit,Glob,Grep,WebSearch,WebFetch
  *   --max-turns 40
  */
-import { spawn } from 'node:child_process'
+import { spawn, type ChildProcess } from 'node:child_process'
 import { createHash } from 'node:crypto'
 import fs from 'node:fs/promises'
 import path from 'node:path'
@@ -93,6 +93,20 @@ type Captured = { code: number | null; stdout: string; stderrTail: string; timed
 
 const STDERR_TAIL = 4096
 
+export const DEFAULT_TIMEOUT_MS = 15 * 60 * 1000
+
+export function parseTimeoutMs(value: string | undefined): number {
+  const n = Number(value)
+  return value !== undefined && value.trim() !== '' && Number.isFinite(n) && n > 0 ? n : DEFAULT_TIMEOUT_MS
+}
+
+/** Under a Windows shell, child.kill() only ends cmd.exe; kill the whole tree. */
+function killTree(child: ChildProcess, shell: boolean): void {
+  if (process.platform === 'win32' && shell && child.pid !== undefined)
+    spawn('taskkill', ['/pid', String(child.pid), '/T', '/F'], { windowsHide: true }).on('error', () => undefined)
+  else child.kill('SIGKILL')
+}
+
 /** Spawns without a shell unless told; drains both streams, keeps a bounded stderr tail, resolves on `close`. */
 function capture(
   executable: string,
@@ -110,8 +124,10 @@ function capture(
         ? undefined
         : setTimeout(() => {
             timedOut = true
-            child.kill()
+            killTree(child, options.shell ?? false)
           }, options.timeoutMs)
+    child.stdout.setEncoding('utf8')
+    child.stderr.setEncoding('utf8')
     child.stdout.on('data', (s) => (stdout += s))
     child.stderr.on('data', (s) => (stderrTail = (stderrTail + s).slice(-STDERR_TAIL)))
     child.on('error', (error) => {
@@ -265,7 +281,7 @@ async function main(argv: string[]): Promise<number> {
   if (tasks.length === 0) throw new Error(`Unknown task "${args.task}"`)
   const executable = process.env.OMBELLE_AGENT_EVAL_CLAUDE ?? 'claude'
   const model = process.env.OMBELLE_AGENT_EVAL_MODEL ?? 'claude-opus-5-5'
-  const timeoutMs = Number(process.env.OMBELLE_AGENT_EVAL_TIMEOUT_MS ?? 15 * 60 * 1000)
+  const timeoutMs = parseTimeoutMs(process.env.OMBELLE_AGENT_EVAL_TIMEOUT_MS)
   await preflight(executable)
   const results: EvalResult['tasks'] = []
   for (const task of tasks) {
