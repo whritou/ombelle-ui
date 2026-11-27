@@ -39,6 +39,24 @@ Response headers:
 `HEAD` returns the same headers with no body. `OPTIONS` answers `204` with `Allow` and `Cache-Control: no-store`; it does
 not enable CORS. Other methods answer `405` with `Allow`.
 
+## Read: `GET /api/v1/catalog`
+
+Returns the agent catalog as JSON (`application/json; charset=utf-8`): the catalog every coding agent reads before it
+installs anything. The response is static and built with the site.
+CORS headers are added in a later change.
+
+| Field | Meaning |
+| --- | --- |
+| `catalogVersion` | `1` |
+| `cliPackage`, `cliVersion`, `installCommand` | The published installer, for example `npx @ombelle-ui/cli@<version>` |
+| `docs` | Absolute URLs of `llms.txt`, `llms-full.txt` and the agents guide |
+| `skills.install` | The command that installs the Ombelle agent skill |
+| `families` | Each offered style family with its `accessibilityCaveat` (`null` unless the family carries one, as liquid glass does) |
+| `components`, `blocks` | One entry per item: `id`, `kind`, `name`, `description`, `installable`, `minimumCli` (when set), `glass`, `docs.html` and `docs.markdown`; components add `category`, blocks add `components` and `exampleOnly` |
+
+`installable` is `false` when the published installer is older than the item's `minimumCli` (blocks need 1.1.0).
+This is not a shadcn registry: there are no registry item routes.
+
 ## Errors
 
 Every error is JSON with `Cache-Control: no-store`:
