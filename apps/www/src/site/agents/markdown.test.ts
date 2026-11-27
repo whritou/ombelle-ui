@@ -47,6 +47,16 @@ describe('markdown pages for agents', () => {
     expect(text).toContain('/llms.txt')
   })
 
+  it('keeps the lines of a guide code block', () => {
+    const text = guideMarkdown('getting-started')
+    expect(text).toContain('```tsx\nimport { Button }')
+    expect(text).toMatch(/import \{ Button \}[^\n]*\n\nexport function SaveAction/)
+  })
+
+  it('renders definition lists as bullets', () => {
+    expect(guideMarkdown('style-families')).toMatch(/^- \*\*[^*\n]+\*\*: \S/m)
+  })
+
   it.each(documentationGuides.map((guide) => guide.slug))('renders the %s guide', (slug) => {
     const text = guideMarkdown(slug)
     expect(text.startsWith('# ')).toBe(true)

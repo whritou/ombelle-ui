@@ -127,15 +127,13 @@ function toHtml(node: ReactNode): string {
   const element = node as ReactElement<Record<string, unknown> & { children?: ReactNode }>
   const { type, props } = element
   if (type === Fragment) return toHtml(props.children)
-  if (type === CodeBlockCommand) return `<div data-md="command">${escapeHtml(String(props.args))}</div>`
-  if (type === CodeBlock) return `<div data-md="code" data-title="${escapeHtml(String(props.title ?? ''))}">${escapeHtml(String(props.code))}</div>`
+  if (type === CodeBlockCommand) return `<pre data-md="command">${escapeHtml(String(props.args))}</pre>`
+  if (type === CodeBlock) return `<pre data-md="code" data-title="${escapeHtml(String(props.title ?? ''))}">${escapeHtml(String(props.code))}</pre>`
   if (typeof type === 'function') return toHtml((type as (props: unknown) => ReactNode)(props))
   if (typeof type !== 'string') throw new Error('Unsupported element in a guide.')
   const href = typeof props.href === 'string' ? ` href="${escapeHtml(props.href)}"` : ''
   return voidTags.has(type) ? `<${type}${href}>` : `<${type}${href}>${toHtml(props.children)}</${type}>`
 }
-
-const runnerPrefix = /^(?:pnpm dlx|npx|yarn dlx(?: --quiet)?|bunx)s+/
 
 function turndown(): TurndownService {
   const service = new TurndownService({ headingStyle: 'atx', codeBlockStyle: 'fenced', bulletListMarker: '-', emDelimiter: '*' })
@@ -145,7 +143,7 @@ function turndown(): TurndownService {
     filter: (node) => marker(node, 'command'),
     replacement: (_content, node) => `
 
-${fence(`npx ${(node.textContent ?? '').trim().replace(runnerPrefix, '')}`, 'sh')}
+${fence(`npx ${(node.textContent ?? '').trim()}`, 'sh')}
 
 `,
   })
@@ -160,6 +158,10 @@ ${fence(node.textContent ?? '', /.tsx$/.test(title) ? 'tsx' : '')}
 `
     },
   })
+  // Definition lists become bullets: the term in bold, then its definition.
+  service.addRule('definitionTerm', { filter: 'dt', replacement: (content) => `\n- **${content.trim()}**: ` })
+  service.addRule('definitionDetail', { filter: 'dd', replacement: (content) => `${content.trim()}\n` })
+  service.addRule('definitionList', { filter: 'dl', replacement: (content) => `\n\n${content.trim()}\n\n` })
   return service
 }
 
