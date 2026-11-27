@@ -2,6 +2,17 @@
 
 This is the dated record of every `@ombelle-ui/cli` release: what changed, what the website gates on, and what was verified after publication. It is append-only history. Statements about a "current" or "published" installer inside an entry describe that release's day, not today. The procedure for making a release is [cli-release.md](cli-release.md), and the version npm serves is `npm view @ombelle-ui/cli dist-tags`.
 
+The 1.1.2 release is a patch that changes installed source only, in the `pricing-01` block (`blocks/pricing-01.tsx`
+and `blocks/pricing-01.css`, both editions): plans side by side line up, with every "Choose" button at the bottom of
+its card at one height, and the Recommended badge keeps a gap and a space after the plan name. No command, flag,
+`--json` field, lock field or schema changes; `ombelle update` refreshes an unedited `pricing-01`.
+`@ombelle-ui/cli@1.1.2` was published on 2026-11-27 from `3783953a`, where Foundation run 45916687455 passed, and is
+the `latest` tag, through `publish-cli.yml` with npm trusted publishing and a provenance attestation (run
+45968367691). No install command on the website needs a newer installer (`installRules` is empty). Published first,
+then `pnpm version:set --published 1.1.2` (and `--check --published`) and deploy from `main`. The registry tarball,
+its integrity, a fresh registry install and a production dry-run `init` were verified after publication. See
+[release evidence](evidence/npm-1.1.2-2026-11-27.md).
+
 The 1.1.1 release is a patch that changes installed source only. Toolbar keeps readable text when a pressed item is
 hovered, which fixes the 1.1.0 known issue (`toolbar.css` in flat, liquid glass, minimalist, neo-brutalism, ombelle
 and papier), and the minimalist Native Select option list is readable in dark mode (`native-select.css` in minimalist).

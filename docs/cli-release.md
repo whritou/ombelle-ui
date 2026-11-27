@@ -9,7 +9,7 @@ All six workspace packages use software version 1.1.2. This is the workspace ver
 
 ## Version in this tree
 
-The workspace is 1.1.2 (prepared 27 November 2026, not yet published). The published installer is 1.1.1 (26 November 2026, from `c68d5618`, published by `publish-cli.yml` with provenance). The next release bumps first with `pnpm version:set <next>`; every number is final once published, and `pnpm pack:cli -- --release` refuses a version the registry already has.
+The workspace and the published installer are both 1.1.2 (published 27 November 2026, from `3783953a`, by `publish-cli.yml` with provenance). The next release bumps first with `pnpm version:set <next>`; every number is final once published, and `pnpm pack:cli -- --release` refuses a version the registry already has.
 
 ## Rules
 
