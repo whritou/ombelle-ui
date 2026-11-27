@@ -24,6 +24,14 @@ export function securityHeaders(previewOrigin?: string): { key: string; value: s
   ]
 }
 
+/** The agent-facing files: any origin may read them. Sources match the rewrites in next.config.ts. */
+const agentFileSources = [
+  '/llms.txt',
+  '/llms-full.txt',
+  '/api/v1/catalog',
+  ...['components', 'blocks', 'docs'].map((kind) => `/${kind}/:id([a-z0-9-]+)\\.md`),
+]
+
 /** Every `headers()` rule of the site: security headers everywhere, the preview's sandbox access, and the schemas'. */
 export function headerRules(previewOrigin?: string): { source: string; headers: { key: string; value: string }[] }[] {
   return [{
@@ -50,5 +58,8 @@ export function headerRules(previewOrigin?: string): { source: string; headers: 
     // A later rule's header replaces an earlier one's.
     source: '/schemas/:name([a-z0-9-]+\\.schema\\.json)',
     headers: [{ key: 'Cache-Control', value: 'public, max-age=3600, must-revalidate' }],
-  }]
+  }, ...agentFileSources.map((source) => ({
+    source,
+    headers: [{ key: 'Access-Control-Allow-Origin', value: '*' }],
+  }))]
 }

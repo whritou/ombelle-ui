@@ -43,7 +43,7 @@ not enable CORS. Other methods answer `405` with `Allow`.
 
 Returns the agent catalog as JSON (`application/json; charset=utf-8`): the catalog every coding agent reads before it
 installs anything. The response is static and built with the site.
-CORS headers are added in a later change.
+The response carries `Access-Control-Allow-Origin: *` (as do `/llms.txt`, `/llms-full.txt` and the `.md` pages), so any origin may read it.
 
 | Field | Meaning |
 | --- | --- |
