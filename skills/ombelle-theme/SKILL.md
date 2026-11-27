@@ -5,7 +5,7 @@ description: Use when the user asks to change, switch or apply an Ombelle theme 
 
 # Change an Ombelle theme or preset
 
-Presets set colours, tokens, fonts and the style family. Follow the install loop from the `ombelle-install` skill: `--dry-run --json`, show the plan, `--yes` only when no warning has `resolutions`, stop and ask on `FILE_CONFLICT`, finish with `doctor --json`.
+Presets set colours, tokens, fonts and the style family. Follow the install loop from the `ombelle-install` skill: `--dry-run --json`, show the plan, `--yes` only when `status` is `planned` and no warning has `resolutions`, stop and ask on `FILE_CONFLICT`, finish with `doctor --json`.
 
 ## Get the CLI version
 
@@ -43,10 +43,10 @@ npx @ombelle-ui/cli@<version> theme add <code> --dry-run --json
 npx @ombelle-ui/cli@<version> preset apply <preset> --dry-run --json
 ```
 
-After the developer accepts the plan, apply it:
+After the developer accepts the plan, apply exactly what was dry-run (same operand and options) with `--yes`:
 
 ```bash
-npx @ombelle-ui/cli@<version> preset apply <code> --yes
+npx @ombelle-ui/cli@<version> preset apply <preset> --yes
 ```
 
 A component-only preset for one Button:

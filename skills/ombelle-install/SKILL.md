@@ -17,9 +17,10 @@ Agents have no TTY, so every write needs `--yes`, but only after a dry run.
 
 1. Run the writing command with `--dry-run --json`. It writes nothing.
 2. Show the developer the planned changes: `changes[].path` with its `action`, `dependencyPlan`, `notices`.
-3. If `warnings` is empty of entries with `resolutions`, rerun the same command with `--yes` in place of `--dry-run`.
-4. If a warning has `resolutions` (or the code is `FILE_CONFLICT`), stop and ask the developer. Never choose `--overwrite` or `--beside` yourself.
-5. Finish with `doctor --json` and report its `checks`.
+3. Rerun the same command with `--yes` in place of `--dry-run` only when the record's `status` is `planned`, the exit code is 0 and no entry in `warnings` has `resolutions`.
+4. On `status: "conflict"` (exit 4), or any warning with `resolutions`, stop and ask the developer. Never choose `--overwrite` or `--beside` yourself.
+5. On `status: "error"`, read `error.code`, `error.message` and `error.nextAction` and follow the code table below. Codes appear in `error.code` for errors and in `warnings[].code` for plan diagnostics.
+6. Finish with `doctor --json` and report its `checks`.
 
 `--yes` never bypasses a conflict, a schema error or an unsupported project.
 
@@ -31,7 +32,7 @@ Lead with a preset code (`ps_…@1`) the developer gives you:
 npx @ombelle-ui/cli@<version> init --preset <code> --dry-run --json
 ```
 
-A preset JSON file works too (a path starting with `./` or a full path):
+A preset JSON file works too (prefix a local preset path with `./`):
 
 ```bash
 npx @ombelle-ui/cli@<version> init --preset <preset> --dry-run --json
@@ -65,7 +66,7 @@ npx @ombelle-ui/cli@<version> doctor --json
 
 ## Conflicts
 
-A plan that would replace a file the developer owns reports `FILE_CONFLICT` and writes nothing. Show the paths and explain the two ways forward, then wait for the developer's choice:
+A plan that would replace a file the developer owns reports `FILE_CONFLICT` and writes nothing. Show the paths and offer only the options listed in that warning's `resolutions` (a managed file edited after install has `["overwrite"]` only, and `--beside` fails there), then wait for the developer's choice:
 
 - `--beside <path>` keeps their component file and installs Ombelle's under `<components>/ombelle/` (component files only, not blocks or shared files).
 - `--overwrite <path>` replaces the file with the catalog source.
@@ -90,8 +91,8 @@ npx @ombelle-ui/cli@<version> add <component> --overwrite <path> --dry-run --jso
 | `FILE_CONFLICT` | 4 | Stop and ask; offer `--beside` (component files) or `--overwrite`. |
 | `UNSUPPORTED_PROJECT` | 3 | Explain the message and its next action; do not work around it. |
 | `UNSUPPORTED_RELEASE` | 3 | Explain it; the document or config needs a newer CLI. Rerun with the current `<version>`; otherwise stop. |
-| `RESOLUTION_FAILURE` | 5 | A preset code could not be resolved. Check the code with the developer; do not retry guesses. |
-| `DEPENDENCY_FAILURE` | 6 | Report the package manager's reason. The CLI rolled the files back; say so. |
+| `RESOLUTION_FAILURE` | 5 | A preset code could not be resolved: a network, service or integrity failure, or a bad or withdrawn code. Check the code and connection with the developer; do not retry guesses. |
+| `DEPENDENCY_FAILURE` | 6 | Report the package manager's reason. Source files were rolled back; relay `error.recovery.packageStateMayHaveChanged`, since `node_modules` or the lockfile may have changed. |
 | `UNKNOWN_COMPONENT` | 2 | The id is not in the catalog; use the closest suggestion or `ombelle-choose`. |
 | `INVALID_DATA` | 2 | A flag or input was wrong; fix the command, not the project. |
 

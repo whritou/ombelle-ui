@@ -47,7 +47,7 @@ Preview first; the plan lists what refreshes:
 npx @ombelle-ui/cli@<version> update --dry-run --json
 ```
 
-Then follow the loop: show the plan, run again with `--yes` only if no warning has `resolutions`. An edited file conflicts (`FILE_CONFLICT`): stop and ask. If the developer decides to replace it, they choose the path and you run `update <component> --overwrite <path>` (dry run first). Never pick `--overwrite` yourself. Finish with `doctor --json`.
+Then follow the loop: show the plan, run again with `--yes` only if `status` is `planned`, the exit code is 0 and no warning has `resolutions`. An edited file conflicts (`FILE_CONFLICT`): stop and ask. If the developer decides to replace it, they choose the path and you run `update <component> --overwrite <path>` (dry run first). Never pick `--overwrite` yourself. Finish with `doctor --json`.
 
 ## Saved preset
 

@@ -13,7 +13,7 @@ Read `cliVersion` from `https://ombelle-ui.vercel.app/api/v1/catalog` and confir
 
 ## Install loop
 
-Same loop as `ombelle-install`: dry run with `--json`, show the plan, `--yes` only when no warning has `resolutions`, stop and ask on `FILE_CONFLICT`, finish with `doctor --json`.
+Same loop as `ombelle-install`: dry run with `--json`, show the plan, `--yes` only when `status` is `planned`, the exit code is 0 and no warning has `resolutions`, stop and ask on `status: "conflict"` or `FILE_CONFLICT`, finish with `doctor --json`.
 
 ```bash
 npx @ombelle-ui/cli@<version> add <block> --dry-run --json
@@ -31,12 +31,14 @@ A block writes `blocks/<id>.tsx` and `<id>.css` next to the components directory
 
 ## Wire it in
 
+Blocks take no props. Each block file exports one component with no props (`Login01`, `Settings01`, `Pricing01`, `Dashboard01`), installed at `@/components/blocks/<block>` by default.
+
 1. Read the installed block file and the block's `docs.markdown` from the catalog before changing anything.
-2. Render the block from the page or route the developer named, importing it through the project alias.
-3. Keep the block's own files as installed. Change copy, links and props at the call site, or tell the developer that editing the file means a later `update` will report it as edited.
+2. Render the component from the page or route the developer named, importing it from the block file.
+3. Copy, links and the example handlers (such as `exampleData` and `showExampleNotice`) live in the block file and are meant to be edited there. Tell the developer that editing it makes the file `edited`, so a later `update` reports `FILE_CONFLICT` for it until they choose `--overwrite <path>` or keep their version.
 
 ## Auth and data are example-only
 
-Every block's sign-in, form handling and data (plans, accounts, metrics) are examples. They do not authenticate, store or fetch anything. Keep them marked as example in code and comments, and never present them as working. When the developer connects real auth or data, replace the example parts in their own code and say what was replaced. Do not add fake credentials, tokens or endpoints, and do not remove the example marking before the real implementation exists.
+The catalog entry's `exampleOnly` list names the parts that are examples (sign-in, form handling, plans, accounts, metrics). Keep them marked as examples until they are replaced with real code. They do not authenticate, store or fetch anything. Keep them marked as example in code and comments, and never present them as working. When the developer connects real auth or data, replace the example parts in their own code and say what was replaced. Do not add fake credentials, tokens or endpoints, and do not remove the example marking before the real implementation exists.
 
 Liquid glass in a block's preset: say `Accessibility not guaranteed`.

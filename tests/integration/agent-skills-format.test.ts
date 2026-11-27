@@ -4,7 +4,7 @@ import path from 'node:path'
 
 const skillsDir = path.resolve('skills')
 const skillNames = ['ombelle-install', 'ombelle-choose', 'ombelle-theme', 'ombelle-blocks', 'ombelle-check']
-const dryRunExempt = new Set(['ombelle-choose', 'ombelle-check'])
+const dryRunExempt = new Set(['ombelle-choose'])
 
 function frontmatter(source: string) {
   const match = /^---\r?\n([\s\S]*?)\r?\n---\r?\n/.exec(source)
@@ -47,9 +47,10 @@ describe('agent skills', () => {
         expect(source).toContain('https://ombelle-ui.vercel.app/docs/getting-started')
       })
 
-      it(dryRunExempt.has(name) ? 'is read-only' : 'plans with --dry-run', async () => {
+      it(dryRunExempt.has(name) ? 'has no writing command' : 'plans with --dry-run', async () => {
         const source = await fs.readFile(file, 'utf8')
-        if (!dryRunExempt.has(name)) expect(source).toContain('--dry-run')
+        if (!dryRunExempt.has(name)) return expect(source).toContain('--dry-run')
+        expect(source).not.toMatch(/--yes|```/)
       })
     })
   }
