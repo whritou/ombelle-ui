@@ -144,7 +144,88 @@ describe('commandsFromStreamJson', () => {
     ]
     expect(commandsFromStreamJson(lines)).toEqual([
       { command: 'npx @ombelle-ui/cli@1.1.2 doctor --json', exitCode: 2 },
-      { command: 'ls' },
+      { command: 'ls', exitCode: 0 },
     ])
+  })
+})
+
+describe('segment-aware scoring', () => {
+  const run = (commands: string[]) =>
+    scoreRun(commands.map((command) => ({ command })), ok, { lockIds: ['button'] })
+  const pass = (s: ReturnType<typeof scoreRun>, id: string) => s.checks.find((c) => c.id === id)?.passed
+
+  it('ignores shadcn mentioned in non-invocation text', () => {
+    const s = run([
+      'grep shadcn components.json',
+      'echo "no shadcn"',
+      `${CLI} add button --dry-run --json`,
+      'npm view @ombelle-ui/cli@1.1.2',
+    ])
+    expect(pass(s, 'published-cli')).toBe(true)
+  })
+
+  it('does not count npm view as a CLI run', () => {
+    expect(pass(run(['npm view @ombelle-ui/cli@1.1.2']), 'published-cli')).toBe(false)
+  })
+
+  it.each([
+    'npx shadcn@latest add button',
+    'pnpm dlx shadcn@latest add button',
+    'yarn dlx --quiet shadcn add button',
+    'bunx --bun shadcn@latest add button',
+    'npm exec -- shadcn add button',
+    'cd app && npx -y shadcn@latest add button',
+  ])('fails published-cli for %s', (cmd) => {
+    expect(pass(run([`${CLI} add button --dry-run`, cmd]), 'published-cli')).toBe(false)
+  })
+
+  it('recognises other runners for the published CLI', () => {
+    for (const c of [
+      'pnpm dlx @ombelle-ui/cli@1.1.2 doctor --json',
+      'yarn dlx @ombelle-ui/cli@1.1.2 doctor --json',
+      'bunx @ombelle-ui/cli@1.1.2 doctor --json',
+      'npm exec @ombelle-ui/cli@1.1.2 -- doctor --json',
+    ]) expect(pass(run([c]), 'published-cli')).toBe(true)
+  })
+
+  it('does not treat echo --overwrite as a resolution', () => {
+    const s = run([`${CLI} add button --dry-run`, 'echo --overwrite --beside'])
+    expect(pass(s, 'no-unasked-resolution')).toBe(true)
+  })
+
+  it('still flags a chained --overwrite on a CLI segment', () => {
+    const s = run([`cd app && ${CLI} add button --yes --overwrite src/x.tsx`])
+    expect(pass(s, 'no-unasked-resolution')).toBe(false)
+  })
+
+  it('passes dry-run-first for a chained dry-run then yes', () => {
+    const s = run([`${CLI} add button --dry-run && ${CLI} add button --yes`])
+    expect(pass(s, 'dry-run-first')).toBe(true)
+  })
+
+  it('fails dry-run-first for a chained yes then dry-run', () => {
+    const s = run([`${CLI} add button --yes && ${CLI} add button --dry-run`])
+    expect(pass(s, 'dry-run-first')).toBe(false)
+  })
+
+  it('ignores --yes outside CLI segments', () => {
+    const s = run([`echo --yes`, `${CLI} add button --dry-run`])
+    expect(pass(s, 'dry-run-first')).toBe(true)
+  })
+})
+
+describe('commandsFromStreamJson exit codes', () => {
+  const lines = (isError: boolean, text: string) => [
+    JSON.stringify({ type: 'assistant', message: { content: [{ type: 'tool_use', id: 't', name: 'Bash', input: { command: 'x' } }] } }),
+    JSON.stringify({ type: 'user', message: { content: [{ type: 'tool_result', tool_use_id: 't', content: text, is_error: isError }] } }),
+  ]
+  it('gives 0 for a successful result even if the text mentions Exit code', () => {
+    expect(commandsFromStreamJson(lines(false, 'Exit code 5 in docs'))[0]?.exitCode).toBe(0)
+  })
+  it('parses the code from an error result', () => {
+    expect(commandsFromStreamJson(lines(true, 'Exit code 3 fail'))[0]?.exitCode).toBe(3)
+  })
+  it('leaves exitCode undefined for an error result without a code', () => {
+    expect(commandsFromStreamJson(lines(true, 'something broke'))[0]?.exitCode).toBeUndefined()
   })
 })
