@@ -1,5 +1,7 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { renderReport, type EvalResult } from '../../scripts/agent-evals/report.js'
+import { EventEmitter } from 'node:events'
+import { PassThrough } from 'node:stream'
 import fs from 'node:fs/promises'
 import os from 'node:os'
 import path from 'node:path'
@@ -7,6 +9,8 @@ import {
   agentInvocation,
   aggregateRuns,
   hasResultEvent,
+  capture,
+  killTree,
   parseTimeoutMs,
   skillFolders,
   diffTrees,
@@ -134,5 +138,48 @@ describe('parseTimeoutMs', () => {
     expect(parseTimeoutMs('5000')).toBe(5000)
     for (const bad of [undefined, '', 'abc', '0', '-5', 'Infinity', 'NaN'])
       expect(parseTimeoutMs(bad)).toBe(15 * 60 * 1000)
+  })
+})
+
+function fakeChild(pid = 4242) {
+  const child = Object.assign(new EventEmitter(), {
+    pid,
+    stdout: new PassThrough(),
+    stderr: new PassThrough(),
+    stdin: new PassThrough(),
+    kill: vi.fn(),
+  })
+  return child
+}
+
+describe('killTree', () => {
+  it('runs taskkill on the tree for a win32 shell and falls back when it fails', () => {
+    const child = fakeChild()
+    const killer = new EventEmitter()
+    const spawn = vi.fn(() => killer)
+    killTree(child as never, true, { spawn: spawn as never, platform: 'win32', graceMs: 1 })
+    expect(spawn).toHaveBeenCalledWith('taskkill', ['/pid', '4242', '/T', '/F'], { windowsHide: true })
+    expect(child.kill).not.toHaveBeenCalled()
+    killer.emit('close', 1)
+    expect(child.kill).toHaveBeenCalledWith('SIGKILL')
+  })
+  it('kills directly without a shell', () => {
+    const child = fakeChild()
+    const spawn = vi.fn()
+    killTree(child as never, false, { spawn: spawn as never, platform: 'win32', graceMs: 1 })
+    expect(spawn).not.toHaveBeenCalled()
+    expect(child.kill).toHaveBeenCalledWith('SIGKILL')
+  })
+})
+
+describe('capture', () => {
+  it('resolves timedOut after the grace period even if close never fires', async () => {
+    const child = fakeChild()
+    const spawn = vi.fn(() => child)
+    const result = await capture('x', [], { cwd: '.', timeoutMs: 10 }, { spawn: spawn as never, platform: 'linux', graceMs: 10 })
+    expect(result.timedOut).toBe(true)
+    expect(result.code).toBeNull()
+    expect(child.kill).toHaveBeenCalledWith('SIGKILL')
+    expect(child.stdout.destroyed).toBe(true)
   })
 })

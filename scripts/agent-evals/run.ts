@@ -100,31 +100,57 @@ export function parseTimeoutMs(value: string | undefined): number {
   return value !== undefined && value.trim() !== '' && Number.isFinite(n) && n > 0 ? n : DEFAULT_TIMEOUT_MS
 }
 
-/** Under a Windows shell, child.kill() only ends cmd.exe; kill the whole tree. */
-function killTree(child: ChildProcess, shell: boolean): void {
-  if (process.platform === 'win32' && shell && child.pid !== undefined)
-    spawn('taskkill', ['/pid', String(child.pid), '/T', '/F'], { windowsHide: true }).on('error', () => undefined)
-  else child.kill('SIGKILL')
+export type SpawnDeps = { spawn: typeof spawn; platform: NodeJS.Platform; graceMs: number }
+const realDeps: SpawnDeps = { spawn, platform: process.platform, graceMs: 10_000 }
+
+/** Under a Windows shell, child.kill() only ends cmd.exe; kill the whole tree, falling back to a plain kill. */
+export function killTree(child: ChildProcess, shell: boolean, deps: SpawnDeps = realDeps): void {
+  if (deps.platform === 'win32' && shell && child.pid !== undefined) {
+    const fallback = () => child.kill('SIGKILL')
+    const killer = deps.spawn('taskkill', ['/pid', String(child.pid), '/T', '/F'], { windowsHide: true })
+    killer.on('error', fallback)
+    killer.on('close', (code) => {
+      if (code !== 0) fallback()
+    })
+  } else child.kill('SIGKILL')
 }
 
-/** Spawns without a shell unless told; drains both streams, keeps a bounded stderr tail, resolves on `close`. */
-function capture(
+/**
+ * Spawns without a shell unless told; drains both streams, keeps a bounded stderr tail, resolves on `close`.
+ * After a timeout kill it also resolves after a grace period, in case a grandchild keeps the pipes open.
+ */
+export function capture(
   executable: string,
   args: string[],
   options: { cwd: string; shell?: boolean; input?: string; timeoutMs?: number },
+  deps: SpawnDeps = realDeps,
 ): Promise<Captured> {
   return new Promise((resolve) => {
-    const child = spawn(executable, args, { cwd: options.cwd, shell: options.shell ?? false, windowsHide: true })
+    const child = deps.spawn(executable, args, { cwd: options.cwd, shell: options.shell ?? false, windowsHide: true })
     let stdout = ''
     let stderrTail = ''
     let timedOut = false
     let spawnError: Error | undefined
+    let grace: NodeJS.Timeout | undefined
+    let done = false
+    const finish = (code: number | null) => {
+      if (done) return
+      done = true
+      if (timer) clearTimeout(timer)
+      if (grace) clearTimeout(grace)
+      resolve({ code, stdout, stderrTail, timedOut, spawnError })
+    }
     const timer =
       options.timeoutMs === undefined
         ? undefined
         : setTimeout(() => {
             timedOut = true
-            killTree(child, options.shell ?? false)
+            killTree(child, options.shell ?? false, deps)
+            grace = setTimeout(() => {
+              child.stdout?.destroy()
+              child.stderr?.destroy()
+              finish(null)
+            }, deps.graceMs)
           }, options.timeoutMs)
     child.stdout.setEncoding('utf8')
     child.stderr.setEncoding('utf8')
@@ -133,10 +159,7 @@ function capture(
     child.on('error', (error) => {
       spawnError = error
     })
-    child.on('close', (code) => {
-      if (timer) clearTimeout(timer)
-      resolve({ code, stdout, stderrTail, timedOut, spawnError })
-    })
+    child.on('close', (code) => finish(code))
     child.stdin.on('error', () => undefined)
     child.stdin.end(options.input ?? '')
   })
