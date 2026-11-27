@@ -3,11 +3,24 @@ import { CodeBlock, CodeBlockCommand } from '../../generated/ui/components/ui/co
 import { componentDocs } from '../components/catalog'
 import { familyList } from '../families'
 import { publishedInstaller } from '../../snapshots/install-command'
+import { agentRules } from '../agents/rules'
+import { ruleText } from './rule-text'
 import type { GuideSlug } from './navigation'
 
 type GuideSection = { id: string; title: string; content: ReactNode }
 const release = `${publishedInstaller.packageName}@${publishedInstaller.version}`
 const npx = `npx ${release}`
+const siteOrigin = 'https://ombelle-ui.vercel.app'
+const agentsSnippet = [
+  '## Ombelle UI',
+  '',
+  `Before installing any Ombelle component, read ${siteOrigin}/llms.txt and follow its install rules.`,
+  `- Run only the published CLI: ${npx} (never \`shadcn add\`, never hand-copied source).`,
+  `- Initialize with the preset code I give you: ${npx} init --preset ps_…@1. If I gave none, ask me for one.`,
+  '- Run every command that writes files with --dry-run --json first and show me the plan; then rerun it with --yes.',
+  '- On a file conflict or an unsupported project, stop and ask me. Finish with doctor --json.',
+].join('\n')
+
 function Command({ args }: { args: string }) {
   return <div className="my-5"><CodeBlockCommand args={`${release} ${args}`} runners={{ yarn: 'yarn dlx --quiet' }} /></div>
 }
@@ -198,6 +211,29 @@ export const guideSections: Record<GuideSlug, GuideSection[]> = {
     { id: 'sharing', title: 'A code cannot be published or installed', content: <>
       <p>Retry a failed publication from the editor and retain JSON as a backup. For installation, copy the complete code including <code>@1</code>, use a compatible current CLI, and verify the snapshot is available. Custom origins require the exact content hash; offline mode requires a verified cache entry and cannot detect later withdrawals.</p>
       <p>If dependency installation fails, check the detected package manager and its network access, then follow the CLI’s transaction/recovery message. Keep the error output and paths if you need help. Report reproducible problems through <a href="/security">support and security</a>, including framework, edition, CLI version, command, and sanitized error output.</p>
+    </> },
+  ],
+  agents: [
+    { id: 'rules', title: 'Install rules', content: <>
+      <p>A coding agent installs Ombelle with the published CLI, the same way you do. These are the rules every agent follows. They are repeated in <code>llms.txt</code>, the catalog JSON and the agent skills, so all of them stay in step.</p>
+      <ol>{agentRules().map(rule => <li key={rule.id}>{ruleText(rule.text)}</li>)}</ol>
+    </> },
+    { id: 'machine-readable', title: 'Docs for agents', content: <>
+      <p>Every page has a plain-text form that agents can read without a browser.</p>
+      <ul>
+        <li><a href={`${siteOrigin}/llms.txt`}>{`${siteOrigin}/llms.txt`}</a> is the index: the install rules, plus a link to every guide, component and block.</li>
+        <li><a href={`${siteOrigin}/llms-full.txt`}>{`${siteOrigin}/llms-full.txt`}</a> holds the same content in one file.</li>
+        <li>Add <code>.md</code> to a guide, component or block address for its Markdown page, for example <a href={`${siteOrigin}/docs/getting-started.md`}>{`${siteOrigin}/docs/getting-started.md`}</a>.</li>
+        <li><a href={`${siteOrigin}/api/v1/catalog`}>{`${siteOrigin}/api/v1/catalog`}</a> is the catalog as JSON: components, blocks, style support, the published CLI and these rules.</li>
+      </ul>
+    </> },
+    { id: 'skills', title: 'Agent skills', content: <>
+      <p>Agent skills are coming soon; they will install with <code>npx skills add whritou/ombelle-ui</code>. Until then the rules and docs above give an agent everything it needs.</p>
+    </> },
+    { id: 'tell-your-agent', title: 'Tell your agent', content: <>
+      <p>Paste this into your project’s <code>AGENTS.md</code> or <code>CLAUDE.md</code>. It points the agent at the install rules and the published CLI. Replace <code>ps_…@1</code> with your own preset code from the <a href="/editor/preset">preset editor</a>.</p>
+      <CodeBlock title="AGENTS.md" code={agentsSnippet} />
+      <p>Liquid glass is labelled <strong>Accessibility not guaranteed</strong>, because its contrast depends on what sits behind it. Agents are told to say so when they offer it.</p>
     </> },
   ],
 }
