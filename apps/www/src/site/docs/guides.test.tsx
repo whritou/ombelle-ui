@@ -29,6 +29,7 @@ describe('agents guide', () => {
     const fenced = markdown.match(/```\n([\s\S]*?)\n```/g) ?? []
     const snippet = fenced.find((block) => block.includes('https://ombelle-ui.vercel.app/llms.txt') && block.includes('--dry-run'))
     expect(snippet).toBeDefined()
+    for (const part of ['--yes', 'resolutions', '--overwrite', '--beside', 'Accessibility not guaranteed']) expect(snippet).toContain(part)
     expect(snippet).toContain(`${publishedInstaller.packageName}@${publishedInstaller.version}`)
   })
 })

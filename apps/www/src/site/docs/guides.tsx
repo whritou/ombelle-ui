@@ -3,6 +3,7 @@ import { CodeBlock, CodeBlockCommand } from '../../generated/ui/components/ui/co
 import { componentDocs } from '../components/catalog'
 import { familyList } from '../families'
 import { publishedInstaller } from '../../snapshots/install-command'
+import { accessibilityCaveatLabel } from '@ombelle/contracts'
 import { agentRules } from '../agents/rules'
 import { ruleText } from './rule-text'
 import type { GuideSlug } from './navigation'
@@ -17,8 +18,10 @@ const agentsSnippet = [
   `Before installing any Ombelle component, read ${siteOrigin}/llms.txt and follow its install rules.`,
   `- Run only the published CLI: ${npx} (never \`shadcn add\`, never hand-copied source).`,
   `- Initialize with the preset code I give you: ${npx} init --preset ps_…@1. If I gave none, ask me for one.`,
-  '- Run every command that writes files with --dry-run --json first and show me the plan; then rerun it with --yes.',
-  '- On a file conflict or an unsupported project, stop and ask me. Finish with doctor --json.',
+  '- Run every command that writes files with --dry-run --json first and show me the plan; rerun it with --yes only when the plan has no warnings with resolutions.',
+  '- On FILE_CONFLICT or any warning with resolutions, stop and ask me; never choose --overwrite or --beside yourself.',
+  '- On an unsupported project, explain it and stop. Finish with doctor --json.',
+  `- Liquid glass is labelled ${accessibilityCaveatLabel}; say so whenever you offer it.`,
 ].join('\n')
 
 function Command({ args }: { args: string }) {
