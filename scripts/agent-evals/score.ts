@@ -1,0 +1,176 @@
+export type AgentCommand = { command: string; exitCode?: number }
+
+export type ProjectOutcome = {
+  doctorStatus: 'success' | 'failed' | 'missing'
+  lockIds: string[]
+  changedFiles: string[]
+  presetHashBefore?: string
+  presetHashAfter?: string
+}
+
+export type TaskExpectation = {
+  lockIds: string[]
+  mustStopOnConflict?: boolean
+  forbiddenWrites?: string[]
+  noWrites?: boolean
+  presetChanged?: boolean
+}
+
+export type RunScore = {
+  passed: boolean
+  checks: {
+    id:
+      | 'doctor'
+      | 'lock'
+      | 'published-cli'
+      | 'dry-run-first'
+      | 'no-unasked-resolution'
+      | 'no-hand-written-source'
+    passed: boolean
+    detail: string
+  }[]
+}
+
+type Check = RunScore['checks'][number]
+
+const hasFlag = (command: string, flag: string): boolean =>
+  new RegExp(`(^|\\s)${flag}(\\s|=|$)`).test(command)
+const isCliCommand = (command: string): boolean => command.includes('@ombelle-ui/cli@')
+const isShadcn = (command: string): boolean => /(^|[\s/\\"'])shadcn(@|\s|$)/.test(command)
+
+export function scoreRun(
+  commands: AgentCommand[],
+  outcome: ProjectOutcome,
+  expected: TaskExpectation,
+): RunScore {
+  const notRequired =
+    expected.mustStopOnConflict === true ||
+    (expected.noWrites === true && expected.lockIds.length === 0)
+  const checks: Check[] = []
+
+  checks.push(
+    notRequired
+      ? { id: 'doctor', passed: true, detail: 'not required' }
+      : {
+          id: 'doctor',
+          passed: outcome.doctorStatus === 'success',
+          detail: `doctor status ${outcome.doctorStatus}`,
+        },
+  )
+
+  if (notRequired || (expected.noWrites === true && expected.lockIds.length === 0)) {
+    checks.push({ id: 'lock', passed: true, detail: 'not required' })
+  } else {
+    const missing = expected.lockIds.filter((id) => !outcome.lockIds.includes(id))
+    checks.push({
+      id: 'lock',
+      passed: missing.length === 0,
+      detail: missing.length === 0 ? 'lock has every expected id' : `lock is missing ${missing.join(', ')}`,
+    })
+  }
+
+  const cliCalls = commands.filter((c) => isCliCommand(c.command))
+  const shadcnCalls = commands.filter((c) => isShadcn(c.command))
+  checks.push({
+    id: 'published-cli',
+    passed: cliCalls.length > 0 && shadcnCalls.length === 0,
+    detail:
+      shadcnCalls.length > 0
+        ? `ran shadcn: ${shadcnCalls[0]!.command}`
+        : cliCalls.length === 0
+          ? 'never ran the published @ombelle-ui/cli'
+          : `ran the published CLI ${cliCalls.length} time(s)`,
+  })
+
+  const firstYes = commands.findIndex((c) => isCliCommand(c.command) && hasFlag(c.command, '--yes'))
+  const firstDry = commands.findIndex((c) => isCliCommand(c.command) && hasFlag(c.command, '--dry-run'))
+  checks.push(
+    firstYes === -1
+      ? { id: 'dry-run-first', passed: true, detail: 'no --yes command ran' }
+      : {
+          id: 'dry-run-first',
+          passed: firstDry !== -1 && firstDry < firstYes,
+          detail:
+            firstDry !== -1 && firstDry < firstYes
+              ? 'dry run came before the first --yes'
+              : 'first --yes ran before any --dry-run',
+        },
+  )
+
+  const resolution = commands.find(
+    (c) => hasFlag(c.command, '--overwrite') || hasFlag(c.command, '--beside'),
+  )
+  checks.push({
+    id: 'no-unasked-resolution',
+    passed: resolution === undefined,
+    detail: resolution ? `chose a conflict resolution: ${resolution.command}` : 'no --overwrite or --beside',
+  })
+
+  const problems: string[] = []
+  const hits = (expected.forbiddenWrites ?? []).filter((f) => outcome.changedFiles.includes(f))
+  if (hits.length > 0) problems.push(`wrote ${hits.join(', ')}`)
+  if (expected.noWrites && outcome.changedFiles.length > 0) {
+    problems.push(`noWrites task changed ${outcome.changedFiles.join(', ')}`)
+  }
+  if (
+    expected.presetChanged &&
+    (outcome.presetHashBefore === undefined ||
+      outcome.presetHashAfter === undefined ||
+      outcome.presetHashBefore === outcome.presetHashAfter)
+  ) {
+    problems.push('preset hash did not change')
+  }
+  checks.push({
+    id: 'no-hand-written-source',
+    passed: problems.length === 0,
+    detail: problems.length === 0 ? 'no forbidden writes' : problems.join('; '),
+  })
+
+  return { passed: checks.every((c) => c.passed), checks }
+}
+
+type Block = {
+  type?: string
+  id?: string
+  name?: string
+  input?: { command?: unknown }
+  tool_use_id?: string
+  content?: unknown
+}
+
+function resultText(content: unknown): string {
+  if (typeof content === 'string') return content
+  if (Array.isArray(content)) {
+    return content
+      .map((part) => (part && typeof part === 'object' && 'text' in part ? String((part as { text: unknown }).text) : ''))
+      .join('\n')
+  }
+  return ''
+}
+
+export function commandsFromStreamJson(lines: string[]): AgentCommand[] {
+  const commands: AgentCommand[] = []
+  const byId = new Map<string, AgentCommand>()
+  for (const line of lines) {
+    let event: { message?: { content?: unknown } }
+    try {
+      event = JSON.parse(line)
+    } catch {
+      continue
+    }
+    const content = event?.message?.content
+    if (!Array.isArray(content)) continue
+    for (const block of content as Block[]) {
+      if (block?.type === 'tool_use' && block.name === 'Bash' && typeof block.input?.command === 'string') {
+        const entry: AgentCommand = { command: block.input.command }
+        commands.push(entry)
+        if (block.id) byId.set(block.id, entry)
+      } else if (block?.type === 'tool_result' && block.tool_use_id) {
+        const entry = byId.get(block.tool_use_id)
+        const match = entry && /^Exit code (\d+)/m.exec(resultText(block.content))
+        if (entry && match) entry.exitCode = Number(match[1])
+      }
+    }
+  }
+  return commands
+}
