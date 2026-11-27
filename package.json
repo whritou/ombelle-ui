@@ -19,6 +19,7 @@
     "test:hosted-storage": "node --env-file-if-exists=.env.hosted.local node_modules/vitest/vitest.mjs run --config vitest.postgres.config.ts",
     "test": "pnpm build:packages && pnpm test:unit && pnpm test:integration",
     "generate:preview": "tsx scripts/generate-preview.ts",
+    "eval:agents": "tsx scripts/agent-evals/run.ts",
     "prepare:consumers": "tsx scripts/prepare-consumers.ts",
     "build:consumers": "tsx scripts/build-consumers.ts",
     "build:preview": "vite build apps/preview --config apps/preview/vite.config.ts",
