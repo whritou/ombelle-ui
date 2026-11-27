@@ -33,7 +33,7 @@ export type RunScore = {
 
 type Check = RunScore['checks'][number]
 
-type Segment = { kind: 'ombelle' | 'shadcn' | 'other'; tokens: string[]; text: string }
+type Segment = { kind: 'ombelle' | 'shadcn' | 'other'; tokens: string[]; argStart: number; text: string }
 
 const RUNNERS: Record<string, string[]> = {
   npx: [],
@@ -49,9 +49,13 @@ function classify(text: string): Segment {
   while (i < tokens.length && /^[A-Za-z_][A-Za-z0-9_]*=/.test(tokens[i]!)) i++
   const runner = tokens[i]
   let kind: Segment['kind'] = 'other'
+  let argStart = tokens.length
   if (runner !== undefined) {
     let target: string | undefined
-    if (runner === 'shadcn') target = runner
+    if (runner === 'shadcn') {
+      target = runner
+      argStart = i + 1
+    }
     else if (runner in RUNNERS) {
       const subs = RUNNERS[runner]!
       let j = i + 1
@@ -59,6 +63,7 @@ function classify(text: string): Segment {
         if (subs.length > 0) j++
         while (j < tokens.length && (tokens[j]!.startsWith('-') || tokens[j] === '--')) j++
         target = tokens[j]
+        argStart = j + 1
       }
     }
     if (target !== undefined) {
@@ -66,7 +71,7 @@ function classify(text: string): Segment {
       else if (/^shadcn(-ui)?(@|$)/.test(target)) kind = 'shadcn'
     }
   }
-  return { kind, tokens, text: text.trim() }
+  return { kind, tokens, argStart, text: text.trim() }
 }
 
 const segmentsOf = (command: string): Segment[] =>
@@ -76,7 +81,7 @@ const segmentsOf = (command: string): Segment[] =>
     .map(classify)
 
 const hasFlag = (segment: Segment, flag: string): boolean =>
-  segment.tokens.some((t) => t === flag || t.startsWith(flag + '='))
+  segment.tokens.slice(segment.argStart).some((t) => t === flag || t.startsWith(flag + '='))
 
 export function scoreRun(
   commands: AgentCommand[],

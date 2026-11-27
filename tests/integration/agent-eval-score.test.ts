@@ -229,3 +229,27 @@ describe('commandsFromStreamJson exit codes', () => {
     expect(commandsFromStreamJson(lines(true, 'something broke'))[0]?.exitCode).toBeUndefined()
   })
 })
+
+describe('flags after the package target', () => {
+  const NPX = 'npx --yes @ombelle-ui/cli@1.1.2'
+  const run = (commands: string[]) =>
+    scoreRun(commands.map((command) => ({ command })), ok, { lockIds: ['button'] })
+  const pass = (s: ReturnType<typeof scoreRun>, id: string) => s.checks.find((c) => c.id === id)?.passed
+
+  it("does not read npx's own --yes as the CLI's", () => {
+    const s = run([`${NPX} add x --dry-run && ${NPX} add x --yes`])
+    expect(pass(s, 'dry-run-first')).toBe(true)
+  })
+
+  it('fails when only the first command carries the CLI --yes', () => {
+    const s = run([`${NPX} add x --yes && ${NPX} add x --dry-run`])
+    expect(pass(s, 'dry-run-first')).toBe(false)
+  })
+
+  it('treats a dry-run alone as no write and no resolution', () => {
+    const s = run([`${NPX} add x --dry-run`])
+    expect(pass(s, 'dry-run-first')).toBe(true)
+    expect(s.checks.find((c) => c.id === 'dry-run-first')?.detail).toBe('no --yes command ran')
+    expect(pass(s, 'no-unasked-resolution')).toBe(true)
+  })
+})
