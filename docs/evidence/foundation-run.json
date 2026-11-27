@@ -1,17 +1,17 @@
 {
   "schemaVersion": 1,
   "run": {
-    "id": 45869029914,
-    "url": "https://github.com/whritou/ombelle-ui/actions/runs/45869029914",
+    "id": 45916687455,
+    "url": "https://github.com/whritou/ombelle-ui/actions/runs/45916687455",
     "event": "workflow_dispatch",
     "branch": "main",
-    "startedAt": "2026-11-26T17:35:30Z",
-    "completedAt": "2026-11-26T19:32:17Z"
+    "startedAt": "2026-11-27T00:26:05Z",
+    "completedAt": "2026-11-27T01:55:18Z"
   },
-  "sourceCommit": "c68d5618b3f6d2dc03b6e706c6ab6d3f79501ba8",
+  "sourceCommit": "3783953a7a44fdef04da81594234ad340c632013",
   "counts": {
     "unit": {
-      "passed": 6879,
+      "passed": 6880,
       "failed": 0,
       "skipped": 0
     },
@@ -21,8 +21,8 @@
       "skipped": 0
     },
     "browser": {
-      "startTime": "2026-11-26T18:24:56.068Z",
-      "duration": 3655106.144,
+      "startTime": "2026-11-27T01:06:03.217Z",
+      "duration": 2685266.791,
       "expected": 1185,
       "skipped": 0,
       "unexpected": 0,
@@ -60,15 +60,15 @@
     "channel": "bundled Chromium"
   },
   "jobMinutes": {
-    "consumers (2)": 60.6,
-    "specimen (4)": 28.5,
-    "specimen (3)": 25.8,
-    "consumers (3)": 93.5,
-    "specimen (2)": 27.3,
-    "catalog-consumers": 3,
-    "consumers (1)": 110.4,
-    "quality": 39.8,
-    "specimen (1)": 23.6,
-    "verify": 6.3
+    "catalog-consumers": 2.9,
+    "quality": 26.8,
+    "specimen (3)": 21.4,
+    "consumers (2)": 70.2,
+    "specimen (2)": 33.6,
+    "consumers (1)": 84.8,
+    "specimen (1)": 27.8,
+    "consumers (3)": 72,
+    "specimen (4)": 19.5,
+    "verify": 4.4
   }
 }
