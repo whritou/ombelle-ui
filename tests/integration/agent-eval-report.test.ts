@@ -1,7 +1,13 @@
 import { describe, expect, it } from 'vitest'
 import { renderReport, type EvalResult } from '../../scripts/agent-evals/report.js'
+import fs from 'node:fs/promises'
+import os from 'node:os'
+import path from 'node:path'
 import {
+  agentInvocation,
   aggregateRuns,
+  hasResultEvent,
+  skillFolders,
   diffTrees,
   lockIdsFromLock,
   parseArgs,
@@ -83,5 +89,41 @@ describe('aggregateRuns', () => {
       { passed: false, checks: [{ id: 'lock', passed: false, detail: '' }, { id: 'doctor', passed: true, detail: '' }] },
     ])
     expect(task).toEqual({ id: 't', passed: 1, runs: 2, failures: ['lock'] })
+  })
+})
+
+describe('agentInvocation', () => {
+  it('uses raw argv without a shell for an executable', () => {
+    const { args, shell } = agentInvocation('claude', 'claude-opus-5-5')
+    expect(shell).toBe(false)
+    expect(args).toContain('-p')
+    expect(args).not.toContain('--prompt')
+    expect(args).toEqual(expect.arrayContaining(['--model', 'claude-opus-5-5', '--max-turns', '40']))
+  })
+  it('enables a shell only for .cmd/.bat and validates every arg', () => {
+    expect(agentInvocation('C:/x/claude.cmd', 'claude-opus-5-5').shell).toBe(true)
+    expect(() => agentInvocation('claude.cmd', 'bad model & calc')).toThrow(/argument/)
+    expect(agentInvocation('claude', 'bad model & calc').shell).toBe(false)
+  })
+})
+
+describe('hasResultEvent', () => {
+  it('finds a stream-json result line', () => {
+    expect(hasResultEvent(['{"type":"assistant"}', 'junk', '{"type":"result","subtype":"success"}'])).toBe(true)
+    expect(hasResultEvent(['{"type":"assistant"}', 'junk'])).toBe(false)
+  })
+})
+
+describe('skillFolders', () => {
+  it('throws when skills/ is missing or empty and lists folders otherwise', async () => {
+    const dir = await fs.mkdtemp(path.join(os.tmpdir(), 'skills-test-'))
+    try {
+      await expect(skillFolders(path.join(dir, 'nope'))).rejects.toThrow('phase-2 needs skills/ (Task 10)')
+      await expect(skillFolders(dir)).rejects.toThrow('phase-2 needs skills/ (Task 10)')
+      await fs.mkdir(path.join(dir, 'ombelle'))
+      expect(await skillFolders(dir)).toEqual(['ombelle'])
+    } finally {
+      await fs.rm(dir, { recursive: true, force: true })
+    }
   })
 })
