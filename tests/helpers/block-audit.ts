@@ -187,6 +187,27 @@ export async function expectLoginNotice(section: Locator): Promise<void> {
   expect(gap, 'the empty notice region adds no gap above the first field').toBe(0)
 }
 
+/**
+ * Pricing plans side by side line up: every Choose button at one height at the bottom of its card, and the
+ * Recommended badge apart from the plan name, on screen and in the name a screen reader reads.
+ */
+export async function expectPricingAligned(section: Locator): Promise<void> {
+  const layout = await section.locator('[data-block-part="card"]').evaluateAll(cards => cards.map(card => {
+    const button = card.querySelector('[data-block-part="choose"]')!.getBoundingClientRect()
+    return { buttonTop: Math.round(button.top), belowButton: Math.round(card.getBoundingClientRect().bottom - button.bottom) }
+  }))
+  expect(new Set(layout.map(plan => plan.buttonTop)).size, `Choose buttons line up: ${JSON.stringify(layout)}`).toBe(1)
+  expect(new Set(layout.map(plan => plan.belowButton)).size, `Choose buttons sit at the card bottom: ${JSON.stringify(layout)}`).toBe(1)
+  const name = section.locator('[data-highlighted] [data-block-part="plan-name"]')
+  const gap = await name.evaluate(heading => {
+    const range = document.createRange()
+    range.selectNodeContents(heading.firstChild!)
+    return heading.querySelector('[data-slot$="badge"]')!.getBoundingClientRect().left - range.getBoundingClientRect().right
+  })
+  expect(gap, 'the badge keeps a gap after the plan name').toBeGreaterThanOrEqual(4)
+  await expect(name, 'the plan name and badge read as two words').toHaveText(/\S \S/)
+}
+
 /** What a person typed survives the 768px breakpoint, in both directions (a phone turned on its side). */
 export async function expectSettingsKeepsInput(page: Page, section: Locator): Promise<void> {
   const height = page.viewportSize()!.height

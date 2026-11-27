@@ -70,8 +70,12 @@ function Thumbnail({ id, family, mode, title }: { id: BlockId; family: StyleFami
         src={blockFrameSrc(id, family, mode)}
         loading="lazy"
         sandbox="allow-scripts allow-forms"
+        // A still picture: a block taller than the card is cut at its edge, with no scrollbar.
+        scrolling="no"
         className="pointer-events-none absolute left-0 top-0 origin-top-left border-0"
-        style={{ width: viewport.width, height: viewport.height, transform: `scale(${scale})` }}
+        // max-width: none undoes the base styles' max-width: 100% on iframes, which laid the block out at the
+        // card's width (a phone layout) before the scale shrank it again.
+        style={{ width: viewport.width, maxWidth: 'none', height: viewport.height, transform: `scale(${scale})` }}
       />
     </div>
   )

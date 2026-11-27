@@ -58,6 +58,19 @@
   outline-offset: -1px;
 }
 
+/* The badge sits after the plan name with a gap, and wraps under it in a narrow card. */
+[data-block="pricing-01"] [data-block-part="plan-name"] {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem 0.5rem;
+}
+
+/* Cards in a row share a height: the body takes the spare space, so every footer sits at the bottom. */
+[data-block="pricing-01"] [data-block-part="plan-body"] {
+  flex: 1 0 auto;
+}
+
 [data-block="pricing-01"] [data-block-part="price"] {
   display: flex;
   flex-wrap: wrap;

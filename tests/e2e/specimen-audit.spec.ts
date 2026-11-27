@@ -8,7 +8,7 @@ import {
 } from '../helpers/specimen-audit.js'
 import { editions, modes, specimenArtifacts as artifacts, specimenRunIsPartial } from '../helpers/specimen-run.js'
 import { inShard, specimenShard } from '../helpers/specimen-shard.js'
-import { blockAuditActions, expectBlockLayout, expectBlockSwitchesAt768, expectLoginNotice, expectSettingsKeepsInput } from '../helpers/block-audit.js'
+import { blockAuditActions, expectBlockLayout, expectBlockSwitchesAt768, expectLoginNotice, expectPricingAligned, expectSettingsKeepsInput } from '../helpers/block-audit.js'
 
 const isBlock = (id: string): id is BlockId => (supportedBlockIds as readonly string[]).includes(id)
 // A block is page-sized: it is measured at a phone and at a desktop width, not in the specimen column.
@@ -199,6 +199,7 @@ async function auditBlocks(page: Page, blocks: BlockId[], run: BlockRun): Promis
       // Before the 1280px pass submits the form: later the Alert is in the region.
       if (id === 'login-01' && width === blockWidths[0]) await expectLoginNotice(section)
       if (id === 'settings-01' && width === blockWidths[0]) await expectSettingsKeepsInput(page, section)
+      if (id === 'pricing-01' && width === blockWidths[0]) await expectPricingAligned(section)
       if (width === blockWidths[0]) await expectBlockSwitchesAt768(page, section, id)
       await page.setViewportSize({ width, height })
       await section.screenshot({ path: path.join(shots, `${id}-${width}.png`), animations: 'disabled' })
