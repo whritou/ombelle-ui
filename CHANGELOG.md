@@ -4,8 +4,13 @@ Entries are written for someone upgrading a project. From 1.0 each release group
 
 ## Unreleased
 
+**Installed source**
+
+- `pricing-01`: plans side by side line up. Each card's body takes the spare height, so every "Choose" button sits at the bottom of its card at one height; before, a plan with fewer features had its button about 32 px higher. The Recommended badge keeps a gap after the plan name, and a space between them, so a screen reader reads "Team Recommended" instead of "TeamRecommended". This changes `blocks/pricing-01.tsx` and `blocks/pricing-01.css` in both editions; `update` refreshes unedited files.
+
 **Website**
 
+- The `/blocks` gallery thumbnails show each block's desktop layout. The base styles' `max-width: 100%` on iframes laid the 1200 px preview out at the card's width (a phone layout) before scaling it down, so thumbnails showed a narrow column on the left with a scrollbar. Thumbnails no longer scroll.
 - Block previews load much faster. The block frame used to import the compiler and the contracts package for a font list and an origin check, so every `/blocks` page downloaded and parsed about 5.6 MB of JavaScript before showing a block. The frame now loads about 0.4 MB, mostly React and the block itself. The frame and its viewport widths are unchanged.
 
 ## 1.1.1 — 26 November 2026

@@ -95,13 +95,14 @@ function Pricing01Content() {
             <li key={plan.id} data-block-part="plan" data-highlighted={plan.highlighted ? '' : undefined}>
               <Card data-block-part="card">
                 <CardHeader>
-                  <CardTitle>
+                  <CardTitle data-block-part="plan-name">
                     {plan.name}
-                    {plan.highlighted ? <Badge>{exampleData.recommended}</Badge> : null}
+                    {/* The space keeps the name and badge apart for screen readers; the gap spaces them on screen. */}
+                    {plan.highlighted ? <>{' '}<Badge>{exampleData.recommended}</Badge></> : null}
                   </CardTitle>
                   <CardDescription>{plan.description}</CardDescription>
                 </CardHeader>
-                <CardContent>
+                <CardContent data-block-part="plan-body">
                   <p data-block-part="price">
                     <strong>${plan.price[billing]}</strong>
                     <span>{plan.price.monthly === 0 ? 'free' : 'per member, per month'}</span>
