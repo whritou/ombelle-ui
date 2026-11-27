@@ -4,6 +4,12 @@ Entries are written for someone upgrading a project. From 1.0 each release group
 
 ## Unreleased
 
+## 1.1.2 — 27 November 2026
+
+A patch release: it fixes the `pricing-01` block layout. Nothing breaks.
+
+**Upgrade.** Run `ombelle update` with CLI 1.1.2 to refresh an unedited `pricing-01` block; an edited file conflicts and `--overwrite <path>` replaces it.
+
 **Installed source**
 
 - `pricing-01`: plans side by side line up. Each card's body takes the spare height, so every "Choose" button sits at the bottom of its card at one height; before, a plan with fewer features had its button about 32 px higher. The Recommended badge keeps a gap after the plan name, and a space between them, so a screen reader reads "Team Recommended" instead of "TeamRecommended". This changes `blocks/pricing-01.tsx` and `blocks/pricing-01.css` in both editions; `update` refreshes unedited files.
