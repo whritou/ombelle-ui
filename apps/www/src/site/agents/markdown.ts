@@ -1,17 +1,15 @@
 import { Fragment, type ReactElement, type ReactNode } from 'react'
 import TurndownService from 'turndown'
 import { officialSnapshotOrigin, styleSupport } from '@ombelle/contracts'
-import { compareVersions, publishedInstaller } from '../../snapshots/install-command'
-import { blockGlassAvailable, type BlockDoc } from '../blocks/catalog'
-import { componentDoc, componentInstallable, glassOnSite, type ComponentDoc } from '../components/catalog'
+import { publishedInstaller } from '../../snapshots/install-command'
+import { blockDocs, blockGlassAvailable, type BlockDoc } from '../blocks/catalog'
+import { componentDoc, componentDocs, glassOnSite, type ComponentDoc } from '../components/catalog'
 import { familyList } from '../families'
 import { documentationGuides, type GuideSlug } from '../docs/navigation'
 import { guideSections } from '../docs/guides'
 import { CodeBlock, CodeBlockCommand } from '../../generated/ui/components/ui/code-block'
+import { blocksMinimumCli, installableFor, type Installer } from './installer'
 
-type Installer = { packageName: string; version: string }
-
-const blocksMinimumCli = '1.1.0'
 const glassNotice = 'Liquid glass: available. Accessibility not guaranteed. In a liquid glass project the plan adds a notice, because text contrast depends on the background behind the glass.'
 
 function footer(): string {
@@ -22,12 +20,38 @@ function footer(): string {
   ].join('\n')
 }
 
+/** The line under every install command: how an agent runs it. */
+function agentRunLine(): string {
+  return `Agents: run it with \`--dry-run --json\` first, then \`--yes\` when the plan is clean; see the install rules at ${officialSnapshotOrigin}/llms.txt.`
+}
+
+const markdownPages: Record<string, () => string[]> = {
+  docs: () => documentationGuides.map((guide) => guide.slug),
+  components: () => componentDocs.map((doc) => doc.id),
+  blocks: () => blockDocs.map((doc) => doc.id),
+}
+
+/**
+ * A site link as agents read it: absolute on the site origin, and a guide, component or block page as its `.md`
+ * version, so llms-full.txt reads as raw text. Other links are left alone.
+ */
+export function agentHref(href: string): string {
+  if (!href.startsWith('/') || href.startsWith('//')) return href
+  const hashAt = href.indexOf('#')
+  const pathname = hashAt === -1 ? href : href.slice(0, hashAt)
+  const hash = hashAt === -1 ? '' : href.slice(hashAt)
+  const match = /^\/(docs|components|blocks)\/([^/]+)$/.exec(pathname)
+  if (match && markdownPages[match[1]!]!().includes(match[2]!))
+    return `${officialSnapshotOrigin}/${match[1]}/${match[2]}.md${hash}`
+  return officialSnapshotOrigin + href
+}
+
 const fence = (code: string, language = '') => '```' + language + '\n' + code.replace(/\n$/, '') + '\n```'
 
 /** The component page as markdown, matching the HTML page's installation, usage and API sections. */
 export function componentMarkdown(doc: ComponentDoc, installer: Installer = publishedInstaller): string {
   const cli = `npx ${installer.packageName}@${installer.version}`
-  const installable = !doc.minimumCli || compareVersions(installer.version, doc.minimumCli) >= 0
+  const installable = installableFor(installer, doc.minimumCli)
   const glass = styleSupport(doc.id, 'liquid-glass')
   const lines = [
     `# ${doc.name}`,
@@ -36,11 +60,11 @@ export function componentMarkdown(doc: ComponentDoc, installer: Installer = publ
     '',
     '## Installation',
     '',
-    'Run in a project initialized with an Ombelle preset (see [Get started](/docs/getting-started.md)). The component uses the saved project preset. Run the command from your app folder; it shows the changes and asks before writing.',
+    `Run in a project initialized with an Ombelle preset (see [Get started](${agentHref('/docs/getting-started')})). The component uses the saved project preset. Run the command from your app folder; it shows the changes and asks before writing.`,
     '',
   ]
   if (installable) {
-    lines.push(fence(`${cli} add ${doc.id}`, 'sh'), '')
+    lines.push(fence(`${cli} add ${doc.id}`, 'sh'), '', agentRunLine(), '')
     if (doc.client) lines.push('This is a client component.', '')
     lines.push(
       glassOnSite(doc.id)
@@ -70,7 +94,7 @@ export function componentMarkdown(doc: ComponentDoc, installer: Installer = publ
 /** The block page as markdown. */
 export function blockMarkdown(doc: BlockDoc, installer: Installer = publishedInstaller): string {
   const cli = `npx ${installer.packageName}@${installer.version}`
-  const installable = compareVersions(installer.version, blocksMinimumCli) >= 0
+  const installable = installableFor(installer, blocksMinimumCli)
   const lines = [
     `# ${doc.title}`,
     '',
@@ -78,12 +102,14 @@ export function blockMarkdown(doc: BlockDoc, installer: Installer = publishedIns
     '',
     '## Installation',
     '',
-    'Run in a project initialized with an Ombelle preset (see [Get started](/docs/getting-started.md)). The block uses the saved project preset. Run the command from your app folder; it shows the changes and asks before writing.',
+    `Run in a project initialized with an Ombelle preset (see [Get started](${agentHref('/docs/getting-started')})). The block uses the saved project preset. Run the command from your app folder; it shows the changes and asks before writing.`,
     '',
   ]
   if (installable) {
     lines.push(
       fence(`${cli} add ${doc.id}`, 'sh'),
+      '',
+      agentRunLine(),
       '',
       `Adds \`components/blocks/${doc.id}.tsx\` and \`${doc.id}.css\` beside your components folder, and the components the block uses. A component you already installed and edited is kept as it is. Blocks need ${installer.packageName} ${blocksMinimumCli} or later.`,
       '',
@@ -98,7 +124,7 @@ export function blockMarkdown(doc: BlockDoc, installer: Installer = publishedIns
   lines.push(
     '## Components it installs',
     '',
-    ...doc.components.map((id) => `- [${componentDoc(id)?.name ?? id}](/components/${id}.md)`),
+    ...doc.components.map((id) => `- [${componentDoc(id)?.name ?? id}](${agentHref(`/components/${id}`)})`),
     '',
     '## Example only',
     '',
@@ -131,7 +157,7 @@ function toHtml(node: ReactNode): string {
   if (type === CodeBlock) return `<pre data-md="code" data-title="${escapeHtml(String(props.title ?? ''))}">${escapeHtml(String(props.code))}</pre>`
   if (typeof type === 'function') return toHtml((type as (props: unknown) => ReactNode)(props))
   if (typeof type !== 'string') throw new Error('Unsupported element in a guide.')
-  const href = typeof props.href === 'string' ? ` href="${escapeHtml(props.href)}"` : ''
+  const href = typeof props.href === 'string' ? ` href="${escapeHtml(agentHref(props.href))}"` : ''
   return voidTags.has(type) ? `<${type}${href}>` : `<${type}${href}>${toHtml(props.children)}</${type}>`
 }
 

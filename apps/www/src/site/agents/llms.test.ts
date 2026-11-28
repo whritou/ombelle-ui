@@ -65,6 +65,11 @@ describe('llms-full.txt', () => {
     for (const doc of componentDocs) expect(text).toContain(componentMarkdown(doc))
     for (const doc of blockDocs) expect(text).toContain(blockMarkdown(doc))
   })
+
+  it('has only absolute links, with guides as their .md pages, so it reads as raw text', () => {
+    expect(text).not.toMatch(/\]\(\//)
+    expect(text).not.toMatch(/\]\(https:\/\/ombelle-ui\.vercel\.app\/docs\/[a-z-]+\)/)
+  })
 })
 
 describe('routes and headers', () => {
