@@ -145,7 +145,7 @@ export async function prepareManager(
   deps: Dependency[] = [],
 ): Promise<PreparedManager> {
   if (manager === 'bun') return prepareBun(root,await resolveBunExecutable(),bunLockfile ?? 'bun.lock',deps)
-  const launcher = await resolveManager(manager)
+  const launcher = await resolveManager(manager, root)
   // pnpm's standalone installer ships a native binary, which runs without Node (INS-04).
   const executable = launcher.native ? launcher.entry : await resolveNodeExecutable()
   const prepared = launcher.native
@@ -202,12 +202,12 @@ function executeScript(
  * Resolves the manager launcher and the runtime an install would use, running nothing but the runtime's
  * `--version`. A dry run calls it to report an install that could not start.
  */
-export async function checkInstallRuntime(manager: PackageManager): Promise<string[]> {
+export async function checkInstallRuntime(manager: PackageManager, root?: string): Promise<string[]> {
   if (manager === 'bun') {
     const bun = await resolveRuntime('bun')
     return [runtimeNotice('bun', bun.version)].filter((notice): notice is string => notice !== undefined)
   }
-  const launcher = await resolveManager(manager)
+  const launcher = await resolveManager(manager, root)
   if (launcher.native) return []
   const node = await resolveRuntime('node')
   return [runtimeNotice('node', node.version)].filter((notice): notice is string => notice !== undefined)
@@ -220,13 +220,20 @@ export async function managerEntry(manager: PackageManager): Promise<string> {
   return (await resolveManager(manager)).entry
 }
 
-async function resolveManager(manager: PackageManager): Promise<ManagerLauncher> {
+/**
+ * Finds the manager's JavaScript launcher by reading files and shims, never running them. `root` is the
+ * target application: when it pins pnpm in `packageManager` and no pnpm launcher is on PATH, pnpm runs
+ * through corepack, which honours that pin.
+ */
+export async function resolveManager(manager: PackageManager, root?: string): Promise<ManagerLauncher> {
+  // Windows file names are case-insensitive: `corepack enable` and some installers write `.CMD` shims.
+  const flags = process.platform === 'win32' ? 'i' : ''
   const entryPattern =
     manager === 'npm'
-      ? /^npm-cli\.js$/
+      ? new RegExp('^npm-cli\\.js$', flags)
       : manager === 'pnpm'
-        ? /^pnpm\.(?:cjs|mjs|js)$/
-        : /^yarn\.(?:cjs|mjs|js)$/
+        ? new RegExp('^pnpm\\.(?:cjs|mjs|js)$', flags)
+        : new RegExp('^yarn\\.(?:cjs|mjs|js)$', flags)
   const configured = manager === 'yarn' ? process.env.OMBELLE_YARN_ENTRY : undefined
   if (configured && entryPattern.test(path.basename(configured))) {
     await fs.access(configured)
@@ -267,28 +274,35 @@ async function resolveManager(manager: PackageManager): Promise<ManagerLauncher>
         }
         const source = await fs.readFile(real, 'utf8')
         if (manager === 'pnpm' && name === 'pnpm.cmd') {
+          // A shim that hands pnpm to corepack: `"%~dp0\…\corepack.js" pnpm %*`.
+          const lines = shimLines(source)
+          const corepackLine = lines.find((line) => /corepack\.(?:cjs|js)/i.test(line))
+          if (corepackLine) {
+            const target = corepackShimTarget(lines, path.dirname(real), 'pnpm')
+            if (target) {
+              await fs.access(target)
+              return { entry: target, prefixArgs: ['pnpm'] }
+            }
+            continue
+          }
           const match = source.match(
             /"%(?:~dp0|dp0%)([^"\r\n]*pnpm\.(?:cjs|mjs|js))"/i,
           )
           if (match && !/[&|<>%]/.test(match[1])) {
-            const target = path.resolve(path.dirname(real), match[1])
+            // `"%dp0%\node_modules\…"`: a leading separator is relative to the shim, not the drive root.
+            const target = fromWindowsShim(path.dirname(real), match[1])
             await fs.access(target)
             return { entry: target, prefixArgs: [] }
           }
         } else if (manager === 'yarn' && name === 'yarn.cmd') {
-          const lines = source
-            .split(/\r?\n/)
-            .map((line) => line.trim())
-            .filter((line) => line && !/^@?echo off$/i.test(line))
+          const lines = shimLines(source)
           const corepackLine = lines.find((line) =>
             /corepack\.(?:cjs|js)/i.test(line),
           )
           if (corepackLine) {
-            const match = /^(?:call\s+)?(?:(?:"%~dp0[^"\r\n]*node(?:\.exe)?"|node(?:\.exe)?)\s+)?"%~dp0([^"\r\n]*corepack\.(?:cjs|js))"\s+yarn\s+%\*$/i.exec(
-              corepackLine,
-            )
-            if (match && !/[&|<>]/.test(match[1])) {
-              const target = fromWindowsShim(path.dirname(real), match[1])
+            const match = corepackShimLine(corepackLine, 'yarn')
+            if (match) {
+              const target = fromWindowsShim(path.dirname(real), match)
               await fs.access(target)
               return { entry: target, prefixArgs: ['yarn'] }
             }
@@ -330,13 +344,91 @@ async function resolveManager(manager: PackageManager): Promise<ManagerLauncher>
       }
     }
   }
+  // No pnpm launcher, but the app pins pnpm and corepack is on PATH (common on Windows, where pnpm often
+  // comes only from corepack): run `corepack pnpm`, which installs with the pinned release.
+  if (manager === 'pnpm' && root && (await declaresPnpm(root))) {
+    const corepack = await findCorepack(flags)
+    if (corepack) return { entry: corepack, prefixArgs: ['pnpm'] }
+  }
   throw new FoundationError(
     'UNSUPPORTED_PROJECT',
     'Cannot locate a ' + manager + ' JavaScript entry without shell evaluation',
     undefined,
     'Install ' + manager + ' and add its launcher to PATH' +
-      (manager === 'yarn' ? ', or set OMBELLE_YARN_ENTRY to its JavaScript launcher.' : '.'),
+      (manager === 'yarn'
+        ? ', or set OMBELLE_YARN_ENTRY to its JavaScript launcher.'
+        : manager === 'pnpm'
+          ? ', or pin it with "packageManager": "pnpm@<version>" in package.json to run it through corepack.'
+          : '.'),
   )
+}
+
+/** Non-empty shim lines, without `echo off`. */
+function shimLines(source: string): string[] {
+  return source
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter((line) => line && !/^@?echo off$/i.test(line))
+}
+
+/**
+ * The corepack script a Windows shim line runs, relative to the shim: `[node] "%~dp0…corepack.js" <tool> %*`,
+ * with `tool` empty for corepack's own shim. Anything else, or a path with shell metacharacters, is refused.
+ */
+function corepackShimLine(line: string, tool: string): string | undefined {
+  const match = new RegExp(
+    '^(?:call\\s+)?(?:(?:"%~dp0[^"\\r\\n]*node(?:\\.exe)?"|node(?:\\.exe)?)\\s+)?"%~dp0([^"\\r\\n]*corepack\\.(?:cjs|js))"\\s+' +
+      (tool ? tool + '\\s+' : '') + '%\\*$',
+    'i',
+  ).exec(line)
+  // Yarn's shim check predates the `%` refusal and keeps its original rule.
+  const unsafe = tool === 'yarn' ? /[&|<>]/ : /[&|<>%]/
+  return match && !unsafe.test(match[1]) ? match[1] : undefined
+}
+
+/** The corepack script every corepack line of a shim agrees on, or undefined. */
+function corepackShimTarget(lines: string[], directory: string, tool: string): string | undefined {
+  const targets = lines
+    .filter((line) => /corepack\.(?:cjs|js)/i.test(line))
+    .map((line) => corepackShimLine(line, tool))
+  if (!targets.length || targets.some((target) => target === undefined)) return undefined
+  const resolved = new Set(targets.map((target) => fromWindowsShim(directory, target!)))
+  return resolved.size === 1 ? [...resolved][0] : undefined
+}
+
+/** True when the app's package.json pins pnpm (`"packageManager": "pnpm@…"`). */
+async function declaresPnpm(root: string): Promise<boolean> {
+  try {
+    const pkg = JSON.parse(await fs.readFile(path.join(root, 'package.json'), 'utf8')) as { packageManager?: unknown }
+    return typeof pkg.packageManager === 'string' && /^pnpm@\d/.test(pkg.packageManager)
+  } catch {
+    return false
+  }
+}
+
+/** corepack's JavaScript entry, from a symlink or a Windows shim on PATH; shims are read, never run. */
+async function findCorepack(flags: string): Promise<string | undefined> {
+  const entryPattern = new RegExp('^corepack\\.(?:cjs|js)$', flags)
+  const names = process.platform === 'win32' ? ['corepack.cmd', 'corepack'] : ['corepack']
+  for (const directory of (process.env.PATH ?? process.env.Path ?? '').split(path.delimiter)) {
+    if (!directory) continue
+    for (const name of names) {
+      try {
+        const real = await fs.realpath(path.join(directory, name))
+        let target: string | undefined
+        if (entryPattern.test(path.basename(real))) target = real
+        else if (name === 'corepack.cmd')
+          target = corepackShimTarget(shimLines(await fs.readFile(real, 'utf8')), path.dirname(real), '')
+        if (target && entryPattern.test(path.basename(target))) {
+          await fs.access(target)
+          return target
+        }
+      } catch (e) {
+        if (!['ENOENT', 'ENOTDIR', 'EISDIR'].includes((e as NodeJS.ErrnoException).code ?? '')) throw e
+      }
+    }
+  }
+  return undefined
 }
 
 /** The corepack cache root: COREPACK_HOME, else corepack's per-platform default. */

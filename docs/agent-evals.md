@@ -68,4 +68,4 @@ as your user. Run the evals only on a machine you are comfortable with.
 
 `scripts/agent-evals/session.ts` runs the same tasks and scoring with a Claude Code session as the driver. The session runs `prepare <task>`, gives the prompt to a fresh subagent that works only in that project and lists the shell commands it ran, then runs `score <task> <root> <commands-file> <out-dir>`. After the last run, `report <out-dir> <surface> <model>` writes the report. Commands come from the agent's own list rather than a captured transcript, and the subagent shares the session's context. Both points are written into every report. The baseline in `docs/evidence/agent-evals-baseline.md` was recorded this way.
 
-On Windows, the scoring step's `doctor` call needs pnpm resolvable as a `pnpm.cmd` that points at `pnpm.cjs` (a corepack-only install isn't enough).
+On Windows, the scoring step's `doctor` call finds pnpm through a `pnpm.cmd` shim, or through corepack when the task project pins `pnpm@<version>` in `packageManager`. CLI 1.1.2 and earlier needed a `pnpm.cmd` that points at `pnpm.cjs`.

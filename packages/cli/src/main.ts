@@ -312,7 +312,7 @@ async function runPlan(request: ParsedArgs, io: IO, json: boolean): Promise<numb
   plan.notices.push(...(context.supportNotices ?? []))
   if (plan.dependencyPlan.length)
     try {
-      plan.notices.push(...await checkInstallRuntime(context.manager))
+      plan.notices.push(...await checkInstallRuntime(context.manager, context.root))
     } catch (error) {
       // A dry run reports an install that could not start; an apply stops with the error before any write.
       if (!(error instanceof FoundationError) || !flags['--dry-run']) throw error
