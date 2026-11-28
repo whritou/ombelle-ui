@@ -25,7 +25,8 @@ describe.each(names)('npm pointer package %s', name => {
     for (const field of ['dependencies', 'optionalDependencies', 'peerDependencies', 'bundleDependencies', 'scripts'])
       expect(manifest[field], field).toBeUndefined()
     expect(manifest.files).toEqual(['bin', 'README.md', 'LICENSE'])
-    expect(fs.readFileSync(path.join(aliases, name, 'LICENSE'), 'utf8')).toBe(read('LICENSE'))
+    const lf = (text: string) => text.replaceAll('\r\n', '\n')
+    expect(lf(fs.readFileSync(path.join(aliases, name, 'LICENSE'), 'utf8'))).toBe(lf(read('LICENSE')))
   })
 
   it('points at the installer version the website publishes', () => {
@@ -47,6 +48,10 @@ describe.each(names)('npm pointer package %s', name => {
     expect(result.status).toBe(1)
     expect(result.stderr).toContain(`npx @ombelle-ui/cli@${published} <command>`)
     expect(result.stderr).not.toContain('rm -rf')
+  })
+
+  it('keeps LF line endings so the shebang works on Linux and macOS', () => {
+    expect(fs.readFileSync(path.join(aliases, name, 'bin/pointer.js'), 'utf8')).not.toContain('\r')
   })
 
   it('never runs, spawns, fetches or imports the real CLI', () => {
