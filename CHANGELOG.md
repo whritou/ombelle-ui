@@ -4,6 +4,28 @@ Entries are written for someone upgrading a project. From 1.0 each release group
 
 ## Unreleased
 
+## 1.1.3 — 28 November 2026
+
+A patch release: the CLI finds pnpm through corepack on Windows, resolves preset codes at the new site address, and its npm page points coding agents to the install rules. Nothing breaks, and no installed source changes.
+
+**Upgrade.** Nothing to run in your project. On Windows without a global pnpm, pin `pnpm@<version>` in `packageManager` and CLI 1.1.3 can install component packages; `doctor` passes `install-runtime`.
+
+**CLI**
+
+- pnpm through corepack on Windows. `doctor` used to fail `install-runtime`, and any `add` that needed new packages exited 3 with `UNSUPPORTED_PROJECT: Cannot locate a pnpm JavaScript entry without shell evaluation`, when pnpm was only available through corepack. The CLI now reads corepack's `pnpm.cmd` shims, matches Windows shim names in any case (`pnpm.CMD`), and resolves `%dp0%`-relative shim targets correctly. With no pnpm launcher on PATH it runs pnpm through corepack, but only when the project pins `pnpm@<version>` in `packageManager`; without a pin it still refuses, and the next action now says to add one. Shims are parsed, never run. npm and Yarn detection is unchanged.
+- Bare preset and recipe codes (`ps_…@1`, `rc_…@1`) resolve at `https://ombelle-ui.com`. `https://ombelle-ui.vercel.app` keeps serving the same service, so CLI 1.1.2 and earlier keep working, and a lock keeps the origin it was installed from. `--help` names the new origin.
+- The npm package lists keywords (`ombelle`, `ombelle-ui`, `react`, `components`, `tailwind`, `shadcn`, `cli`, `ui`). Its README has a section for AI coding agents that links `https://ombelle-ui.com/llms.txt`, the agent skills (`npx skills add whritou/ombelle-ui`) and the dry-run-then-`--yes` install loop.
+
+**Contracts**
+
+- No schema, `--json` or exit-code change. The versioned JSON schema `$id`s stay `https://ombelle-ui.vercel.app/schemas/<name>-<version>.json` as permanent identifiers; the site serves each schema at the same path on both domains.
+
+**Website** (already live from `main`)
+
+- The site moved to `https://ombelle-ui.com`.
+- Agent-readable pages: `/llms.txt`, `/llms-full.txt`, a Markdown version of every component, block and guide page (`/components/<id>.md` and so on), and `/api/v1/catalog`, which includes the install rules. A new guide, "Using Ombelle with AI agents", has a paste-ready `AGENTS.md` snippet.
+- Five agent skills in `skills/` (install, choose, theme, blocks, check), installed with `npx skills add whritou/ombelle-ui`.
+
 ## 1.1.2 — 27 November 2026
 
 A patch release: it fixes the `pricing-01` block layout. Nothing breaks.
