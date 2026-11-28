@@ -48,8 +48,10 @@ Assign a maintainer to each public contract, the compiler, CLI, catalog, editor,
 
 Require contributions to include source, metadata, examples, state fixtures, documentation, style support and licenses. Do not accept a screenshot-only component submission into the stable catalog. Keep dependency additions deliberate and explain their size and runtime effects.
 
-## Agent skills roadmap
+## Agent support
 
 Agent-facing documentation should read the current project configuration before suggesting commands, discover the actual supported component API, reuse existing components, preserve local edits, and respect the saved preset. A skill should never invent a property because another UI system has one.
 
-Evaluate skills against practical tasks: build a labelled form, compose a settings block, change a project preset, install a scoped recipe, and handle a local modification conflict. Compare task completion and regressions with and without the skill. Keep the skill's supported CLI and catalog range explicit. This documentation package specifies that future work; it does not install an agent skill.
+What ships: `llms.txt` and `llms-full.txt`, a `.md` page for every guide, component and block, the catalog JSON at `/api/v1/catalog` (with the install rules), and five Agent Skills in `skills/` (`ombelle-install`, `ombelle-choose`, `ombelle-theme`, `ombelle-blocks`, `ombelle-check`), installed with `npx skills add whritou/ombelle-ui`. Every surface names the published CLI and repeats one install loop: dry run first, `--yes` only on a clean plan, ask the developer on conflicts, finish with `doctor`. An MCP server remains optional and is not built.
+
+The opt-in agent evals ([agent evals](agent-evals.md)) score eight practical tasks, three runs each, before and after each surface: initializing with a preset, adding a login or settings block, switching the preset, stopping on a modified-file conflict, and asking for a preset when none was given. No measurements are recorded yet; keep claims about agent success tied to recorded runs. Keep the skills' supported CLI range explicit.

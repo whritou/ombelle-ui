@@ -52,7 +52,9 @@ The public preset-code workflow distinguishes project styling (`theme add <code>
 
 For an already initialized shadcn project, a dedicated `theme add <preset>` command merges the palette and design tokens into its configured global stylesheet, normally `globals.css`. This path saves project defaults without rerunning shadcn initialization or reinstalling component source.
 
-Web beta adds JSX output after the initial TSX implementation passes. All four package managers are alpha requirements. React Native, further blocks beyond the first four, agent skills, custom code execution, private team libraries, and payment features follow separate milestones.
+Web beta adds JSX output after the initial TSX implementation passes. All four package managers are alpha requirements. React Native, further blocks beyond the first four, custom code execution, private team libraries, and payment features follow separate milestones.
+
+Coding agents get an agent-readable site and agent skills: `llms.txt` and `llms-full.txt`, a Markdown version of every guide, component and block page, the catalog JSON at `/api/v1/catalog`, and five Agent Skills in `skills/` (installed with `npx skills add whritou/ombelle-ui`). All of them repeat one set of install rules and name the published CLI. An MCP server remains optional and is not built. The opt-in agent evals ([agent evals](agent-evals.md)) measure the effect; no measurements are recorded yet.
 
 ## Primary journeys
 
