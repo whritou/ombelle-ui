@@ -115,3 +115,33 @@ Follow the "Bad CLI release" runbook in [production operations](production-opera
 2. In GitHub, the environment `npm-release` with the owner as required reviewer, so every publish waits for an approval.
 
 Until then the publish step fails and nothing is published; step 4's manual `npm publish` stays the fallback. With it, steps 5 to 7 above stay manual, the registry integrity equals the artifact attached to the run, and a second maintainer can release by approving the environment.
+
+## npm discoverability
+
+Coding agents look for the installer under the names they guess: `npm view ombelle`, `npm view ombelle-ui`, `npm view @ombelle/cli`. In the agent evals ([baseline](evidence/agent-evals-baseline.md)) most of them got a 404 there and stopped; only agents that ran `npm search ombelle` found `@ombelle-ui/cli`, and none opened the website. Two changes address that.
+
+### Package metadata
+
+`scripts/cli-public-package.mjs` produces the published manifest and README; `scripts/pack-cli.mjs` writes them into the candidate. The keywords include `ombelle` and `ombelle-ui` so `npm search` matches either name, and the README has a "For AI coding agents" section pointing at `https://ombelle-ui.com/llms.txt`, the agent skills (`npx skills add whritou/ombelle-ui`) and the dry-run-then-`--yes` install loop. It reaches npm with the next CLI release; the registry page of an existing version does not change.
+
+### Name pointers (unpublished)
+
+`packages/npm-aliases/ombelle` and `packages/npm-aliases/ombelle-ui` are two tiny packages that would hold the unscoped names. They are not workspace packages and nothing publishes them automatically. Each has no dependencies, no install scripts and one bin that prints `npx @ombelle-ui/cli@<version> …` (its own package version) and exits 1. It never runs, downloads or imports the CLI, so a mistyped name can never install or execute code. `packages/npm-aliases/test/pointers.test.ts` checks this.
+
+Their `version` follows the published installer: `version:set --published <version>` updates both, and `version:set --check --published` fails if they disagree. A pointer published at an older version still prints a working command, so republishing them on every release is optional.
+
+**Publishing them is the owner's decision and the owner's action.** An agent never publishes them. When the owner decides to claim the names, as the `ombelle` npm identity with 2FA:
+
+```powershell
+npm pack --dry-run ./packages/npm-aliases/ombelle
+npm pack --dry-run ./packages/npm-aliases/ombelle-ui
+```
+
+Confirm each lists exactly `LICENSE`, `README.md`, `bin/pointer.js` and `package.json`, then:
+
+```powershell
+npm publish ./packages/npm-aliases/ombelle --access public --ignore-scripts
+npm publish ./packages/npm-aliases/ombelle-ui --access public --ignore-scripts
+```
+
+Check with `npx ombelle@<version> add button`: it must print the `@ombelle-ui/cli` command and exit 1. `@ombelle/cli` is a scoped name and needs the `ombelle` npm organization; claiming it is a separate decision. Record the publication in [CLI release history](cli-release-history.md).
