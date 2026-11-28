@@ -1,4 +1,5 @@
 import { spawn } from 'node:child_process'
+import { readFileSync } from 'node:fs'
 import fs from 'node:fs/promises'
 import os from 'node:os'
 import path from 'node:path'
@@ -12,6 +13,8 @@ export type EvalProjectOptions = {
   files?: Record<string, string>
   /** Components added with the built CLI after `initialized` setup. */
   components?: string[]
+  /** Write no `brand.preset.json` (the no-preset task: the agent must ask for one). */
+  withoutPreset?: boolean
 }
 
 const repo = (...parts: string[]) => path.resolve(process.cwd(), ...parts)
@@ -59,8 +62,8 @@ async function copyFixture(source: string, root: string, skip: string[]) {
 
 /**
  * Builds a temp consumer project for an eval task and returns its absolute root.
- * `brand.preset.json` (flat) is always written; nothing else Ombelle-related
- * exists unless the setup names it.
+ * `brand.preset.json` (flat) is written unless `withoutPreset` is set; nothing
+ * else Ombelle-related exists unless the setup names it.
  */
 export async function prepareEvalProject(
   kind: EvalProjectKind,
@@ -98,10 +101,13 @@ export async function prepareEvalProject(
       '@import "tailwindcss";' + String.fromCharCode(10),
     )
     await fs.writeFile(path.join(root, 'src/scenario.tsx'), plainApp)
-    await fs.copyFile(
-      repo('packages/catalog/src/presets/flat.json'),
-      path.join(root, 'brand.preset.json'),
-    )
+    if (setup === 'initialized' && options.withoutPreset)
+      throw new Error('The initialized setup needs brand.preset.json')
+    if (!options.withoutPreset)
+      await fs.copyFile(
+        repo('packages/catalog/src/presets/flat.json'),
+        path.join(root, 'brand.preset.json'),
+      )
     for (const [name, text] of Object.entries(options.files ?? {})) {
       await fs.mkdir(path.dirname(path.join(root, name)), { recursive: true })
       await fs.writeFile(path.join(root, name), text)
@@ -128,16 +134,22 @@ export async function prepareEvalProject(
   }
 }
 
-/** Task-aware wrapper: adds new.preset.json (minimalist) for switch-theme and a button for check-install. */
-export async function prepareTaskProject(task: EvalTask): Promise<string> {
+/**
+ * Per-task options: new.preset.json (minimalist) for switch-theme, a button for check-install, and no preset at all
+ * for no-preset ("flat style" must make the agent ask, not find a preset file).
+ */
+export function taskProjectOptions(task: EvalTask): EvalProjectOptions {
   const options: EvalProjectOptions = {}
   if (task.id === 'switch-theme')
     options.files = {
-      'new.preset.json': await fs.readFile(
-        repo('packages/catalog/src/presets/minimalist.json'),
-        'utf8',
-      ),
+      'new.preset.json': readFileSync(repo('packages/catalog/src/presets/minimalist.json'), 'utf8'),
     }
   if (task.id === 'check-install') options.components = ['button']
-  return prepareEvalProject(task.project, task.setup, options)
+  if (task.id === 'no-preset') options.withoutPreset = true
+  return options
+}
+
+/** Task-aware wrapper around prepareEvalProject. */
+export async function prepareTaskProject(task: EvalTask): Promise<string> {
+  return prepareEvalProject(task.project, task.setup, taskProjectOptions(task))
 }
