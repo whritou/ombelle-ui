@@ -163,7 +163,7 @@ async function doctor(root: string, manager: ProjectContext['manager'] | undefin
   }
   if (context) {
     try {
-      const runtimeNotices = await checkInstallRuntime(context.manager)
+      const runtimeNotices = await checkInstallRuntime(context.manager, context.root)
       add({ id: 'install-runtime', status: 'pass', message: 'Dependency installs can run ' + context.manager })
       for (const notice of runtimeNotices) add({ id: 'install-runtime', status: 'warn', message: notice })
     } catch (error) {
