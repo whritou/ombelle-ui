@@ -45,8 +45,8 @@ describe('buildAgentCatalog', () => {
 
   it('links markdown docs', () => {
     const button = catalog.components.find((entry) => entry.id === 'button')!
-    expect(button.docs.markdown).toBe('https://ombelle-ui.vercel.app/components/button.md')
-    expect(button.docs.html).toBe('https://ombelle-ui.vercel.app/components/button')
+    expect(button.docs.markdown).toBe('https://ombelle-ui.com/components/button.md')
+    expect(button.docs.html).toBe('https://ombelle-ui.com/components/button')
     expect(button.category).toBe('Actions')
   })
 })

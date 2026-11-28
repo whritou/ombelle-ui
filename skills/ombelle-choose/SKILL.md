@@ -9,7 +9,7 @@ This skill only reads. It decides what to install; the `ombelle-install` skill (
 
 ## Get the catalog and the CLI version
 
-Fetch `https://ombelle-ui.vercel.app/api/v1/catalog`. Its `cliVersion` is the version other Ombelle skills put in `npx @ombelle-ui/cli@<version>`. If that URL is unreachable, use the version on `https://ombelle-ui.vercel.app/docs/getting-started`, and read `https://ombelle-ui.vercel.app/llms.txt`, which lists every component and block with a link to its page.
+Fetch `https://ombelle-ui.com/api/v1/catalog`. Its `cliVersion` is the version other Ombelle skills put in `npx @ombelle-ui/cli@<version>`. If that URL is unreachable, use the version on `https://ombelle-ui.com/docs/getting-started`, and read `https://ombelle-ui.com/llms.txt`, which lists every component and block with a link to its page.
 
 The catalog holds `components[]` and `blocks[]`. Every entry has `id`, `name`, `description`, `installable`, `glass` and `docs.markdown` (a link to its Markdown documentation). Components also have an optional `category` and an optional `minimumCli`; blocks have `components` (what they install), `exampleOnly` (the parts that are examples) and `minimumCli`. Never rely on memory for ids: the catalog changes.
 

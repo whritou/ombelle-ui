@@ -1,6 +1,6 @@
 # Hosted API v1
 
-The hosted snapshot service at `https://ombelle-ui.vercel.app` stores immutable presets and component recipes under
+The hosted snapshot service at `https://ombelle-ui.com` stores immutable presets and component recipes under
 exact codes. This page specifies the **read routes**, which are the public contract. The publish routes exist for the
 site's own editors and are not a public API.
 

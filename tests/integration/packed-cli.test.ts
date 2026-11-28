@@ -106,7 +106,7 @@ it.each(['node', 'bun'] as const)('resolves official codes from the packed %s pr
   expect(add.code, add.stdout + add.stderr).toBe(0)
   expect(await fs.readFile(path.join(root, 'ui-preset.json'), 'utf8')).toBe(defaults)
   const lock = JSON.parse(await fs.readFile(path.join(root, 'ui-library.lock.json'), 'utf8'))
-  expect(lock.recipeSources[exampleRecipe.id + '@' + exampleRecipe.revision]).toMatchObject({ origin: 'https://ombelle-ui.vercel.app', reference: recipeCode })
+  expect(lock.recipeSources[exampleRecipe.id + '@' + exampleRecipe.revision]).toMatchObject({ origin: 'https://ombelle-ui.com', reference: recipeCode })
 })
 
 it.each(['pnpm', 'yarn-classic', 'yarn-modern', 'bun'] as const)('installs the exact tarball with scripts disabled and runs the %s bin', async manager => {

@@ -9,7 +9,7 @@ A block is a composed section built only from Ombelle components. Blocks need `@
 
 ## Get the CLI version
 
-Read `cliVersion` from `https://ombelle-ui.vercel.app/api/v1/catalog` and confirm the block is in `blocks[]` with `installable: true` and a `minimumCli` the version meets. If the catalog is unreachable, use the version on `https://ombelle-ui.vercel.app/docs/getting-started`. A CLI older than 1.1.0 answers `UNKNOWN_COMPONENT` for a block id; run the catalog's version instead. Use `ombelle-choose` when you are unsure which block fits.
+Read `cliVersion` from `https://ombelle-ui.com/api/v1/catalog` and confirm the block is in `blocks[]` with `installable: true` and a `minimumCli` the version meets. If the catalog is unreachable, use the version on `https://ombelle-ui.com/docs/getting-started`. A CLI older than 1.1.0 answers `UNKNOWN_COMPONENT` for a block id; run the catalog's version instead. Use `ombelle-choose` when you are unsure which block fits.
 
 ## Install loop
 

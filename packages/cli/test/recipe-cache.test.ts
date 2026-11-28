@@ -16,7 +16,7 @@ async function setup() {
   const compiled = await normalizePublishedRecipe(recipe)
   const common = { snapshotVersion: '1.0' as const, revision: 1 as const, createdAt: '2026-11-01T12:00:00.000Z', catalogRelease: '0.1.0' as const, compilerVersion: '0.1.0' as const, validationStatus: 'draft' as const }
   const snapshot: RecipeSnapshot = { ...common, id: 'rc_' + 'a'.repeat(32), recipe: compiled.recipe.data, recipeHash: compiled.recipe.hash, preset: compiled.preset.data, presetHash: compiled.preset.hash }
-  const key: RecipeSnapshotSource = { origin: 'https://ombelle-ui.vercel.app', reference: snapshot.id + '@1', recipeHash: snapshot.recipeHash }
+  const key: RecipeSnapshotSource = { origin: 'https://ombelle-ui.com', reference: snapshot.id + '@1', recipeHash: snapshot.recipeHash }
   return { parent, root: path.join(parent, 'cache'), snapshot, key, common }
 }
 it('isolates verified recipe cache keys, refuses mutation and leaves corrupt bytes untouched', async () => {

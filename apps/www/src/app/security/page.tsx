@@ -27,7 +27,7 @@ export default function SecurityPage() {
           GitHub private vulnerability reporting
         </a>
         , not in a public issue. In scope: the publication service at
-        https://ombelle-ui.vercel.app, the <code>@ombelle-ui/cli</code>{' '}
+        https://ombelle-ui.com, the <code>@ombelle-ui/cli</code>{' '}
         installer and the generated component source. Please include steps to
         reproduce and the affected code or version. There is no bug bounty.
       </p>
