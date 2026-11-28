@@ -69,7 +69,7 @@ export function diffTrees(before: Record<string, string>, after: Record<string, 
   return [...paths].filter((p) => before[p] !== after[p]).sort()
 }
 
-type Lock = { artifacts?: Record<string, { logicalPath?: string; kind?: string }> } | undefined
+export type Lock = { artifacts?: Record<string, { logicalPath?: string; kind?: string }> } | undefined
 
 export function lockIdsFromLock(lock: Lock): string[] {
   const ids = new Set<string>()
@@ -308,7 +308,7 @@ export async function skillFolders(skillsDir: string): Promise<string[]> {
   return folders
 }
 
-async function runDoctor(root: string): Promise<ProjectOutcome['doctorStatus']> {
+export async function runDoctor(root: string): Promise<ProjectOutcome['doctorStatus']> {
   const cli = path.resolve('packages/cli/dist/main.js')
   const result = await capture(process.execPath, [cli, 'doctor', '--json'], { cwd: root })
   try {
@@ -319,7 +319,7 @@ async function runDoctor(root: string): Promise<ProjectOutcome['doctorStatus']> 
   }
 }
 
-async function readJson(file: string): Promise<unknown> {
+export async function readJson(file: string): Promise<unknown> {
   try {
     return JSON.parse(await fs.readFile(file, 'utf8'))
   } catch {
@@ -327,7 +327,7 @@ async function readJson(file: string): Promise<unknown> {
   }
 }
 
-async function presetHash(root: string): Promise<string | undefined> {
+export async function presetHash(root: string): Promise<string | undefined> {
   try {
     return createHash('sha256').update(await fs.readFile(path.join(root, 'ui-preset.json'))).digest('hex')
   } catch {
