@@ -7,6 +7,7 @@ export const documentationGuides = [
   { slug: 'component-editor', title: 'Component editor and recipes', description: 'Customize any catalog component and install its scoped recipe.' },
   { slug: 'exports-and-sharing', title: 'Exports and sharing', description: 'Use local JSON, generated source, and immutable public codes.' },
   { slug: 'troubleshooting', title: 'Troubleshooting', description: 'Resolve installation conflicts, draft recovery, and preview problems.' },
+  { slug: 'agents', title: 'Using Ombelle with AI agents', description: 'Rules, docs and skills that help coding agents install Ombelle safely.' },
 ] as const
 
 export type GuideSlug = typeof documentationGuides[number]['slug']

@@ -100,7 +100,7 @@ The next platform milestone is React Native discovery and a small native alpha. 
 
 Then add a small set of blocks: login form, settings form, pricing section, and dashboard overview. **Delivered** as `login-01`, `settings-01`, `pricing-01` and `dashboard-01` in CLI 1.1.0 (unreleased); see [Blocks](05-cli-specification.md#blocks). Blocks reuse component IDs and the project preset and include responsive and accessible compositions. Clearly identify example-only authentication and data flows; do not make mock UI look like a production backend integration.
 
-Finally add agent documentation and skills for discovering components, installing safely, applying presets, composing blocks, and checking accessibility. Publish machine-readable catalog metadata and `llms.txt` early, then add installable skills after CLI contracts stabilize. A new MCP service is optional; first evaluate compatibility with the existing shadcn registry tooling.
+Finally add agent documentation and skills for discovering components, installing safely, applying presets, composing blocks, and checking accessibility. **Delivered:** `llms.txt`, `llms-full.txt`, Markdown pages, the machine-readable catalog metadata and the [agents guide](https://ombelle-ui.vercel.app/docs/agents), and five installable agent skills in the repository `skills/` folder (`npx skills add whritou/ombelle-ui`). A new MCP service is optional and still to come; first evaluate compatibility with the existing shadcn registry tooling.
 
 ## Pilot release gate
 

@@ -125,6 +125,7 @@ Playwright's bundled Chromium. `OMBELLE_BUN_EXECUTABLE` and `OMBELLE_NODE_EXECUT
 - [Hosted deployment](docs/hosted-deployment.md), [production operations and runbooks](docs/production-operations.md),
   [snapshot service operations](docs/snapshot-service-operations.md)
 - [Decisions](docs/decisions), [evidence](docs/evidence) and [local playground](docs/local-playground.md)
+- [Agent evals](docs/agent-evals.md): the opt-in measurement of coding agents installing Ombelle
 
 ## Contributing and license
 

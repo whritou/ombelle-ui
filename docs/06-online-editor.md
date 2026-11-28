@@ -90,7 +90,7 @@ The proposals below that are not in the table are not implemented interfaces.
 
 ## Snapshot API
 
-The implemented routes, limits, headers and error shape are in [Hosted API v1](hosted-api-v1.md). Not implemented and not planned for 1.0: standard registry item routes (`/r/{release}/{item}.json`), a catalog metadata route (`/api/v1/catalog/{release}`), accounts, aliases and listings. Draft publishing is not a verification service.
+The implemented routes, limits, headers and error shape are in [Hosted API v1](hosted-api-v1.md). Implemented: the agent catalog, `GET /api/v1/catalog` (see Hosted API v1). Not implemented and not planned for 1.0: standard registry item routes (`/r/{release}/{item}.json`), a per-release catalog route (`/api/v1/catalog/{release}`), accounts, aliases and listings. Draft publishing is not a verification service.
 
 Opaque ID generation prevents accidental collisions. Content-addressed deduplication is optional and should not reveal whether another person published identical content. Snapshot public-read semantics and retention must be documented before public launch.
 
