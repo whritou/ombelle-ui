@@ -10,7 +10,7 @@ We aim to acknowledge a report within 5 working days and to share an assessment 
 
 ## Scope
 
-In scope: the `@ombelle-ui/cli` installer (file writes, dependency installs, plan and apply safeguards), the compiler and generated component artifacts, and the hosted snapshot service at `ombelle-ui.vercel.app`.
+In scope: the `@ombelle-ui/cli` installer (file writes, dependency installs, plan and apply safeguards), the compiler and generated component artifacts, and the hosted snapshot service at `ombelle-ui.com`.
 
 Out of scope: vulnerabilities in third-party dependencies with no demonstrated impact on Ombelle (report them upstream), findings that need an already compromised local machine, and denial of service through unrealistic input sizes in local-only tooling.
 

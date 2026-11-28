@@ -1,6 +1,6 @@
 # Immutable preset snapshot service operations
 
-This document describes the implementation and operator contract. The hosted service runs on the existing Ombelle Vercel project with Neon Free at `https://ombelle-ui.vercel.app`, and the installer is published as `@ombelle-ui/cli`. See [hosted deployment](hosted-deployment.md) and [CLI release](cli-release.md) for the deployment and release record. The public read contract is [Hosted API v1](hosted-api-v1.md); incident procedures (withdrawal on Postgres, rotation, outages) are in [production operations](production-operations.md#incidents). The local SQLite adapter remains available for development.
+This document describes the implementation and operator contract. The hosted service runs on the existing Ombelle Vercel project with Neon Free at `https://ombelle-ui.com`, and the installer is published as `@ombelle-ui/cli`. See [hosted deployment](hosted-deployment.md) and [CLI release](cli-release.md) for the deployment and release record. The public read contract is [Hosted API v1](hosted-api-v1.md); incident procedures (withdrawal on Postgres, rotation, outages) are in [production operations](production-operations.md#incidents). The local SQLite adapter remains available for development.
 
 ## Implemented contract
 
@@ -92,7 +92,7 @@ pnpm exec node packages/cli/dist/main.js init --preset ps_aaaaaaaaaaaaaaaaaaaaaa
 pnpm exec node packages/cli/dist/main.js init --preset ps_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa@1 --snapshot-origin http://127.0.0.1:3000 --preset-hash bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb --cwd APP --yes
 ```
 
-For an existing project use `theme add`; for the supported component-only path use `add button --preset`. Bare codes resolve against the official origin `https://ombelle-ui.vercel.app`; any other origin requires an exact reference with `--snapshot-origin` and `--preset-hash` (or `--recipe-hash`). It verifies the canonical hash and supported catalog/compiler releases before planning. `--yes` does not bypass conflicts or validation. Dry-run, cancellation, conflict, and failed apply do not write cache entries. A successful apply may cache the verified envelope; cache write failure warns after the install succeeds.
+For an existing project use `theme add`; for the supported component-only path use `add button --preset`. Bare codes resolve against the official origin `https://ombelle-ui.com`; any other origin requires an exact reference with `--snapshot-origin` and `--preset-hash` (or `--recipe-hash`). It verifies the canonical hash and supported catalog/compiler releases before planning. `--yes` does not bypass conflicts or validation. Dry-run, cancellation, conflict, and failed apply do not write cache entries. A successful apply may cache the verified envelope; cache write failure warns after the install succeeds.
 
 Later ordinary adds use the saved local project preset and do not fetch snapshots. `--offline` is explicit and requires a verified cached copy. An offline read cannot learn that an operator withdrew the remote snapshot. This section covers the repository checkout. The published installer accepts the same inputs: `npx @ombelle-ui/cli@1.1.2` resolves bare codes against the official origin without `--snapshot-origin` or a hash.
 

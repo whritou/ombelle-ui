@@ -87,7 +87,7 @@ const manifest = {
   description: 'Guarded installer for Ombelle UI: adds reviewed React components, presets and recipes to a Vite or Next.js project as source you own',
   keywords: ['react', 'components', 'shadcn', 'tailwind', 'cli', 'ui'],
   repository: { type: 'git', url: 'git+https://github.com/whritou/ombelle-ui.git', directory: 'packages/cli' },
-  homepage: 'https://ombelle-ui.vercel.app',
+  homepage: 'https://ombelle-ui.com',
   bugs: { url: 'https://github.com/whritou/ombelle-ui/issues' },
   type: 'module', license: 'MIT', bin: { ombelle: './dist/main.js' },
   engines: { node: '>=24.19.0 <27' },
@@ -95,7 +95,7 @@ const manifest = {
   publishConfig: { access: 'public' },
 }
 await fs.writeFile(path.join(staging, 'package.json'), JSON.stringify(manifest, null, 2) + '\n')
-await fs.writeFile(path.join(staging, 'README.md'), '# Ombelle CLI\n\nInstall reviewed React source using local JSON or immutable publication codes. Review with --dry-run before applying with --yes. Recipes preserve saved project defaults. Node 24.19.0 or newer, below 27, is required (Node 24 and 26 LTS).\n\nBare codes use https://ombelle-ui.vercel.app. Alternate origins require explicit content hashes. Offline pins cannot detect later withdrawals. See --help for supported inputs.\n')
+await fs.writeFile(path.join(staging, 'README.md'), '# Ombelle CLI\n\nInstall reviewed React source using local JSON or immutable publication codes. Review with --dry-run before applying with --yes. Recipes preserve saved project defaults. Node 24.19.0 or newer, below 27, is required (Node 24 and 26 LTS).\n\nBare codes use https://ombelle-ui.com. Alternate origins require explicit content hashes. Offline pins cannot detect later withdrawals. See --help for supported inputs.\n')
 await fs.chmod(path.join(staging, 'dist/main.js'), 0o755)
 
 const npmCandidates = [

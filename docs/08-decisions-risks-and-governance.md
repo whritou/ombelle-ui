@@ -34,7 +34,7 @@ These are the baseline decisions recorded during M0, with their current status. 
 
 ## Decisions still open
 
-See [1.0 decisions](1.0-decisions.md). Resolved and no longer open: product name (Ombelle), npm namespace (`@ombelle-ui`), registry domain (`ombelle-ui.vercel.app`), primitive editions (Radix and Base UI), liquid glass (stable, accessibility not guaranteed), and the open-source licence (MIT). Team, launch budget, native variants, a commercial model and the mobile device matrix are outside 1.0 scope.
+See [1.0 decisions](1.0-decisions.md). Resolved and no longer open: product name (Ombelle), npm namespace (`@ombelle-ui`), registry domain (`ombelle-ui.com`), primitive editions (Radix and Base UI), liquid glass (stable, accessibility not guaranteed), and the open-source licence (MIT). Team, launch budget, native variants, a commercial model and the mobile device matrix are outside 1.0 scope.
 
 ## Licensing and provenance
 

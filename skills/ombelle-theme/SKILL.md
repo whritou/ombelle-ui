@@ -9,11 +9,11 @@ Presets set colours, tokens, fonts and the style family. Follow the install loop
 
 ## Get the CLI version
 
-Read `cliVersion` from `https://ombelle-ui.vercel.app/api/v1/catalog`. If that URL is unreachable, use the version on `https://ombelle-ui.vercel.app/docs/getting-started`. Write it wherever a command says `<version>`.
+Read `cliVersion` from `https://ombelle-ui.com/api/v1/catalog`. If that URL is unreachable, use the version on `https://ombelle-ui.com/docs/getting-started`. Write it wherever a command says `<version>`.
 
 ## Get a preset
 
-Lead with a preset code (`ps_…@1`); a preset JSON file the developer already has is the alternative. If they have neither, ask and point them to `https://ombelle-ui.vercel.app/editor/preset`. Never write preset JSON yourself.
+Lead with a preset code (`ps_…@1`); a preset JSON file the developer already has is the alternative. If they have neither, ask and point them to `https://ombelle-ui.com/editor/preset`. Never write preset JSON yourself.
 
 ## See what is saved
 

@@ -65,7 +65,7 @@ describe('markdown pages for agents', () => {
   })
 
   it('tells agents how to run the install command, right after it', () => {
-    const agents = 'Agents: run it with `--dry-run --json` first, then `--yes` when the plan is clean; see the install rules at https://ombelle-ui.vercel.app/llms.txt.'
+    const agents = 'Agents: run it with `--dry-run --json` first, then `--yes` when the plan is clean; see the install rules at https://ombelle-ui.com/llms.txt.'
     expect(componentMarkdown(componentDoc('button')!)).toContain(`${cli} add button\n\`\`\`\n\n${agents}`)
     expect(blockMarkdown(blockDoc('login-01')!)).toContain(`${cli} add login-01\n\`\`\`\n\n${agents}`)
     expect(componentMarkdown({ ...componentDoc('button')!, minimumCli: '9.0.0' })).not.toContain(agents)
@@ -73,24 +73,24 @@ describe('markdown pages for agents', () => {
 
   it('makes links absolute and points at the markdown pages', () => {
     const component = componentMarkdown(componentDoc('button')!)
-    expect(component).toContain('](https://ombelle-ui.vercel.app/docs/getting-started.md)')
+    expect(component).toContain('](https://ombelle-ui.com/docs/getting-started.md)')
     const block = blockMarkdown(blockDoc('login-01')!)
-    expect(block).toContain('](https://ombelle-ui.vercel.app/components/button.md)')
+    expect(block).toContain('](https://ombelle-ui.com/components/button.md)')
     const started = guideMarkdown('getting-started')
-    expect(started).toContain('](https://ombelle-ui.vercel.app/docs/installation.md#existing-projects)')
-    expect(started).toContain('](https://ombelle-ui.vercel.app/editor/preset)')
+    expect(started).toContain('](https://ombelle-ui.com/docs/installation.md#existing-projects)')
+    expect(started).toContain('](https://ombelle-ui.com/editor/preset)')
     for (const text of [component, block, ...documentationGuides.map((guide) => guideMarkdown(guide.slug))])
       expect(text).not.toMatch(/\]\(\//)
   })
 
   it('rewrites site links for agents', () => {
-    expect(agentHref('/docs/presets')).toBe('https://ombelle-ui.vercel.app/docs/presets.md')
-    expect(agentHref('/docs/troubleshooting#draft-recovery')).toBe('https://ombelle-ui.vercel.app/docs/troubleshooting.md#draft-recovery')
-    expect(agentHref('/components/button')).toBe('https://ombelle-ui.vercel.app/components/button.md')
-    expect(agentHref('/blocks/login-01')).toBe('https://ombelle-ui.vercel.app/blocks/login-01.md')
-    expect(agentHref('/components')).toBe('https://ombelle-ui.vercel.app/components')
-    expect(agentHref('/components/nope')).toBe('https://ombelle-ui.vercel.app/components/nope')
-    expect(agentHref('/security')).toBe('https://ombelle-ui.vercel.app/security')
+    expect(agentHref('/docs/presets')).toBe('https://ombelle-ui.com/docs/presets.md')
+    expect(agentHref('/docs/troubleshooting#draft-recovery')).toBe('https://ombelle-ui.com/docs/troubleshooting.md#draft-recovery')
+    expect(agentHref('/components/button')).toBe('https://ombelle-ui.com/components/button.md')
+    expect(agentHref('/blocks/login-01')).toBe('https://ombelle-ui.com/blocks/login-01.md')
+    expect(agentHref('/components')).toBe('https://ombelle-ui.com/components')
+    expect(agentHref('/components/nope')).toBe('https://ombelle-ui.com/components/nope')
+    expect(agentHref('/security')).toBe('https://ombelle-ui.com/security')
     expect(agentHref('https://example.com/a')).toBe('https://example.com/a')
     expect(agentHref('#local')).toBe('#local')
   })

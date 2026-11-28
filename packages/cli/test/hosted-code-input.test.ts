@@ -12,7 +12,7 @@ import { resolvePresetInput } from '../src/snapshots/input.js'
 import { resolveRecipeInput } from '../src/snapshots/recipe-input.js'
 import { writeRecipeSnapshotCache } from '../src/snapshots/recipe-cache.js'
 
-const official = 'https://ombelle-ui.vercel.app'
+const official = 'https://ombelle-ui.com'
 const cleanups: Array<() => Promise<unknown>> = []
 let presetSnapshot: PresetSnapshot, recipeSnapshot: RecipeSnapshot
 beforeAll(async () => {
