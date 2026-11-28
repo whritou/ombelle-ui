@@ -3,7 +3,7 @@ import { CodeBlock, CodeBlockCommand } from '../../generated/ui/components/ui/co
 import { componentDocs } from '../components/catalog'
 import { familyList } from '../families'
 import { publishedInstaller } from '../../snapshots/install-command'
-import { accessibilityCaveatLabel } from '@ombelle/contracts'
+import { accessibilityCaveatLabel, officialSnapshotOrigin } from '@ombelle/contracts'
 import { agentRules } from '../agents/rules'
 import { ruleText } from './rule-text'
 import type { GuideSlug } from './navigation'
@@ -11,16 +11,17 @@ import type { GuideSlug } from './navigation'
 type GuideSection = { id: string; title: string; content: ReactNode }
 const release = `${publishedInstaller.packageName}@${publishedInstaller.version}`
 const npx = `npx ${release}`
-const siteOrigin = 'https://ombelle-ui.vercel.app'
+const siteOrigin = officialSnapshotOrigin
 const agentsSnippet = [
   '## Ombelle UI',
   '',
   `Before installing any Ombelle component, read ${siteOrigin}/llms.txt and follow its install rules.`,
   `- Run only the published CLI: ${npx} (never \`shadcn add\`, never hand-copied source).`,
-  `- Initialize with the preset code I give you: ${npx} init --preset ps_…@1. If I gave none, ask me for one.`,
+  `- Initialize with the preset code I give you (${npx} init --preset ps_…@1) or the preset JSON file I give you. If I gave neither, ask me for one; never write preset JSON yourself.`,
   '- Run every command that writes files with --dry-run --json first and show me the plan; rerun it with --yes only when its status is planned (exit code 0) and no warning has resolutions.',
   '- On FILE_CONFLICT or any warning with resolutions, stop and ask me; never choose --overwrite or --beside yourself.',
-  '- On UNSUPPORTED_PROJECT or UNSUPPORTED_RELEASE, explain the message and its next action to me and stop; don\'t work around it. Finish with doctor --json.',
+  '- On status error, read error.code and error.nextAction. On UNSUPPORTED_PROJECT or UNSUPPORTED_RELEASE, explain the message and its next action to me and stop; don\'t work around it.',
+  '- Finish with doctor --json and tell me its result.',
   `- Liquid glass is labelled ${accessibilityCaveatLabel}; say so whenever you offer it.`,
 ].join('\n')
 

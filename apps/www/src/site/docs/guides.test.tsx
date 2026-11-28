@@ -34,5 +34,7 @@ describe('agents guide', () => {
     expect(snippet).toBeDefined()
     for (const part of ['--yes', 'planned', 'resolutions', '--overwrite', '--beside', 'UNSUPPORTED_PROJECT', 'UNSUPPORTED_RELEASE', 'Accessibility not guaranteed']) expect(snippet).toContain(part)
     expect(snippet).toContain(`${publishedInstaller.packageName}@${publishedInstaller.version}`)
+    for (const part of ['preset JSON file', 'never write preset JSON yourself', 'status error', 'error.code', 'error.nextAction', 'doctor --json']) expect(snippet).toContain(part)
+    expect(snippet!.replace(/^```\n|\n```$/g, '').split('\n').length).toBeLessThanOrEqual(12)
   })
 })
