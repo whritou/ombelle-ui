@@ -27,7 +27,7 @@ async function setup() {
   await run(root, ['add', '--recipe', path.resolve('examples/recipe.example.json')])
   const lockFile = path.join(root, 'ui-library.lock.json'), lock = JSON.parse(await fs.readFile(lockFile, 'utf8'))
   const key = example.id + '@' + example.revision
-  lock.recipeSources = { [key]: { origin: 'https://ombelle-ui.vercel.app', reference: 'rc_' + 'a'.repeat(32) + '@1', recipeHash: lock.recipes[key].recipe.hash } }
+  lock.recipeSources = { [key]: { origin: 'https://ombelle-ui.com', reference: 'rc_' + 'a'.repeat(32) + '@1', recipeHash: lock.recipes[key].recipe.hash } }
   await fs.writeFile(lockFile, canonicalize(lock) + '\n')
   return { root, lockFile, lock, key }
 }

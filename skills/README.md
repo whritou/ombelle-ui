@@ -22,4 +22,4 @@ npx skills add whritou/ombelle-ui --skill ombelle-install
 - `ombelle-blocks`: install and wire login, settings, pricing and dashboard blocks, keeping their auth and data marked as examples.
 - `ombelle-check`: inspect, diagnose and update an existing install with `info`, `doctor`, `diff` and `update`.
 
-Every skill reads the current CLI version from `https://ombelle-ui.vercel.app/api/v1/catalog` instead of pinning one.
+Every skill reads the current CLI version from `https://ombelle-ui.com/api/v1/catalog` instead of pinning one.

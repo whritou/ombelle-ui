@@ -43,8 +43,8 @@ describe('agent skills', () => {
 
       it('says how to get the CLI version', async () => {
         const source = await fs.readFile(file, 'utf8')
-        expect(source).toContain('https://ombelle-ui.vercel.app/api/v1/catalog')
-        expect(source).toContain('https://ombelle-ui.vercel.app/docs/getting-started')
+        expect(source).toContain('https://ombelle-ui.com/api/v1/catalog')
+        expect(source).toContain('https://ombelle-ui.com/docs/getting-started')
       })
 
       it(dryRunExempt.has(name) ? 'has no writing command' : 'plans with --dry-run', async () => {

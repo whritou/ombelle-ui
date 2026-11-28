@@ -9,7 +9,7 @@ Ombelle UI is installed with its CLI, never by copying component source or runni
 
 ## Get the CLI version
 
-Read `cliVersion` from `https://ombelle-ui.vercel.app/api/v1/catalog`. If that URL is unreachable, use the version on `https://ombelle-ui.vercel.app/docs/getting-started`. Write it wherever a command below says `<version>`; never guess it or reuse one from memory. `npx` is the default runner. In a project that uses another manager you may use `pnpm dlx`, `yarn dlx --quiet` (with `--json`) or `bunx` with the same arguments; for Yarn 1 use `npx`. The runner never changes the project's package manager. To target an app inside a monorepo, add `--cwd` with the app's directory.
+Read `cliVersion` from `https://ombelle-ui.com/api/v1/catalog`. If that URL is unreachable, use the version on `https://ombelle-ui.com/docs/getting-started`. Write it wherever a command below says `<version>`; never guess it or reuse one from memory. `npx` is the default runner. In a project that uses another manager you may use `pnpm dlx`, `yarn dlx --quiet` (with `--json`) or `bunx` with the same arguments; for Yarn 1 use `npx`. The runner never changes the project's package manager. To target an app inside a monorepo, add `--cwd` with the app's directory.
 
 ## The install loop
 
@@ -38,7 +38,7 @@ A preset JSON file works too (prefix a local preset path with `./`):
 npx @ombelle-ui/cli@<version> init --preset <preset> --dry-run --json
 ```
 
-If the developer gave neither a code nor a file, ask for one and point them to `https://ombelle-ui.vercel.app/editor/preset`, where they design a preset and copy its code. Never write preset JSON yourself and never invent a code. After the plan is reviewed, rerun with `--yes`:
+If the developer gave neither a code nor a file, ask for one and point them to `https://ombelle-ui.com/editor/preset`, where they design a preset and copy its code. Never write preset JSON yourself and never invent a code. After the plan is reviewed, rerun with `--yes`:
 
 ```bash
 npx @ombelle-ui/cli@<version> init --preset <code> --yes

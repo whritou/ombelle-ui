@@ -12,7 +12,7 @@ export default function PrivacyPage() {
 
       <h2>Operator</h2>
       <p>
-        Ombelle and its publication service at https://ombelle-ui.vercel.app are
+        Ombelle and its publication service at https://ombelle-ui.com are
         operated by Arthur Thomas. Contact details are on the{' '}
         <a href="/security">support and security page</a>.
       </p>

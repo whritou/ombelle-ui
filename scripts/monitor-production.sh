@@ -12,7 +12,7 @@
 #                              failure. The service alerts when pings stop, which catches a monitor that no longer runs
 # See docs/production-operations.md.
 set -uo pipefail
-origin="${OMBELLE_MONITOR_ORIGIN:-https://ombelle-ui.vercel.app}"
+origin="${OMBELLE_MONITOR_ORIGIN:-https://ombelle-ui.com}"
 npm_registry="${OMBELLE_MONITOR_NPM_REGISTRY:-https://registry.npmjs.org}"
 warn_percent="${OMBELLE_MONITOR_WARN_PERCENT:-80}"
 # Neon Free's per-project storage allowance. Set it from the plan page; the default assumes 1 GiB.

@@ -131,7 +131,7 @@ export function usage(): string {
     '  --help, -h   --version',
     '',
     'Preset inputs are a local JSON file or an exact code ps_<32 hex>@1; recipe inputs a file or rc_<32 hex>@1.',
-    'Bare codes resolve at https://ombelle-ui.vercel.app. Other origins need --snapshot-origin and the',
+    'Bare codes resolve at https://ombelle-ui.com. Other origins need --snapshot-origin and the',
     'matching --preset-hash or --recipe-hash. HTTPS is required except literal loopback HTTP. --offline needs',
     'an explicit origin, hash and verified cache entry, and cannot detect later withdrawals.',
     '',

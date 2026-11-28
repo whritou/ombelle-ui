@@ -8,7 +8,7 @@ if (origin.protocol !== 'http:' || origin.hostname !== '127.0.0.1' || origin.use
   throw new Error('Test transport requires the owned loopback fixture')
 const original = https.get
 https.get = function (url, options, ...rest) {
-  if (url instanceof URL && url.origin === 'https://ombelle-ui.vercel.app') {
+  if (url instanceof URL && url.origin === 'https://ombelle-ui.com') {
     if (options?.rejectUnauthorized !== true) throw new Error('Official transport must request verified TLS')
     return http.get(new URL(url.pathname, origin), options, ...rest)
   }

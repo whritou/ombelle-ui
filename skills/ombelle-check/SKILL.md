@@ -9,7 +9,7 @@ The commands `info`, `doctor`, `diff` and `preset show` are read-only. `update` 
 
 ## Get the CLI version
 
-Read `cliVersion` from `https://ombelle-ui.vercel.app/api/v1/catalog`. If that URL is unreachable, use the version on `https://ombelle-ui.vercel.app/docs/getting-started`. Write it wherever a command says `<version>`. Confirm the CLI that will run with:
+Read `cliVersion` from `https://ombelle-ui.com/api/v1/catalog`. If that URL is unreachable, use the version on `https://ombelle-ui.com/docs/getting-started`. Write it wherever a command says `<version>`. Confirm the CLI that will run with:
 
 ```bash
 npx @ombelle-ui/cli@<version> --version --json

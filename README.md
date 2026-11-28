@@ -1,7 +1,7 @@
 # Ombelle UI
 
 Source-distributed React components with persistent, shareable presets. You pick a style, tune its tokens in the
-[hosted editors](https://ombelle-ui.vercel.app), and a guarded CLI writes plain TSX and CSS into your project. You own
+[hosted editors](https://ombelle-ui.com), and a guarded CLI writes plain TSX and CSS into your project. You own
 the installed source; nothing from Ombelle runs in your app.
 
 - **63 components**, each in two editions (Radix and Base UI).
@@ -42,7 +42,7 @@ shadcn's file unless you install beside it. See [local usage](docs/foundation-lo
 Supported shadcn `components.json` styles: `radix-nova`, `new-york`, and the eight `base-*` styles. Other
 `radix-*` styles and the React Aria base are read for palette themes only; `add` refuses them.
 
-Hosted codes resolve at `https://ombelle-ui.vercel.app` through a read API documented in
+Hosted codes resolve at `https://ombelle-ui.com` through a read API documented in
 [Hosted API v1](docs/hosted-api-v1.md). Installed components need no Ombelle service.
 
 ## Repository map

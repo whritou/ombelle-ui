@@ -34,7 +34,7 @@ it.each([
   expect(() => validateRecipeSnapshot(value)).toThrow()
 })
 it('validates a separate canonical recipe source', () => {
-  const source = { origin: 'https://ombelle-ui.vercel.app', reference: id + '@1', recipeHash: 'a'.repeat(64) }
+  const source = { origin: 'https://ombelle-ui.com', reference: id + '@1', recipeHash: 'a'.repeat(64) }
   expect(validateRecipeSnapshotSource(source)).toEqual(source)
   for (const bad of [{ ...source, origin: 'https://EXAMPLE.com/' }, { ...source, presetHash: 'b'.repeat(64) }, { ...source, reference: id + '@2' }])
     expect(() => validateRecipeSnapshotSource(bad)).toThrow()

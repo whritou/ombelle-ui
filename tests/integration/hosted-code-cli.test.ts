@@ -54,7 +54,7 @@ it('plans official code-only preset and recipe installs without writing project 
   const before = await snapshotTree(context.root)
   const dry = await context.run(['init', '--preset', context.preset.id + '@1', '--dry-run'])
   expect(dry.code, dry.output + dry.stderr).toBe(0)
-  expect(dry.data.presetResolution.source).toEqual({ origin: 'https://ombelle-ui.vercel.app', reference: context.preset.id + '@1', presetHash: context.preset.presetHash })
+  expect(dry.data.presetResolution.source).toEqual({ origin: 'https://ombelle-ui.com', reference: context.preset.id + '@1', presetHash: context.preset.presetHash })
   expect(await snapshotTree(context.root)).toEqual(before)
   expect(await fs.readdir(context.cacheParent)).toEqual([])
   expect((await context.run(['init', '--preset', path.resolve('examples/preset.example.json'), '--yes'])).code).toBe(0)
@@ -73,7 +73,7 @@ it.each(['pnpm', 'npm', 'yarn', 'bun'] as const)('preserves defaults and remote 
   const installed = await context.run(['add', '--recipe', context.recipeSnapshot.id + '@1', '--yes'])
   expect(installed.code, installed.output + installed.stderr).toBe(0)
   const first = await context.lock(), key = recipe.id + '@' + recipe.revision
-  expect(first.recipeSources[key]).toEqual({ origin: 'https://ombelle-ui.vercel.app', reference: context.recipeSnapshot.id + '@1', recipeHash: context.recipeSnapshot.recipeHash })
+  expect(first.recipeSources[key]).toEqual({ origin: 'https://ombelle-ui.com', reference: context.recipeSnapshot.id + '@1', recipeHash: context.recipeSnapshot.recipeHash })
   expect(await fs.readFile(path.join(context.root, 'ui-preset.json'), 'utf8')).toBe(before)
   await context.service.close()
   const later = await context.run(['add', 'input', '--yes'])
