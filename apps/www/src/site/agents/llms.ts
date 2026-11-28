@@ -5,9 +5,8 @@ import { documentationGuides } from '../docs/navigation'
 import { publishedInstaller } from '../../snapshots/install-command'
 import { buildAgentCatalog, type CatalogEntry } from './catalog-json'
 import { blockMarkdown, componentMarkdown, guideMarkdown } from './markdown'
+import type { Installer } from './installer'
 import { agentRulesMarkdown } from './rules'
-
-type Installer = { packageName: string; version: string }
 
 /** One llmstxt.org link line: the description, then the CLI gate or glass caveat when the entry has one. */
 function entryLine(entry: CatalogEntry): string {

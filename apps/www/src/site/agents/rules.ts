@@ -1,12 +1,11 @@
 import { accessibilityCaveatLabel, officialSnapshotOrigin } from '@ombelle/contracts'
 import { publishedInstaller } from '../../snapshots/install-command'
+import type { Installer } from './installer'
 
 export type AgentRuleId = 'published-cli' | 'preset' | 'no-preset' | 'dry-run' | 'apply' | 'conflict' | 'unsupported' | 'doctor' | 'glass'
 
 /** One rule a coding agent follows when installing Ombelle. `text` uses backticks for code. */
 export type AgentRule = { id: AgentRuleId; text: string }
-
-type Installer = { packageName: string; version: string }
 
 /** The single source of the install rules that llms.txt, the agents guide, the skill and the catalog JSON repeat. */
 export function agentRules(installer: Installer = publishedInstaller): AgentRule[] {

@@ -53,6 +53,7 @@ The response carries `Access-Control-Allow-Origin: *` (as do `/llms.txt`, `/llms
 | `skills.install` | The command that installs the Ombelle agent skill |
 | `families` | Each offered style family with its `accessibilityCaveat` (`null` unless the family carries one, as liquid glass does) |
 | `components`, `blocks` | One entry per item: `id`, `kind`, `name`, `description`, `installable`, `minimumCli` (when set), `glass`, `docs.html` and `docs.markdown`; components add `category`, blocks add `components` and `exampleOnly` |
+| `rules` | The install rules every agent follows, in order: `{ id, text }` with code in backticks. The same list `llms.txt` and the agents guide show |
 
 `installable` is `false` when the published installer is older than the item's `minimumCli` (blocks need 1.1.0).
 This is not a shadcn registry: there are no registry item routes.

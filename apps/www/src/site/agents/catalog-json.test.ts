@@ -3,6 +3,7 @@ import { supportedBlockIds, supportedComponentIds } from '@ombelle/contracts'
 import { componentDocs } from '../components/catalog'
 import { compareVersions } from '../../snapshots/install-command'
 import { buildAgentCatalog } from './catalog-json'
+import { agentRules } from './rules'
 import { GET } from '../../app/api/v1/catalog/route'
 
 describe('buildAgentCatalog', () => {
@@ -33,6 +34,13 @@ describe('buildAgentCatalog', () => {
   it('carries the glass caveat', () => {
     expect(catalog.families.find((family) => family.id === 'liquid-glass')?.accessibilityCaveat).toMatch(/^Accessibility not guaranteed/)
     expect(catalog.families.find((family) => family.id === 'flat')?.accessibilityCaveat).toBeNull()
+  })
+
+  it('carries the install rules', () => {
+    expect(catalog.rules).toEqual(agentRules())
+    expect(catalog.rules.map((rule) => rule.id)).toContain('no-preset')
+    const older = buildAgentCatalog({ packageName: '@ombelle-ui/cli', version: '0.7.0' })
+    expect(older.rules.find((rule) => rule.id === 'published-cli')?.text).toContain('@ombelle-ui/cli@0.7.0')
   })
 
   it('links markdown docs', () => {

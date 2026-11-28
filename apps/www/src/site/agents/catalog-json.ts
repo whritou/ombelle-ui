@@ -1,9 +1,11 @@
 import { familyAccessibilityCaveat, officialSnapshotOrigin, type StyleFamily } from '@ombelle/contracts'
-import { compareVersions, publishedInstaller } from '../../snapshots/install-command'
+import { publishedInstaller } from '../../snapshots/install-command'
 import { blockDocs, blockGlassAvailable } from '../blocks/catalog'
 import { componentDocs, glassOnSite } from '../components/catalog'
 import { componentCategories } from '../components/component-names'
 import { familyHeadings, siteStableFamilies } from '../families'
+import { blocksMinimumCli, installableFor, type Installer } from './installer'
+import { agentRules, type AgentRule } from './rules'
 
 export type CatalogEntry = {
   id: string
@@ -29,12 +31,9 @@ export type AgentCatalog = {
   families: { id: string; name: string; accessibilityCaveat: string | null }[]
   components: CatalogEntry[]
   blocks: CatalogEntry[]
+  /** The install rules every agent follows, the same list llms.txt and the agents guide show. */
+  rules: AgentRule[]
 }
-
-/** Blocks need CLI 1.1.0 (docs/05-cli-specification.md, "Blocks"). */
-const blocksMinimumCli = '1.1.0'
-
-type Installer = { packageName: string; version: string }
 
 function family(id: StyleFamily, name: string) {
   return { id, name, accessibilityCaveat: familyAccessibilityCaveat(id) }
@@ -51,7 +50,7 @@ export function buildAgentCatalog(installer: Installer = publishedInstaller): Ag
     name: doc.name,
     description: doc.description,
     ...(categoryOf.has(doc.id) ? { category: categoryOf.get(doc.id) } : {}),
-    installable: !doc.minimumCli || compareVersions(installer.version, doc.minimumCli) >= 0,
+    installable: installableFor(installer, doc.minimumCli),
     ...(doc.minimumCli ? { minimumCli: doc.minimumCli } : {}),
     glass: glassOnSite(doc.id),
     docs: { html: `${origin}/components/${doc.id}`, markdown: `${origin}/components/${doc.id}.md` },
@@ -64,7 +63,7 @@ export function buildAgentCatalog(installer: Installer = publishedInstaller): Ag
     description: doc.description,
     components: doc.components,
     exampleOnly: doc.exampleOnly,
-    installable: compareVersions(installer.version, blocksMinimumCli) >= 0,
+    installable: installableFor(installer, blocksMinimumCli),
     minimumCli: blocksMinimumCli,
     glass: blockGlassAvailable(doc),
     docs: { html: `${origin}/blocks/${doc.id}`, markdown: `${origin}/blocks/${doc.id}.md` },
@@ -80,6 +79,7 @@ export function buildAgentCatalog(installer: Installer = publishedInstaller): Ag
     families: [...siteStableFamilies.map((id) => family(id, familyHeadings[id])), family('liquid-glass', 'Liquid glass')],
     components,
     blocks,
+    rules: agentRules(installer),
   }
 }
 
