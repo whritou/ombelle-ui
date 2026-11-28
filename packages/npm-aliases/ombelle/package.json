@@ -1,0 +1,13 @@
+{
+  "name": "ombelle",
+  "version": "1.1.2",
+  "description": "Pointer to @ombelle-ui/cli, the Ombelle UI installer. This package installs nothing and runs nothing: its bin prints the right npx command and exits 1.",
+  "keywords": ["ombelle", "ombelle-ui", "react", "components", "tailwind", "shadcn", "cli"],
+  "homepage": "https://ombelle-ui.com",
+  "repository": { "type": "git", "url": "git+https://github.com/whritou/ombelle-ui.git", "directory": "packages/npm-aliases/ombelle" },
+  "bugs": { "url": "https://github.com/whritou/ombelle-ui/issues" },
+  "license": "MIT",
+  "type": "module",
+  "bin": { "ombelle": "./bin/pointer.js" },
+  "files": ["bin", "README.md", "LICENSE"]
+}

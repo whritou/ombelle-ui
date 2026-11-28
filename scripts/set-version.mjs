@@ -35,6 +35,9 @@ const publishedSites = [
   { file: 'docs/snapshot-service-operations.md', pattern: /`npx @ombelle-ui\/cli@(?<v>\d+\.\d+\.\d+)` resolves bare codes/g },
   { file: 'docs/07-delivery-plan.md', pattern: /installer is published as `@ombelle-ui\/cli@(?<v>\d+\.\d+\.\d+)`/g },
   { file: 'docs/04-presets-and-contracts.md', pattern: /The published installer is version (?<v>\d+\.\d+\.\d+)/g },
+  // The npm name pointers print `npx @ombelle-ui/cli@<their own version>`.
+  { file: 'packages/npm-aliases/ombelle/package.json', pattern: /"version"\s*:\s*"(?<v>[^"]+)"/g },
+  { file: 'packages/npm-aliases/ombelle-ui/package.json', pattern: /"version"\s*:\s*"(?<v>[^"]+)"/g },
 ]
 
 function fail(message) {

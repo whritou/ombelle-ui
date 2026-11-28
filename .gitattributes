@@ -8,3 +8,6 @@ fixtures/shadcn/** -text
 # endings. Keep checkouts LF too, so a Windows build does not dirty the tree.
 packages/catalog/src/generated.ts text eol=lf
 packages/contracts/src/*-schema.ts text eol=lf
+
+# Published as-is from a checkout: a CRLF shebang breaks the bin on Linux and macOS.
+packages/npm-aliases/** text eol=lf

@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises'
 import os from 'node:os'
 import path from 'node:path'
-import { readFileSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 import { spawn } from 'node:child_process'
 import { afterAll, expect, it } from 'vitest'
 
@@ -20,7 +20,9 @@ async function expand(pattern: string): Promise<string[]> {
   if (!pattern.includes('*')) return [pattern]
   const [head, tail] = pattern.split('*')
   const entries = await fs.readdir(path.join(repo, head), { withFileTypes: true })
-  return entries.filter(entry => entry.isDirectory()).map(entry => head + entry.name + tail)
+  // Folders without the file (such as packages/npm-aliases, which holds unpublished pointers) are not workspace packages.
+  const candidates = entries.filter(entry => entry.isDirectory()).map(entry => head + entry.name + tail)
+  return candidates.filter(file => existsSync(path.join(repo, file)))
 }
 
 async function copyRepoSubset(patterns: string[]) {
@@ -60,6 +62,8 @@ const publishedFiles = [
   'docs/snapshot-service-operations.md',
   'docs/07-delivery-plan.md',
   'docs/04-presets-and-contracts.md',
+  'packages/npm-aliases/ombelle/package.json',
+  'packages/npm-aliases/ombelle-ui/package.json',
 ]
 
 async function withUnreleased(dir: string) {
@@ -103,6 +107,7 @@ it('--published only flips website commands', async () => {
     expect(text, file).not.toContain('@ombelle-ui/cli@' + published)
   }
   for (const file of packageJsons) expect(JSON.parse(await read(dir, file)).version).toBe(current)
+  for (const name of ['ombelle', 'ombelle-ui']) expect(JSON.parse(await read(dir, 'packages/npm-aliases/' + name + '/package.json')).version).toBe(next)
   const contracts = await read(dir, 'docs/04-presets-and-contracts.md')
   expect(documentedPublishedVersion(contracts)).toBe(next)
   expect(contracts).toContain('Workspace packages are version ' + current + '.')
