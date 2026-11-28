@@ -23,13 +23,16 @@ describe('agents guide', () => {
     expect(markdown).toContain('https://ombelle-ui.vercel.app/llms-full.txt')
     expect(markdown).toContain('https://ombelle-ui.vercel.app/api/v1/catalog')
     expect(markdown).toContain('npx skills add whritou/ombelle-ui')
+    expect(markdown).toContain('npx skills add whritou/ombelle-ui --skill ombelle-install')
+    expect(markdown).not.toMatch(/coming soon/i)
+    for (const skill of ['ombelle-install', 'ombelle-choose', 'ombelle-theme', 'ombelle-blocks', 'ombelle-check']) expect(markdown).toContain(skill)
   })
 
   it('has a paste-ready AGENTS.md snippet in a code fence', () => {
     const fenced = markdown.match(/```\n([\s\S]*?)\n```/g) ?? []
     const snippet = fenced.find((block) => block.includes('https://ombelle-ui.vercel.app/llms.txt') && block.includes('--dry-run'))
     expect(snippet).toBeDefined()
-    for (const part of ['--yes', 'resolutions', '--overwrite', '--beside', 'Accessibility not guaranteed']) expect(snippet).toContain(part)
+    for (const part of ['--yes', 'planned', 'resolutions', '--overwrite', '--beside', 'UNSUPPORTED_PROJECT', 'UNSUPPORTED_RELEASE', 'Accessibility not guaranteed']) expect(snippet).toContain(part)
     expect(snippet).toContain(`${publishedInstaller.packageName}@${publishedInstaller.version}`)
   })
 })

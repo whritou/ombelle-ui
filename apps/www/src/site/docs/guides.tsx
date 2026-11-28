@@ -18,9 +18,9 @@ const agentsSnippet = [
   `Before installing any Ombelle component, read ${siteOrigin}/llms.txt and follow its install rules.`,
   `- Run only the published CLI: ${npx} (never \`shadcn add\`, never hand-copied source).`,
   `- Initialize with the preset code I give you: ${npx} init --preset ps_…@1. If I gave none, ask me for one.`,
-  '- Run every command that writes files with --dry-run --json first and show me the plan; rerun it with --yes only when the plan has no warnings with resolutions.',
+  '- Run every command that writes files with --dry-run --json first and show me the plan; rerun it with --yes only when its status is planned (exit code 0) and no warning has resolutions.',
   '- On FILE_CONFLICT or any warning with resolutions, stop and ask me; never choose --overwrite or --beside yourself.',
-  '- On an unsupported project, explain it and stop. Finish with doctor --json.',
+  '- On UNSUPPORTED_PROJECT or UNSUPPORTED_RELEASE, explain the message and its next action to me and stop; don\'t work around it. Finish with doctor --json.',
   `- Liquid glass is labelled ${accessibilityCaveatLabel}; say so whenever you offer it.`,
 ].join('\n')
 
@@ -231,7 +231,15 @@ export const guideSections: Record<GuideSlug, GuideSection[]> = {
       </ul>
     </> },
     { id: 'skills', title: 'Agent skills', content: <>
-      <p>Agent skills are coming soon; they will install with <code>npx skills add whritou/ombelle-ui</code>. Until then the rules and docs above give an agent everything it needs.</p>
+      <p>Five agent skills in the <code>skills/</code> folder of the repository teach a coding agent the same guarded loop. They work with agents that read the open Agent Skills format.</p>
+      <ul>
+        <li><strong>ombelle-install</strong> installs components and initializes a preset with the guarded CLI loop.</li>
+        <li><strong>ombelle-choose</strong> picks the right component or block from the live catalog.</li>
+        <li><strong>ombelle-theme</strong> switches or applies a preset and adds a component-only preset.</li>
+        <li><strong>ombelle-blocks</strong> installs and wires login, settings, pricing and dashboard blocks.</li>
+        <li><strong>ombelle-check</strong> inspects, diagnoses and updates an existing install.</li>
+      </ul>
+      <p>Install all five with <code>npx skills add whritou/ombelle-ui</code>, or one with <code>npx skills add whritou/ombelle-ui --skill ombelle-install</code>.</p>
     </> },
     { id: 'tell-your-agent', title: 'Tell your agent', content: <>
       <p>Paste this into your project’s <code>AGENTS.md</code> or <code>CLAUDE.md</code>. It points the agent at the install rules and the published CLI. Replace <code>ps_…@1</code> with your own preset code from the <a href="/editor/preset">preset editor</a>.</p>

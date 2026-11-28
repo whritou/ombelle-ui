@@ -19,6 +19,13 @@ describe('agentRules', () => {
     expect(text('conflict')).toMatch(/ask the developer/i)
   })
 
+  it('gates --yes on a planned dry run and reads error.code on an error', () => {
+    expect(text('apply')).toContain('`planned`')
+    expect(text('apply')).toContain('--yes')
+    expect(text('unsupported')).toContain('`error.code`')
+    expect(text('unsupported')).toContain('`error.nextAction`')
+  })
+
   it('links the preset editor for a missing preset', () => {
     expect(text('no-preset')).toContain(`${officialSnapshotOrigin}/editor/preset`)
   })

@@ -30,7 +30,7 @@ export function agentRules(installer: Installer = publishedInstaller): AgentRule
     },
     {
       id: 'apply',
-      text: 'When the plan has no warnings with `resolutions`, rerun the same command with `--yes`. Agents have no TTY, so `--yes` is required.',
+      text: 'Rerun the same command with `--yes` only when the dry run\'s `status` is `planned` (exit code 0) and no warning has `resolutions`. Agents have no TTY, so `--yes` is required.',
     },
     {
       id: 'conflict',
@@ -38,7 +38,7 @@ export function agentRules(installer: Installer = publishedInstaller): AgentRule
     },
     {
       id: 'unsupported',
-      text: 'On `UNSUPPORTED_PROJECT` or `UNSUPPORTED_RELEASE`, explain the message and its next action to the developer. Do not work around it.',
+      text: 'When the dry run\'s `status` is `error`, read `error.code`, `error.message` and `error.nextAction`. On `UNSUPPORTED_PROJECT` or `UNSUPPORTED_RELEASE`, explain the message and its next action to the developer. Do not work around it.',
     },
     {
       id: 'doctor',
