@@ -14,6 +14,8 @@ export type TaskExpectation = {
   forbiddenWrites?: string[]
   noWrites?: boolean
   presetChanged?: boolean
+  /** Ombelle CLI subcommands the run must call, such as `doctor` or `theme add`. */
+  requiredCommands?: string[]
 }
 
 export type RunScore = {
@@ -23,6 +25,7 @@ export type RunScore = {
       | 'doctor'
       | 'lock'
       | 'published-cli'
+      | 'required-commands'
       | 'dry-run-first'
       | 'no-unasked-resolution'
       | 'no-hand-written-source'
@@ -67,7 +70,8 @@ function classify(text: string): Segment {
       }
     }
     if (target !== undefined) {
-      if (target.startsWith('@ombelle-ui/cli@')) kind = 'ombelle'
+      // Any version, tag or none: `@ombelle-ui/cli`, `@ombelle-ui/cli@1.1.2`, `@ombelle-ui/cli@latest`.
+      if (/^@ombelle-ui\/cli(@\S+)?$/.test(target)) kind = 'ombelle'
       else if (/^shadcn(-ui)?(@|$)/.test(target)) kind = 'shadcn'
     }
   }
@@ -79,6 +83,17 @@ const segmentsOf = (command: string): Segment[] =>
     .split(/&&|\|\||[;|\n]/)
     .filter((part) => part.trim() !== '')
     .map(classify)
+
+/** The leading non-flag words after the package target, e.g. `theme add` (a `--` separator is skipped). */
+function subcommand(segment: Segment): string[] {
+  const words: string[] = []
+  for (const token of segment.tokens.slice(segment.argStart)) {
+    if (token === '--' && words.length === 0) continue
+    if (token.startsWith('-')) break
+    words.push(token)
+  }
+  return words
+}
 
 const hasFlag = (segment: Segment, flag: string): boolean =>
   segment.tokens.slice(segment.argStart).some((t) => t === flag || t.startsWith(flag + '='))
@@ -117,15 +132,36 @@ export function scoreRun(
   const segments = commands.flatMap((c) => segmentsOf(c.command))
   const cliCalls = segments.filter((seg) => seg.kind === 'ombelle')
   const shadcnCalls = segments.filter((seg) => seg.kind === 'shadcn')
+  const required = expected.requiredCommands ?? []
+  // A task that writes nothing and needs no command (no-preset: ask for a preset) passes without any CLI call.
+  const cliOptional = required.length === 0 && expected.noWrites === true
   checks.push({
     id: 'published-cli',
-    passed: cliCalls.length > 0 && shadcnCalls.length === 0,
+    passed: shadcnCalls.length === 0 && (cliCalls.length > 0 || cliOptional),
     detail:
       shadcnCalls.length > 0
         ? `ran shadcn: ${shadcnCalls[0]!.text}`
-        : cliCalls.length === 0
-          ? 'never ran the published @ombelle-ui/cli'
-          : `ran the published CLI ${cliCalls.length} time(s)`,
+        : cliCalls.length > 0
+          ? `ran the published CLI ${cliCalls.length} time(s)`
+          : cliOptional
+            ? 'CLI not required'
+            : 'never ran the published @ombelle-ui/cli',
+  })
+
+  const ran = cliCalls.map(subcommand)
+  const missingCommands = required.filter((command) => {
+    const words = command.split(/\s+/)
+    return !ran.some((seen) => words.every((word, i) => seen[i] === word))
+  })
+  checks.push({
+    id: 'required-commands',
+    passed: missingCommands.length === 0,
+    detail:
+      required.length === 0
+        ? 'none required'
+        : missingCommands.length === 0
+          ? `ran ${required.join(', ')}`
+          : `never ran ${missingCommands.join(', ')}`,
   })
 
   const firstYes = cliCalls.findIndex((seg) => hasFlag(seg, '--yes'))

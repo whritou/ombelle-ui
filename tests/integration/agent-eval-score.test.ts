@@ -20,7 +20,7 @@ describe('scoreRun', () => {
   it('passes a clean install that dry-runs first and ends with doctor success', () => {
     const score = scoreRun(cleanRun, ok, { lockIds: ['button'] })
     expect(score.passed).toBe(true)
-    expect(score.checks).toHaveLength(6)
+    expect(score.checks).toHaveLength(7)
   })
 
   it('fails a run that writes before any dry run', () => {
@@ -251,5 +251,65 @@ describe('flags after the package target', () => {
     expect(pass(s, 'dry-run-first')).toBe(true)
     expect(s.checks.find((c) => c.id === 'dry-run-first')?.detail).toBe('no --yes command ran')
     expect(pass(s, 'no-unasked-resolution')).toBe(true)
+  })
+})
+
+describe('required commands and the CLI requirement', () => {
+  const none: ProjectOutcome = { doctorStatus: 'missing', lockIds: [], changedFiles: [] }
+  const pass = (s: ReturnType<typeof scoreRun>, id: string) => s.checks.find((c) => c.id === id)
+
+  it('passes a no-preset run that asks and calls nothing', () => {
+    const score = scoreRun([], none, { lockIds: [], noWrites: true })
+    expect(score.passed).toBe(true)
+    expect(pass(score, 'published-cli')?.detail).toBe('CLI not required')
+    expect(pass(score, 'required-commands')?.passed).toBe(true)
+  })
+
+  it('still fails a no-preset run that ran shadcn', () => {
+    const score = scoreRun([{ command: 'npx shadcn@latest init' }], none, { lockIds: [], noWrites: true })
+    expect(pass(score, 'published-cli')?.passed).toBe(false)
+  })
+
+  it('requires the CLI when the task names required commands', () => {
+    const score = scoreRun([{ command: 'cat ui-library.lock.json' }], none, { lockIds: [], noWrites: true, requiredCommands: ['doctor'] })
+    expect(pass(score, 'published-cli')?.passed).toBe(false)
+    expect(pass(score, 'required-commands')?.passed).toBe(false)
+    expect(pass(score, 'required-commands')?.detail).toContain('doctor')
+  })
+
+  it('passes check-install when doctor ran through the published CLI', () => {
+    const score = scoreRun([{ command: `${CLI} doctor --json` }], none, { lockIds: [], noWrites: true, requiredCommands: ['doctor'] })
+    expect(score.passed).toBe(true)
+  })
+
+  it('matches multi-word commands after runner flags and --', () => {
+    const commands = [
+      { command: 'npx --yes @ombelle-ui/cli@1.1.2 theme add ./new.preset.json --dry-run --json' },
+      { command: 'npm exec @ombelle-ui/cli@1.1.2 -- doctor --json' },
+    ]
+    const score = scoreRun(commands, ok, { lockIds: [], requiredCommands: ['theme add', 'doctor'] })
+    expect(pass(score, 'required-commands')?.passed).toBe(true)
+    const missing = scoreRun([commands[1]!], ok, { lockIds: [], requiredCommands: ['theme add', 'doctor'] })
+    expect(pass(missing, 'required-commands')?.passed).toBe(false)
+    expect(pass(missing, 'required-commands')?.detail).toContain('theme add')
+  })
+
+  it('does not count doctor named only in a non-CLI segment', () => {
+    const score = scoreRun([{ command: `echo doctor && ${CLI} add button --dry-run` }], ok, { lockIds: ['button'], requiredCommands: ['doctor'] })
+    expect(pass(score, 'required-commands')?.passed).toBe(false)
+  })
+
+  it.each(['npx @ombelle-ui/cli doctor --json', 'npx @ombelle-ui/cli@latest doctor --json', 'pnpm dlx @ombelle-ui/cli@next doctor --json'])(
+    'counts %s as the published CLI',
+    (command) => {
+      const score = scoreRun([{ command }], none, { lockIds: [], noWrites: true, requiredCommands: ['doctor'] })
+      expect(pass(score, 'published-cli')?.passed).toBe(true)
+      expect(pass(score, 'required-commands')?.passed).toBe(true)
+    },
+  )
+
+  it('does not count a different package with the same prefix', () => {
+    const score = scoreRun([{ command: 'npx @ombelle-ui/cli-extra doctor' }], none, { lockIds: [], noWrites: true, requiredCommands: ['doctor'] })
+    expect(pass(score, 'published-cli')?.passed).toBe(false)
   })
 })
