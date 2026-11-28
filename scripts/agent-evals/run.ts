@@ -1,20 +1,38 @@
 /**
  * Agent eval runner. Opt-in only: set OMBELLE_AGENT_EVALS=1. Never run in CI or check:foundation.
+ * See docs/agent-evals.md.
  *
  * Usage: pnpm eval:agents --surface <baseline|phase-1|phase-2|phase-3> [--runs 3] [--task <id>]
  *
  * Environment:
- *   OMBELLE_AGENT_EVALS=1         required to run anything
- *   OMBELLE_AGENT_EVAL_CLAUDE     agent executable (default `claude`)
- *   OMBELLE_AGENT_EVAL_MODEL      model (default claude-opus-5-5)
+ *   OMBELLE_AGENT_EVALS=1           required to run anything
+ *   OMBELLE_AGENT_EVAL_CLAUDE       agent executable (default `claude`)
+ *   OMBELLE_AGENT_EVAL_MODEL        model (default claude-opus-5-5)
+ *   OMBELLE_AGENT_EVAL_TIMEOUT_MS   per-run agent timeout in ms (default 15 minutes)
  *
- * Headless flags used, unverified until the first real run (the claude CLI was
+ * The baseline measures agents BEFORE the agent-readable site exists. Run `--surface baseline` before llms.txt,
+ * the .md pages and the catalog JSON are deployed to the site origin, or with that domain blocked for the agent;
+ * otherwise the agent can read them and the baseline no longer measures "before".
+ *
+ * Containment: the agent runs in a temp project directory with a minimal environment (agentEnv: PATH, HOME, the
+ * Windows essentials, the Anthropic credentials and CI=1), no MCP servers, only project/local settings and a fixed
+ * tool list. It is NOT sandboxed beyond its temp cwd: with bypassPermissions it can run any shell command and reach
+ * the network as your user. Run it only on a machine you are comfortable with.
+ *
+ * Headless flags used, unverified until the first real run (check them against `claude --help`; the claude CLI was
  * not installed where this was written):
- *   -p (prompt on stdin: unverified, `claude -p` should read stdin when given no prompt argument)
+ *   -p (prompt on stdin: `claude -p` should read stdin when given no prompt argument)
  *   --output-format stream-json --verbose --model <model>
  *   --permission-mode bypassPermissions
+ *   --strict-mcp-config (with no --mcp-config: no MCP servers)
+ *   --setting-sources project,local (no user settings, hooks or plugins)
+ *   --tools Bash,Read,Write,Edit,Glob,Grep,WebSearch,WebFetch (the only tools that exist for the agent)
  *   --allowedTools Bash,Read,Write,Edit,Glob,Grep,WebSearch,WebFetch
  *   --max-turns 40
+ *
+ * A run that throws before it is scored (agent start, timeout, no result event, project preparation) is recorded
+ * as an infra failure and excluded from the rates. The eval stops after 3 infra failures in a row and still writes
+ * the partial results; it exits 1 then.
  */
 import { spawn, type ChildProcess } from 'node:child_process'
 import { createHash } from 'node:crypto'
@@ -63,13 +81,58 @@ export function lockIdsFromLock(lock: Lock): string[] {
   return [...ids]
 }
 
-export function aggregateRuns(id: string, scores: RunScore[]): EvalResult['tasks'][number] {
+/** A scored run, or a run that failed before it could be scored. */
+export type RunOutcome = RunScore | { infraError: string }
+
+export function aggregateRuns(id: string, outcomes: RunOutcome[]): EvalResult['tasks'][number] {
+  const scores = outcomes.filter((o): o is RunScore => 'checks' in o)
+  const infraErrors = outcomes.flatMap((o) => ('infraError' in o ? [o.infraError] : []))
   return {
     id,
     passed: scores.filter((s) => s.passed).length,
     runs: scores.length,
+    infra: infraErrors.length,
+    infraErrors,
     failures: scores.flatMap((s) => s.checks.filter((c) => !c.passed).map((c) => c.id)),
   }
+}
+
+export const MAX_CONSECUTIVE_INFRA = 3
+
+/**
+ * Runs every task `runs` times. A run that throws is recorded as an infra failure and the eval goes on; after
+ * MAX_CONSECUTIVE_INFRA in a row it stops and returns what completed, with `aborted` set.
+ */
+export async function collectRuns(
+  tasks: readonly EvalTask[],
+  runs: number,
+  runOne: (task: EvalTask, index: number) => Promise<RunScore>,
+  log: (line: string) => void = console.log,
+): Promise<Pick<EvalResult, 'tasks' | 'aborted'>> {
+  const results: EvalResult['tasks'] = []
+  let consecutive = 0
+  for (const task of tasks) {
+    const outcomes: RunOutcome[] = []
+    for (let i = 0; i < runs; i++) {
+      log(`${task.id} run ${i + 1}/${runs}`)
+      try {
+        outcomes.push(await runOne(task, i))
+        consecutive = 0
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error)
+        log(`${task.id} run ${i + 1}/${runs}: infra failure: ${message}`)
+        outcomes.push({ infraError: message })
+        consecutive++
+        if (consecutive >= MAX_CONSECUTIVE_INFRA) {
+          results.push(aggregateRuns(task.id, outcomes))
+          const last = message.split(/\r?\n/)[0]
+          return { tasks: results, aborted: `${MAX_CONSECUTIVE_INFRA} infra failures in a row (last: ${last})` }
+        }
+      }
+    }
+    results.push(aggregateRuns(task.id, outcomes))
+  }
+  return { tasks: results }
 }
 
 export async function hashTree(root: string): Promise<Record<string, string>> {
@@ -122,11 +185,16 @@ export function killTree(child: ChildProcess, shell: boolean, deps: SpawnDeps = 
 export function capture(
   executable: string,
   args: string[],
-  options: { cwd: string; shell?: boolean; input?: string; timeoutMs?: number },
+  options: { cwd: string; shell?: boolean; input?: string; timeoutMs?: number; env?: NodeJS.ProcessEnv },
   deps: SpawnDeps = realDeps,
 ): Promise<Captured> {
   return new Promise((resolve) => {
-    const child = deps.spawn(executable, args, { cwd: options.cwd, shell: options.shell ?? false, windowsHide: true })
+    const child = deps.spawn(executable, args, {
+      cwd: options.cwd,
+      shell: options.shell ?? false,
+      windowsHide: true,
+      ...(options.env ? { env: options.env } : {}),
+    })
     let stdout = ''
     let stderrTail = ''
     let timedOut = false
@@ -169,9 +237,12 @@ class InfraError extends Error {}
 
 const SAFE_ARG = /^[A-Za-z0-9._:,=/-]+$/
 
+export const AGENT_TOOLS = 'Bash,Read,Write,Edit,Glob,Grep,WebSearch,WebFetch'
+
 /**
  * Headless arguments (the prompt goes on stdin, so no quoting is ever needed).
  * A shell is enabled only for .cmd/.bat shims, and then every argument must be plain.
+ * No MCP servers, no user settings, and only AGENT_TOOLS exist for the agent.
  */
 export function agentInvocation(executable: string, model: string): { args: string[]; shell: boolean } {
   const args = [
@@ -180,12 +251,44 @@ export function agentInvocation(executable: string, model: string): { args: stri
     '--verbose',
     '--model', model,
     '--permission-mode', 'bypassPermissions',
-    '--allowedTools', 'Bash,Read,Write,Edit,Glob,Grep,WebSearch,WebFetch',
+    '--strict-mcp-config',
+    '--setting-sources', 'project,local',
+    '--tools', AGENT_TOOLS,
+    '--allowedTools', AGENT_TOOLS,
     '--max-turns', '40',
   ]
   const shell = /\.(cmd|bat)$/i.test(executable)
   if (shell) for (const arg of args) if (!SAFE_ARG.test(arg)) throw new Error(`Unsafe agent argument: ${arg}`)
   return { args, shell }
+}
+
+/** Variables the agent may see; everything else in the caller's environment is dropped. */
+const AGENT_ENV_KEYS = [
+  'PATH',
+  'HOME',
+  // Windows essentials: process start, shims, temp files and the user profile.
+  'SystemRoot',
+  'ComSpec',
+  'PATHEXT',
+  'TEMP',
+  'TMP',
+  'USERPROFILE',
+  'APPDATA',
+  'LOCALAPPDATA',
+  // Anthropic credentials, when set.
+  'ANTHROPIC_API_KEY',
+  'ANTHROPIC_AUTH_TOKEN',
+  'CLAUDE_CODE_OAUTH_TOKEN',
+]
+
+/** The agent's minimal environment: AGENT_ENV_KEYS (matched case-insensitively; Windows has Path) plus CI=1. */
+export function agentEnv(source: NodeJS.ProcessEnv = process.env): Record<string, string> {
+  const wanted = new Set(AGENT_ENV_KEYS.map((key) => key.toUpperCase()))
+  const env: Record<string, string> = {}
+  for (const [key, value] of Object.entries(source))
+    if (value !== undefined && wanted.has(key.toUpperCase())) env[key] = value
+  env.CI = '1'
+  return env
 }
 
 export function hasResultEvent(lines: string[]): boolean {
@@ -234,7 +337,7 @@ async function presetHash(root: string): Promise<string | undefined> {
 
 async function preflight(executable: string): Promise<void> {
   const shell = /\.(cmd|bat)$/i.test(executable)
-  const result = await capture(executable, ['--version'], { cwd: process.cwd(), shell, timeoutMs: 30000 })
+  const result = await capture(executable, ['--version'], { cwd: process.cwd(), shell, timeoutMs: 30000, env: agentEnv() })
   if (result.spawnError || result.code !== 0)
     throw new InfraError(
       `Cannot run the agent "${executable}" (${result.spawnError?.message ?? `exit ${result.code}`}). Set OMBELLE_AGENT_EVAL_CLAUDE to the claude executable.
@@ -250,7 +353,7 @@ async function runAgent(
   timeoutMs: number,
 ): Promise<string[]> {
   const { args, shell } = agentInvocation(executable, model)
-  const result = await capture(executable, args, { cwd, shell, input: prompt, timeoutMs })
+  const result = await capture(executable, args, { cwd, shell, input: prompt, timeoutMs, env: agentEnv() })
   const lines = result.stdout.split(/\r?\n/).filter((l) => l.trim() !== '')
   if (result.spawnError)
     throw new InfraError(`Agent failed to start: ${result.spawnError.message}
@@ -306,27 +409,27 @@ async function main(argv: string[]): Promise<number> {
   const model = process.env.OMBELLE_AGENT_EVAL_MODEL ?? 'claude-opus-5-5'
   const timeoutMs = parseTimeoutMs(process.env.OMBELLE_AGENT_EVAL_TIMEOUT_MS)
   await preflight(executable)
-  const results: EvalResult['tasks'] = []
-  for (const task of tasks) {
-    const scores: RunScore[] = []
-    for (let i = 0; i < args.runs; i++) {
-      console.log(`${task.id} run ${i + 1}/${args.runs}`)
-      scores.push(await runOnce(task, args, executable, model, timeoutMs))
-    }
-    results.push(aggregateRuns(task.id, scores))
-  }
+  // Each run is caught inside collectRuns, so the results below are always written, partial or not.
+  const { tasks: results, aborted } = await collectRuns(tasks, args.runs, (task) =>
+    runOnce(task, args, executable, model, timeoutMs),
+  )
   const result: EvalResult = {
     surface: args.surface,
     model,
     date: new Date().toISOString().slice(0, 10),
     runsPerTask: args.runs,
     tasks: results,
+    ...(aborted ? { aborted } : {}),
   }
   await fs.mkdir('.artifacts/agent-evals', { recursive: true })
   await fs.writeFile(`.artifacts/agent-evals/${args.surface}.json`, JSON.stringify(result, null, 2) + '\n')
   await fs.mkdir('docs/evidence', { recursive: true })
   await fs.writeFile(`docs/evidence/agent-evals-${args.surface}.md`, renderReport(result))
   console.log(renderReport(result))
+  if (aborted) {
+    console.error(`Aborted: ${aborted}. Partial results were written.`)
+    return 1
+  }
   return 0
 }
 
