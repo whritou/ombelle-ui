@@ -1,5 +1,6 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import fs from 'node:fs/promises'
+import os from 'node:os'
 import path from 'node:path'
 import { prepareEvalProject } from '../../scripts/agent-evals/projects.js'
 import { jsonRecord, runBuiltCli } from '../helpers/cli-runtime.js'
@@ -8,6 +9,7 @@ import { extractSkillCommands } from '../helpers/skill-commands.js'
 const skillsDir = path.resolve('skills')
 const preset = path.resolve('packages/catalog/src/presets/flat.json')
 const writing = new Set(['init', 'add', 'update', 'theme', 'preset'])
+const NL = os.EOL
 
 const managedPath = 'src/components/ui/button.tsx'
 // --beside only takes a hand-written file of a component Ombelle does not manage yet,
@@ -48,41 +50,71 @@ async function collect(): Promise<Case[]> {
 }
 
 const cases = await collect()
+const isConflict = (c: Case) =>
+  c.original.includes('--overwrite') || c.original.includes('--beside')
+
+function expectedCommand(args: string[]): string {
+  const [first, second] = args
+  return first === 'theme' || first === 'preset' ? first + ' ' + second : first!
+}
 
 describe('agent skill commands run against the built CLI', () => {
   let project: string
+  const exits: string[] = []
   beforeAll(async () => {
     project = await prepareEvalProject('vite-pnpm', 'initialized', {
       components: ['button'],
     })
-    // --beside and --overwrite only resolve a file edited after install.
-    const button = path.join(project, managedPath)
-    await fs.appendFile(button, '// edited by the project' + String.fromCharCode(10))
-    const own = path.join(project, besidePath)
-    await fs.mkdir(path.dirname(own), { recursive: true })
-    await fs.writeFile(own, 'export const Button = () => null' + String.fromCharCode(10))
   }, 600_000)
   afterAll(async () => {
     if (project) await fs.rm(project, { recursive: true, force: true })
+    console.log('skill command exit codes' + NL + exits.join(NL))
   })
+
+  async function check(c: Case, expectedCode: number) {
+    const result = await runBuiltCli('node', c.args, project)
+    exits.push(result.code + '  ' + c.skill + ': ' + c.original)
+    const label =
+      c.skill + ': npx @ombelle-ui/cli@<version> ' + c.original + NL +
+      'ran: ' + c.args.join(' ') + NL + 'exit ' + result.code + NL + result.output
+    expect(result.code, label).toBe(expectedCode)
+    const record = jsonRecord(result.data)
+    if (c.args[0] === '--version') {
+      expect(String(record.version), label).toMatch(/^\d+\.\d+\.\d+/)
+      return
+    }
+    expect(record.command, label).toBe(expectedCommand(c.args))
+    if (expectedCode === 0) expect(record.status, label).not.toBe('error')
+  }
 
   it('extracts the commands shown in the skills', () => {
     expect(cases.length).toBeGreaterThanOrEqual(15)
   })
 
-  for (const c of cases) {
-    it(`${c.skill}: ${c.original}`, async () => {
-      const result = await runBuiltCli('node', c.args, project)
-      const label =
-        `${c.skill}: npx @ombelle-ui/cli@<version> ${c.original}\n` +
-        `ran: ${c.args.join(' ')}\nexit ${result.code}\n${result.output}`
-      if (c.args[0] === '--version') {
-        expect(result.code, label).toBe(0)
-        expect(String(jsonRecord(result.data).version), label).toMatch(/^\d+\.\d+\.\d+/)
-        return
-      }
-      expect([0, 4], label).toContain(result.code)
-      expect(jsonRecord(result.data).command, label).not.toBe('')
-    }, 120_000)
-  }
+  it('finds commands in every skill that runs the CLI', async () => {
+    const entries = await fs.readdir(skillsDir, { withFileTypes: true })
+    for (const entry of entries.filter((e) => e.isDirectory())) {
+      if (entry.name === 'ombelle-choose') continue
+      expect(
+        cases.filter((c) => c.skill.includes(entry.name)).length,
+        entry.name,
+      ).toBeGreaterThan(0)
+    }
+  })
+
+  // The project is pristine here: button installed and unedited, so any conflict is a skill bug.
+  for (const c of cases.filter((c) => !isConflict(c)))
+    it(`${c.skill}: ${c.original}`, () => check(c, 0), 120_000)
+
+  describe('commands that resolve a conflict', () => {
+    beforeAll(async () => {
+      // --overwrite needs a managed file edited after install; --beside a hand-written one.
+      await fs.appendFile(path.join(project, managedPath), '// edited by the project' + NL)
+      const own = path.join(project, besidePath)
+      await fs.mkdir(path.dirname(own), { recursive: true })
+      await fs.writeFile(own, 'export const Button = () => null' + NL)
+    })
+    for (const c of cases.filter(isConflict))
+      it(`${c.skill}: ${c.original}`, () => check(c, 0), 120_000)
+  })
 })
